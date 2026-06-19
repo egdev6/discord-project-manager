@@ -252,6 +252,7 @@ Start with the shortest path that matches your goal:
 - **Effective runtime resolver:** [`docs/architecture/discord-effective-runtime-resolver.md`](./docs/architecture/discord-effective-runtime-resolver.md)
 - **Durable change audit:** [`docs/architecture/discord-durable-change-audit.md`](./docs/architecture/discord-durable-change-audit.md)
 - **Security and data handling:** [`docs/security/data-handling.md`](./docs/security/data-handling.md)
+- **Private runtime backup/restore:** [`docs/operations/private-runtime-backup-restore.md`](./docs/operations/private-runtime-backup-restore.md)
 - **Operational Docker guidance:** [`docs/operations/docker-runtime.md`](./docs/operations/docker-runtime.md)
 - **Release workflow:** [`docs/process/release-workflow.md`](./docs/process/release-workflow.md)
 - **Shared artifact rules:** [`docs/process/shared-artifact-serialization.md`](./docs/process/shared-artifact-serialization.md)

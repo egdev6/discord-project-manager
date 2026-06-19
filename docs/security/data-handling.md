@@ -71,7 +71,7 @@ Private profiles are reusable context, not repo-backed skills. Public docs may d
 
 ## Current recovery path
 
-Until issue #189 adds the dedicated backup/restore contract and end-to-end validation, the operator-owned recovery path is conservative:
+The dedicated contract is `docs/operations/private-runtime-backup-restore.md`. Until full live restore validation lands, the operator-owned recovery path is conservative:
 
 1. Stop runtime writes before backup or restore.
 2. Export private runtime storage outside the repo.
@@ -94,24 +94,28 @@ docker run --rm \
   alpine tar czf /backup/openclaw-home-demo.tgz -C /source .
 ```
 
-A sanitized restore rehearsal must happen only in a private runtime environment. Use commands shaped like:
+A sanitized restore rehearsal must happen only in an isolated private rehearsal environment, never directly into the active Compose project or active named volumes. Use commands shaped like:
 
 ```bash
-# Restore Postgres/Engram into a private rehearsal database/container.
-cat ../private-backups/engram-demo.sql | docker compose exec -T postgres psql \
+# Start or target an isolated rehearsal project, not the active runtime project.
+REHEARSAL_PROJECT=discord-project-manager-restore-rehearsal
+
+# Restore Postgres/Engram into the rehearsal database/container only.
+cat ../private-backups/engram-demo.sql | docker compose -p "$REHEARSAL_PROJECT" exec -T postgres psql \
   -U "${POSTGRES_USER:-engram}" \
   "${POSTGRES_DB:-engram_cloud}"
 
-# Restore OpenClaw workspace volume into a private rehearsal volume.
+# Restore OpenClaw workspace into the rehearsal volume only.
+docker volume create "${REHEARSAL_PROJECT}_openclaw-home"
 docker run --rm \
-  -v discord-project-manager_openclaw-home:/target \
+  -v "${REHEARSAL_PROJECT}_openclaw-home:/target" \
   -v "$PWD/../private-backups:/backup:ro" \
   alpine sh -lc 'cd /target && tar xzf /backup/openclaw-home-demo.tgz'
 ```
 
 After restore, run a sanitized readback check before enabling writes again: resolve the same fake profile binding before and after restore, compare only profile refs/bindings/audit metadata, and confirm shared profile references were not duplicated.
 
-These commands are examples of the expected private recovery path, not public evidence. Do not commit generated backups. Formal RPO/RTO ownership and full end-to-end restore validation remain follow-up work for #189/#192.
+These commands are examples of the expected private recovery path, not public evidence. Do not commit generated backups. Formal production RPO/RTO ownership remains future production-readiness work; sanitized restore invariants are validated by `scripts/validate-private-runtime-backup-restore.sh`.
 
 ## Fake fixture rules
 
@@ -167,6 +171,7 @@ Before opening a PR, confirm:
 
 ## Related docs
 
+- `docs/operations/private-runtime-backup-restore.md`
 - `docs/architecture/openclaw-artifact-classification.md`
 - `docs/architecture/public-private-boundaries.md`
 - `docs/adr/0002-engram-namespace-contract.md`

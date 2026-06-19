@@ -147,6 +147,7 @@ External-service and local filesystem capabilities must never expose credentials
 - `docs/architecture/discord-scoped-skills-registry.md`
 - `docs/architecture/discord-context-skill-packs.md`
 - `docs/architecture/discord-memory-gateway.md`
+- `docs/operations/private-runtime-backup-restore.md`
 - `docs/security/data-handling.md`
 
 ## Validation checklist
