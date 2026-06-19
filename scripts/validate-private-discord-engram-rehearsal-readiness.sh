@@ -6,6 +6,8 @@ GUIDE_PATH="docs/operations/private-discord-manual-verification-guide.md"
 APPROVAL_DOC="docs/operations/discord-approval-responses.md"
 SLICE_FIXTURE="examples/private-discord-engram-vertical-slice.fake.yaml"
 APPROVAL_FIXTURE="examples/discord-approval-gate.fake.yaml"
+NOOP_FIXTURE="examples/private-discord-engram-noop-observation.fake.yaml"
+REPAIR_FIXTURE="examples/runtime-approval-enforcement-repair.fake.yaml"
 RUNTIME_NAMESPACE_CONTRACT="discord-project-manager/runtime/discord/<guild-id>/<channel-id>"
 
 fail() {
@@ -20,7 +22,7 @@ require_cmd() {
 require_cmd grep
 require_cmd python3
 
-for path in "$FIXTURE_PATH" "$GUIDE_PATH" "$APPROVAL_DOC" "$SLICE_FIXTURE" "$APPROVAL_FIXTURE"; do
+for path in "$FIXTURE_PATH" "$GUIDE_PATH" "$APPROVAL_DOC" "$SLICE_FIXTURE" "$APPROVAL_FIXTURE" "$NOOP_FIXTURE" "$REPAIR_FIXTURE"; do
   [[ -f "$path" ]] || fail "required path not found: $path"
 done
 
@@ -41,13 +43,14 @@ for required in \
   "readiness_result: blocked" \
   "runtime_namespace_contract: $RUNTIME_NAMESPACE_CONTRACT" \
   "id: runtime-approval-enforcement" \
+  "status: design-only-not-implemented" \
   "id: no-op-observation-path" \
-  "status: missing" \
+  "status: design-only-not-proven" \
   "id: explicit-human-approval" \
   "status: not-granted" \
   "allowed_now: false" \
-  "prepare read-only no-op observation design" \
-  "open separate runtime enforcement repair before live traffic"; do
+  "implement and prove read-only no-op observation path" \
+  "implement and prove runtime approval enforcement before live traffic"; do
   grep -F "$required" "$FIXTURE_PATH" >/dev/null || fail "readiness fixture missing marker: $required"
 done
 
@@ -95,6 +98,8 @@ required_contracts = {
     "docs/operations/discord-approval-responses.md",
     "examples/private-discord-engram-vertical-slice.fake.yaml",
     "examples/discord-approval-gate.fake.yaml",
+    "examples/private-discord-engram-noop-observation.fake.yaml",
+    "examples/runtime-approval-enforcement-repair.fake.yaml",
     "docs/operations/runtime-version-baseline.md",
 }
 if set(data.get("source_contracts", [])) != required_contracts:
@@ -126,10 +131,14 @@ for check_id, check in checks.items():
     if check.get("required_before_execution") is not True:
         raise SystemExit(f"readiness check must be required: {check_id}")
 
-if checks["runtime-approval-enforcement"].get("status") != "missing":
-    raise SystemExit("runtime approval enforcement must remain missing until proven")
-if checks["no-op-observation-path"].get("status") != "missing":
-    raise SystemExit("no-op observation path must remain missing until proven")
+if checks["runtime-approval-enforcement"].get("status") != "design-only-not-implemented":
+    raise SystemExit("runtime approval enforcement must remain design-only-not-implemented until implemented and proven")
+if checks["runtime-approval-enforcement"].get("contract_ref") != "examples/runtime-approval-enforcement-repair.fake.yaml":
+    raise SystemExit("runtime approval enforcement must reference repair contract")
+if checks["no-op-observation-path"].get("status") != "design-only-not-proven":
+    raise SystemExit("no-op observation path must remain design-only-not-proven until implemented and proven")
+if checks["no-op-observation-path"].get("contract_ref") != "examples/private-discord-engram-noop-observation.fake.yaml":
+    raise SystemExit("no-op observation path must reference no-op design contract")
 if checks["explicit-human-approval"].get("status") != "not-granted":
     raise SystemExit("explicit human approval must remain not-granted")
 if checks["private-discord-topology"].get("status") != "required-outside-repo":
@@ -152,14 +161,14 @@ if required_state != expected_required_state:
     raise SystemExit("required execution gate state drifted")
 stop_reasons = set(execution.get("stop_reasons", []))
 for required in [
-    "runtime approval enforcement is not proven",
-    "no-op observation path is missing",
+    "runtime approval enforcement repair is design-only-not-implemented",
+    "no-op observation path is design-only-not-proven",
     "explicit execution approval is not granted",
     "private topology and credentials are not represented in repo-safe evidence",
 ]:
     if required not in stop_reasons:
         raise SystemExit(f"missing stop reason: {required}")
-if execution.get("permitted_next_actions") != ["prepare read-only no-op observation design", "open separate runtime enforcement repair before live traffic"]:
+if execution.get("permitted_next_actions") != ["implement and prove read-only no-op observation path", "implement and prove runtime approval enforcement before live traffic"]:
     raise SystemExit("permitted next actions drifted")
 
 policy = data.get("sanitized_evidence_policy", {})
@@ -175,7 +184,7 @@ bash scripts/validate-runtime-version-baseline.sh >/dev/null
 bash scripts/validate-discord-approval-gate.sh >/dev/null
 bash scripts/validate-private-runtime-backup-restore.sh >/dev/null
 
-review_paths=("$FIXTURE_PATH" "$GUIDE_PATH" "$APPROVAL_DOC" "$SLICE_FIXTURE" "$APPROVAL_FIXTURE")
+review_paths=("$FIXTURE_PATH" "$GUIDE_PATH" "$APPROVAL_DOC" "$SLICE_FIXTURE" "$APPROVAL_FIXTURE" "$NOOP_FIXTURE" "$REPAIR_FIXTURE")
 
 if grep -E '\b[0-9]{17,20}\b' "${review_paths[@]}" >/dev/null; then
   fail "private rehearsal readiness artifacts must not expose raw Discord snowflake-like IDs"
