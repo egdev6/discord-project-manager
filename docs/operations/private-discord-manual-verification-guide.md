@@ -317,6 +317,26 @@ bash scripts/validate-private-discord-engram-vertical-slice.sh
 bash scripts/validate-repo-safe-evidence.sh
 ```
 
+## Private Discord-to-Engram rehearsal readiness gate
+
+Before any private Discord message is sent for #211, check the readiness fixture in `examples/private-discord-engram-rehearsal-readiness.fake.yaml` with `scripts/validate-private-discord-engram-rehearsal-readiness.sh`.
+
+This gate is intentionally blocked today: `execution_allowed: false`. It does not close #211 and does not claim live Discord-to-Engram validation. It records the exact prerequisites that must become true outside repo artifacts before a live/private rehearsal can be considered:
+
+- private topology and credentials prepared outside git;
+- explicit operator approval granted for execution;
+- local runtime baseline checked privately;
+- approval-gate lifecycle contract remains green;
+- runtime approval enforcement is proven in the runtime, not only documented;
+- private backup/restore contract remains green;
+- a read-only no-op observation path is available and proven before write-like Discord traffic.
+
+Run the readiness validator with:
+
+```bash
+bash scripts/validate-private-discord-engram-rehearsal-readiness.sh
+```
+
 ## Sanitized evidence checklist
 
 - [ ] Use placeholders such as `<guild-id>` and `<channel-id>`.
@@ -366,4 +386,4 @@ Treat this guide as operator preparation for a **future gated rehearsal**, not a
 
 ## Next step
 
-Continue #211 with the repo-safe evidence pack first. Keep live execution blocked until the private environment, explicit approval, status/repair preview path, and approval-gate behavior are all available and separately approved.
+Continue #211 with a read-only no-op observation design next, or open a separate runtime enforcement repair before any live Discord traffic. Keep live execution blocked until the private environment, explicit approval, status/repair preview path, and approval-gate behavior are all available and separately approved.
