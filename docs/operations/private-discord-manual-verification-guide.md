@@ -349,6 +349,18 @@ Run the no-op observation design validator with:
 bash scripts/validate-private-discord-engram-noop-observation.sh
 ```
 
+## Runtime approval enforcement repair contract
+
+Use `examples/runtime-approval-enforcement-repair.fake.yaml` and `scripts/validate-runtime-approval-enforcement-repair.sh` to review the required runtime repair before live Discord traffic.
+
+This is **design-only-not-implemented**. It does not update the readiness gate, does not close #211, and does not prove runtime enforcement. The contract requires a guard before workflow skills, model prompt execution, file tools, memory tools, and workspace persistence. Write-like Discord-originated turns must stop at `approval-requested` until the exact `approve write` phrase is received for the displayed target only.
+
+Run the repair contract validator with:
+
+```bash
+bash scripts/validate-runtime-approval-enforcement-repair.sh
+```
+
 ## Sanitized evidence checklist
 
 - [ ] Use placeholders such as `<guild-id>` and `<channel-id>`.
