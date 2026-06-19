@@ -33,12 +33,28 @@ Use this runbook before onboarding any real Discord server, brand, Buffer accoun
 | `.env` | Private | Never commit. Real tokens and URLs only. |
 | Docker volumes (`openclaw-home`, `engram-postgres`) | Private | Runtime state and real memory live here. |
 | Engram memory | Private by default | Operational memory until promoted into a repo artifact. |
+| Private context profiles and scope bindings | Private | Store profile definitions, bindings, overrides, and audit metadata outside git. |
+| Capability config and connector credentials | Private | Keep filesystem paths, browser/session state, and connector tokens in private runtime config or a secret store. |
 | Engram exports/backups | Private | Never commit raw exports or database dumps. |
 | Logs, transcripts, screenshots | Private by default | Sanitize before sharing or attaching to issues/PRs. |
 
+## Private runtime state
+
+Private runtime state is any durable operational state that OpenClaw needs but the public repo must not contain.
+
+| State | Public in repo? | Storage expectation |
+|---|---|---|
+| Writing style, brand voice, audience, and publication-rule profiles | No | Private runtime state such as Engram/Postgres or an explicitly private OpenClaw workspace location. |
+| Global/category/channel profile bindings | No | Private runtime state with provenance and backup coverage. |
+| Capability permissions and private config | Usually no | Private runtime config; public docs may describe the contract with fake examples only. |
+| External connector credentials and OAuth/session state | No | `.env`, secret manager, or provider-specific private session store. |
+| Sanitized fixture placeholders | Yes | Repo fixtures/docs when marked fake/demo/sanitized. |
+
+Private profiles are reusable context, not repo-backed skills. Public docs may describe profile shapes and fake examples, but real profile content and real scope bindings stay private.
+
 ## Retention and export rules
 
-- Treat all raw Engram exports, sync archives, SQL dumps, and volume snapshots as private.
+- Treat all raw Engram exports, sync archives, SQL dumps, private profile backups, and volume snapshots as private.
 - Never commit raw Engram exports, Postgres dumps, Discord transcripts, or Buffer response payloads.
 - Promote only sanitized, durable knowledge into repo artifacts:
   - architecture decisions;
@@ -50,6 +66,35 @@ Use this runbook before onboarding any real Discord server, brand, Buffer accoun
 - Disposable smoke-test volumes may be deleted with `docker compose down -v` **only** when they do not contain real memory.
 - If a volume contains real memory, require backup plus explicit human approval before reset or deletion.
 - When exporting for backup, keep files outside the repo and name them as private operational assets.
+- Backup/export must preserve private profile definitions, scope bindings, overrides, disabled bindings, and audit metadata when those features are enabled.
+- Restore validation must prove shared profile references remain shared after restore instead of silently cloning profile content.
+
+## Current recovery path
+
+Until issue #189 adds the dedicated backup/restore contract and end-to-end validation, the operator-owned recovery path is conservative:
+
+1. Stop runtime writes before backup or restore.
+2. Export private runtime storage outside the repo.
+3. Restore only into a private runtime environment.
+4. Re-run sanitized readback checks before resuming writes.
+
+For the current Docker Compose baseline, private runtime state is stored in named volumes such as `engram-postgres` and `openclaw-home`. A sanitized operator backup rehearsal can use commands shaped like:
+
+```bash
+# Postgres/Engram private backup; write output outside the repo.
+docker compose exec -T postgres pg_dump \
+  -U "${POSTGRES_USER:-engram}" \
+  "${POSTGRES_DB:-engram_cloud}" \
+  > ../private-backups/engram-demo.sql
+
+# OpenClaw workspace volume backup; write output outside the repo.
+docker run --rm \
+  -v discord-project-manager_openclaw-home:/source:ro \
+  -v "$PWD/../private-backups:/backup" \
+  alpine tar czf /backup/openclaw-home-demo.tgz -C /source .
+```
+
+These commands are examples of the expected private recovery path, not public evidence. Do not commit generated backups. Restore validation and RPO/RTO ownership remain follow-up work for #189/#192.
 
 ## Fake fixture rules
 
@@ -63,6 +108,7 @@ Required rules:
 - Do not use real customer, employee, creator, or community member names.
 - Do not include screenshots containing private Discord channels, DMs, brand plans, or analytics dashboards.
 - Do not paste real Engram memory entries into docs or PRs.
+- Do not paste real writing profiles, brand voice notes, audience profiles, scope bindings, or private connector configuration into docs or PRs.
 - Clearly label examples as `fake`, `demo`, or `sanitized`.
 
 ## Incident guidance
@@ -104,6 +150,7 @@ Before opening a PR, confirm:
 
 ## Related docs
 
+- `docs/architecture/openclaw-artifact-classification.md`
 - `docs/architecture/public-private-boundaries.md`
 - `docs/adr/0002-engram-namespace-contract.md`
 - `docs/operations/docker-runtime.md`
