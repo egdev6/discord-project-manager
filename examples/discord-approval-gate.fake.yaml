@@ -4,7 +4,14 @@ safe_for_repo: true
 privacy_reviewed: true
 contract: discord-approval-gate
 live_discord_connection: false
+live_engram_calls: false
+live_openclaw_prompt_execution: false
+runtime_enforcement_proven: false
 uses_real_discord_ids: false
+raw_discord_chat_logs_included: false
+raw_private_payload_included: false
+screenshots_included: false
+secrets_included: false
 runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
 approval_phrase: approve write
 write_like_terms:
@@ -22,6 +29,11 @@ pre_approval:
   persistent_writes_allowed: false
   durable_project_writes_allowed: false
   workspace_file_writes_allowed: false
+  memory_writes_allowed: false
+  ledger_writes_allowed: false
+  queue_writes_allowed: false
+  publishing_allowed: false
+  scheduling_allowed: false
   allowed_output: discord-response-only
   audit_trail_mode: response-local-until-decision
 approval_prompt_options:
@@ -30,20 +42,127 @@ approval_prompt_options:
   - reject
 scenarios:
   - name: matched-route-save-request
+    phase: pre-approval
     route_status: matched-route
     channel_name: x-egdev
     request: save a fake X queue variation rule
     expected_state: approval-requested
     target_namespace: discord-project-manager/project/egdev/network/x
+    runtime_audit_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+    mandatory_skill: discord-approval-gate
+    exact_approval_phrase_required: approve write
     writes_before_approval: false
-  - name: matched-route-reject
+    workspace_file_writes_before_approval: false
+    memory_writes_before_approval: false
+    durable_reads_allowed: true
+    allowed_output: proposal-only
+  - name: matched-route-approve-write
+    phase: approved-write
     route_status: matched-route
     channel_name: x-egdev
-    request: reject a fake X queue variation rule
+    request: approve write
+    expected_state: approved-for-write
+    target_namespace: discord-project-manager/project/egdev/network/x
+    runtime_audit_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+    prior_proposal_ref: matched-route-save-request
+    approval_phrase_received: approve write
+    persistent_writes_allowed: true
+    allowed_write_scope: displayed-target-only
+    workspace_file_writes_allowed: false
+    publishing_allowed: false
+    scheduling_allowed: false
+    audit_record_required: true
+    rollback_restore_hint_required: true
+    backup_ref: private-backup://demo/approval-gate-before-write.tgz
+    pre_change_snapshot_ref: snapshot:approval-gate-demo-before-write
+    restore_command_ref: docs/security/data-handling.md#current-recovery-path
+    verification_step: run sanitized readback before accepting more writes
+    owner_ref: operator-demo
+    fix_forward_path: revise proposal and re-run approval gate validation
+  - name: invalid-approval-short
+    phase: invalid-approval
+    route_status: matched-route
+    channel_name: x-egdev
+    request: approve
+    expected_state: approval-requested
+    target_namespace: discord-project-manager/project/egdev/network/x
+    prior_proposal_ref: matched-route-save-request
+    approval_phrase_received: approve
+    valid_approval_phrase: false
+    persistent_writes_allowed: false
+    writes_after_invalid_approval: false
+  - name: invalid-approval-case
+    phase: invalid-approval
+    route_status: matched-route
+    channel_name: x-egdev
+    request: Approve write
+    expected_state: approval-requested
+    target_namespace: discord-project-manager/project/egdev/network/x
+    prior_proposal_ref: matched-route-save-request
+    approval_phrase_received: Approve write
+    valid_approval_phrase: false
+    persistent_writes_allowed: false
+    writes_after_invalid_approval: false
+  - name: invalid-approval-extra-text
+    phase: invalid-approval
+    route_status: matched-route
+    channel_name: x-egdev
+    request: approve write please
+    expected_state: approval-requested
+    target_namespace: discord-project-manager/project/egdev/network/x
+    prior_proposal_ref: matched-route-save-request
+    approval_phrase_received: approve write please
+    valid_approval_phrase: false
+    persistent_writes_allowed: false
+    writes_after_invalid_approval: false
+  - name: invalid-approval-emoji
+    phase: invalid-approval
+    route_status: matched-route
+    channel_name: x-egdev
+    request: thumbs-up-emoji
+    expected_state: approval-requested
+    target_namespace: discord-project-manager/project/egdev/network/x
+    prior_proposal_ref: matched-route-save-request
+    approval_phrase_received: emoji-reaction
+    valid_approval_phrase: false
+    persistent_writes_allowed: false
+    writes_after_invalid_approval: false
+  - name: invalid-approval-silence
+    phase: invalid-approval
+    route_status: matched-route
+    channel_name: x-egdev
+    request: no-reply
+    expected_state: approval-requested
+    target_namespace: discord-project-manager/project/egdev/network/x
+    prior_proposal_ref: matched-route-save-request
+    approval_phrase_received: none
+    valid_approval_phrase: false
+    persistent_writes_allowed: false
+    writes_after_invalid_approval: false
+  - name: matched-route-revise
+    phase: revision
+    route_status: matched-route
+    channel_name: x-egdev
+    request: "revise: keep the rule fake and weekly only"
+    expected_state: approval-requested
+    target_namespace: discord-project-manager/project/egdev/network/x
+    prior_proposal_ref: matched-route-save-request
+    writes_after_revision: false
+    revised_proposal_required: true
+    exact_approval_phrase_required: approve write
+  - name: matched-route-reject
+    phase: rejection
+    route_status: matched-route
+    channel_name: x-egdev
+    request: reject
     expected_state: rejected
     target_namespace: discord-project-manager/project/egdev/network/x
+    prior_proposal_ref: matched-route-save-request
     writes_after_reject: false
+    persistent_writes_allowed: false
+    audit_decision_summary_allowed: true
   - name: unmapped-route-write-request
+    phase: needs-route
     route_status: unmapped-channel
     channel_name: general
     request: remember this fake planning note
@@ -51,9 +170,14 @@ scenarios:
     target_namespace: none
     durable_reads_allowed: false
     writes_before_approval: false
+    persistent_writes_allowed: false
+    allowed_output: route-needed-only
 non_goals:
-  - live Buffer analytics
+  - live Discord execution
+  - live Engram writes
+  - live OpenClaw prompt execution
   - public Discord channels
   - publishing
   - scheduling
   - durable writes before explicit approval
+  - workspace file writes before explicit approval

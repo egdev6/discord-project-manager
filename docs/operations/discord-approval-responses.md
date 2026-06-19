@@ -24,6 +24,19 @@ Before approval, the safe default is response-only: show the proposal and approv
 4. Keep audit trail fields in the response until the operator decides.
 5. After approval, write durable project memory, ledger state, and runtime audit notes only to displayed namespaces.
 
+## Lifecycle validation fixture
+
+The repo-safe lifecycle fixture is `examples/discord-approval-gate.fake.yaml`, validated by `scripts/validate-discord-approval-gate.sh`. It is fake-only and does not prove live Discord/OpenClaw/Engram enforcement.
+
+The fixture must cover:
+
+- matched write-like request stops at `approval-requested`;
+- exact `approve write` applies only the displayed target scope;
+- `revise: <instruction>` produces a revised proposal without persistence;
+- `reject` stops without persistence;
+- unmapped write-like routes perform no durable reads or writes;
+- workspace, memory, ledger, queue, publishing, and scheduling writes stay blocked before approval.
+
 ## Response states
 
 | State | Purpose | Durable writes allowed? |
