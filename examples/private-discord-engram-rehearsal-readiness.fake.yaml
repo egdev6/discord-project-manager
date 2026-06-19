@@ -21,6 +21,8 @@ source_contracts:
   - docs/operations/discord-approval-responses.md
   - examples/private-discord-engram-vertical-slice.fake.yaml
   - examples/discord-approval-gate.fake.yaml
+  - examples/private-discord-engram-noop-observation.fake.yaml
+  - examples/runtime-approval-enforcement-repair.fake.yaml
   - docs/operations/runtime-version-baseline.md
 operator_inputs:
   private_non_production_guild: required-outside-repo
@@ -45,15 +47,17 @@ readiness_checks:
     command_refs:
       - bash scripts/validate-discord-approval-gate.sh
   - id: runtime-approval-enforcement
-    status: missing
+    status: design-only-not-implemented
     required_before_execution: true
     evidence_allowed_in_repo: sanitized-summary-only
-    blocker: runtime approval enforcement must be proven before any private Discord write-like traffic
+    blocker: repair contract exists, but runtime approval enforcement must be implemented and proven before any private Discord write-like traffic
+    contract_ref: examples/runtime-approval-enforcement-repair.fake.yaml
   - id: no-op-observation-path
-    status: missing
+    status: design-only-not-proven
     required_before_execution: true
     evidence_allowed_in_repo: sanitized-summary-only
-    blocker: no proven dry-run/status/preview path for Discord-originated write-like request
+    blocker: no-op observation design exists, but the runtime path must be implemented and proven before any private Discord write-like request
+    contract_ref: examples/private-discord-engram-noop-observation.fake.yaml
   - id: private-discord-topology
     status: required-outside-repo
     required_before_execution: true
@@ -81,13 +85,13 @@ execution_gate:
     explicit-human-approval: granted
     private-backup-restore-ready: repo-contract-ready
   stop_reasons:
-    - runtime approval enforcement is not proven
-    - no-op observation path is missing
+    - runtime approval enforcement repair is design-only-not-implemented
+    - no-op observation path is design-only-not-proven
     - explicit execution approval is not granted
     - private topology and credentials are not represented in repo-safe evidence
   permitted_next_actions:
-    - prepare read-only no-op observation design
-    - open separate runtime enforcement repair before live traffic
+    - implement and prove read-only no-op observation path
+    - implement and prove runtime approval enforcement before live traffic
 sanitized_evidence_policy:
   allowed:
     - pass status summary

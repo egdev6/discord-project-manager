@@ -327,9 +327,9 @@ This gate is intentionally blocked today: `execution_allowed: false`. It does no
 - explicit operator approval granted for execution;
 - local runtime baseline checked privately;
 - approval-gate lifecycle contract remains green;
-- runtime approval enforcement is proven in the runtime, not only documented;
+- runtime approval enforcement repair progresses beyond `design-only-not-implemented` and is proven in the runtime;
 - private backup/restore contract remains green;
-- a read-only no-op observation path is available and proven before write-like Discord traffic.
+- the read-only no-op observation path progresses beyond `design-only-not-proven` and is proven before write-like Discord traffic.
 
 Run the readiness validator with:
 
@@ -410,4 +410,4 @@ Treat this guide as operator preparation for a **future gated rehearsal**, not a
 
 ## Next step
 
-Continue #211 with a read-only no-op observation design next, or open a separate runtime enforcement repair before any live Discord traffic. Keep live execution blocked until the private environment, explicit approval, status/repair preview path, and approval-gate behavior are all available and separately approved.
+Continue #211 by implementing and proving the no-op observation path and runtime approval enforcement before any live Discord traffic. Keep live execution blocked until the private environment, explicit approval, status/repair preview path, and approval-gate behavior are all available and separately approved.
