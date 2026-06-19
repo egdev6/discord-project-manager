@@ -1,0 +1,113 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: private-discord-engram-rehearsal-readiness
+issue: 211
+live_discord_connection: false
+live_engram_calls: false
+live_openclaw_prompt_execution: false
+runtime_enforcement_proven: false
+uses_real_discord_ids: false
+raw_discord_chat_logs_included: false
+raw_private_payload_included: false
+screenshots_included: false
+secrets_included: false
+execution_allowed: false
+readiness_result: blocked
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+source_contracts:
+  - docs/operations/private-discord-manual-verification-guide.md
+  - docs/operations/discord-approval-responses.md
+  - examples/private-discord-engram-vertical-slice.fake.yaml
+  - examples/discord-approval-gate.fake.yaml
+  - docs/operations/runtime-version-baseline.md
+operator_inputs:
+  private_non_production_guild: required-outside-repo
+  private_non_production_channel: required-outside-repo
+  non_production_credentials: required-outside-repo
+  explicit_execution_approval: not-granted
+  real_identifiers_committed: false
+  credentials_committed: false
+readiness_checks:
+  - id: runtime-baseline
+    status: pending-private-run
+    required_before_execution: true
+    evidence_allowed_in_repo: sanitized-summary-only
+    command_refs:
+      - docker compose config
+      - bash scripts/validate-runtime-version-baseline.sh
+      - bash scripts/validate-openclaw-gentle-ai-runtime.sh
+  - id: approval-gate-lifecycle
+    status: repo-contract-ready
+    required_before_execution: true
+    evidence_allowed_in_repo: validator-output-only
+    command_refs:
+      - bash scripts/validate-discord-approval-gate.sh
+  - id: runtime-approval-enforcement
+    status: missing
+    required_before_execution: true
+    evidence_allowed_in_repo: sanitized-summary-only
+    blocker: runtime approval enforcement must be proven before any private Discord write-like traffic
+  - id: no-op-observation-path
+    status: missing
+    required_before_execution: true
+    evidence_allowed_in_repo: sanitized-summary-only
+    blocker: no proven dry-run/status/preview path for Discord-originated write-like request
+  - id: private-discord-topology
+    status: required-outside-repo
+    required_before_execution: true
+    evidence_allowed_in_repo: placeholder-summary-only
+    blocker: private guild/channel details must stay outside git
+  - id: explicit-human-approval
+    status: not-granted
+    required_before_execution: true
+    evidence_allowed_in_repo: decision-summary-only
+    blocker: execution requires separate operator approval
+  - id: private-backup-restore-ready
+    status: repo-contract-ready
+    required_before_execution: true
+    evidence_allowed_in_repo: validator-output-only
+    command_refs:
+      - bash scripts/validate-private-runtime-backup-restore.sh
+execution_gate:
+  allowed_now: false
+  required_state_before_live_discord_message:
+    runtime-baseline: passed-private-run
+    approval-gate-lifecycle: repo-contract-ready
+    runtime-approval-enforcement: available-and-proven
+    no-op-observation-path: available-and-proven
+    private-discord-topology: prepared-outside-repo
+    explicit-human-approval: granted
+    private-backup-restore-ready: repo-contract-ready
+  stop_reasons:
+    - runtime approval enforcement is not proven
+    - no-op observation path is missing
+    - explicit execution approval is not granted
+    - private topology and credentials are not represented in repo-safe evidence
+  permitted_next_actions:
+    - prepare read-only no-op observation design
+    - open separate runtime enforcement repair before live traffic
+sanitized_evidence_policy:
+  allowed:
+    - pass status summary
+    - blocked status summary
+    - not-run status summary
+    - placeholder namespace refs
+    - validator command names and pass/fail summaries
+    - explicit operator decision summary without identifiers
+  forbidden:
+    - real Discord guild/channel/user/message IDs
+    - credentials or .env values
+    - screenshots
+    - raw logs
+    - transcripts
+    - private payloads
+    - raw Engram exports
+    - SQL dumps
+non_goals:
+  - executing live Discord messages
+  - proving live Engram write/readback
+  - claiming approval enforcement in runtime
+  - storing private topology in git
+  - closing issue 211
