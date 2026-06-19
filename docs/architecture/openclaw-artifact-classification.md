@@ -33,7 +33,7 @@ writeback_policy: confirmation-required
 | Field | Required? | Purpose |
 | --- | --- | --- |
 | `artifact_type` | Yes | What kind of thing the user is asking to read, draft, create, update, or route. |
-| `subtype` | When meaningful | Refinement such as `profile`, `scope_binding`, `skill_contract`, or `capability_config`. Use `none` or omit only when the artifact type has no useful subtype. |
+| `subtype` | Yes | Refinement such as `profile`, `scope_binding`, `skill_contract`, `capability_config`, or `none` when the artifact type has no useful subtype. |
 | `operation` | Yes | `read`, `draft`, `create`, `update`, `bind`, `reference`, `unbind`, `clone`, `execute`, or `handoff`. |
 | `persistence_target` | Yes | Where the durable result may live. |
 | `approval_required` | Yes | Whether exact `approve write` is required before persistence. |
@@ -105,12 +105,12 @@ Clone and reference are different operations:
 | --- | --- | --- | --- | --- | --- |
 | “Remember this as my LinkedIn writing style.” | `private_context/profile` | `create` | `private-runtime` | `openclaw-skill-surface` | `confirmation-required` |
 | “Use the same writing profile for LinkedIn and X.” | `private_context/scope_binding` | `bind` | `private-runtime` | `openclaw-skill-surface` | `confirmation-required` |
-| “Add a safe local filesystem capability for content drafts.” | `runtime_capability/capability_config` | `draft` or `update` | `repo` contract plus private config | `gentle-sdd` or `openclaw-skill-surface` | `draft` or `confirmation-required` |
-| “Create a publication flow for Buffer.” | `publication_flow/connector_flow` | `create` | `repo` contract plus `external-service` config | `openclaw-skill-surface` | `confirmation-required` |
+| “Add a safe local filesystem capability for content drafts.” | `runtime_capability/capability_config` | `draft` or `update` | `private-runtime` | `gentle-sdd` or `openclaw-skill-surface` | `draft` or `confirmation-required` |
+| “Create a publication flow for Buffer.” | `publication_flow/connector_flow` | `create` | `external-service` | `openclaw-skill-surface` | `confirmation-required` |
 | “Build a new OpenClaw skill for weekly LinkedIn planning.” | `sdd_dev_work/workflow_skill` | `handoff` | `repo` proposal | `gentle-sdd` | `draft` until write proposal |
 | “Draft three post ideas.” | `ephemeral_draft/none` | `draft` | `ephemeral` | `openclaw-skill-surface` | `draft` |
 
-The table is a summary. Executable fixtures and runtime metadata must still include the full classification block: `artifact_type`, `operation`, `persistence_target`, `approval_required`, `backup_required`, `deployment_required`, `runner_backend`, and `writeback_policy`.
+The table is a summary. `persistence_target` remains one enum value; related public contracts or private config are described in adjacent metadata, not encoded into the field. Executable fixtures and runtime metadata must still include the full classification block: `artifact_type`, `subtype`, `operation`, `persistence_target`, `approval_required`, `backup_required`, `deployment_required`, `runner_backend`, and `writeback_policy`.
 
 ## Approval, backup, and deployment implications
 
@@ -150,7 +150,7 @@ Until those rules exist for a connector, classify connector changes as proposal/
 
 ## Validation checklist
 
-- [ ] Every fixture scenario includes `artifact_type`, `operation`, `persistence_target`, `approval_required`, `backup_required`, `deployment_required`, `runner_backend`, and `writeback_policy`.
+- [ ] Every fixture scenario includes `artifact_type`, `subtype`, `operation`, `persistence_target`, `approval_required`, `backup_required`, `deployment_required`, `runner_backend`, and `writeback_policy`.
 - [ ] Write-like classifications include `approval_required: true` unless explicitly documented otherwise.
 - [ ] Private profile scenarios keep real profile content out of repo fixtures.
 - [ ] Runtime capability scenarios distinguish public contract from private config/secrets.

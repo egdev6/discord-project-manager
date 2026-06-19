@@ -103,8 +103,11 @@ for scenario in scenarios:
     if missing:
         raise SystemExit(f"scenario {scenario['name']} missing classification fields: {sorted(missing)}")
     c = scenario["classification"]
+    write_like_ops = {"create", "update", "bind", "reference", "unbind", "clone", "execute", "handoff"}
     if c["writeback_policy"] == "confirmation-required" and c["approval_required"] != "true":
         raise SystemExit(f"scenario {scenario['name']} confirmation-required must require approval")
+    if c["operation"] in write_like_ops and c["approval_required"] != "true":
+        raise SystemExit(f"scenario {scenario['name']} write-like operation must require approval")
     if c["artifact_type"] == "private_context" and (c["persistence_target"] != "private-runtime" or c["backup_required"] != "true"):
         raise SystemExit(f"scenario {scenario['name']} private context must target private-runtime and require backup")
     if c["artifact_type"] == "ephemeral_draft" and (c["persistence_target"] != "ephemeral" or c["approval_required"] != "false"):
@@ -119,6 +122,7 @@ PY
 
 review_paths=("$FIXTURE_PATH" "$DOC_PATH" "$DATA_DOC")
 
+# Discord snowflakes are currently 17-20 digit decimal identifiers; public fixtures/docs must use placeholders instead.
 if grep -E '\b[0-9]{17,20}\b' "${review_paths[@]}" >/dev/null; then
   fail "artifacts must not expose raw Discord snowflake-like IDs"
 fi
