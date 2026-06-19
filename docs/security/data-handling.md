@@ -33,12 +33,28 @@ Use this runbook before onboarding any real Discord server, brand, Buffer accoun
 | `.env` | Private | Never commit. Real tokens and URLs only. |
 | Docker volumes (`openclaw-home`, `engram-postgres`) | Private | Runtime state and real memory live here. |
 | Engram memory | Private by default | Operational memory until promoted into a repo artifact. |
+| Private context profiles and scope bindings | Private | Store profile definitions, bindings, overrides, and audit metadata outside git. |
+| Capability config and connector credentials | Private | Keep filesystem paths, browser/session state, and connector tokens in private runtime config or a secret store. |
 | Engram exports/backups | Private | Never commit raw exports or database dumps. |
 | Logs, transcripts, screenshots | Private by default | Sanitize before sharing or attaching to issues/PRs. |
 
+## Private runtime state
+
+Private runtime state is any durable operational state that OpenClaw needs but the public repo must not contain.
+
+| State | Public in repo? | Storage expectation |
+|---|---|---|
+| Writing style, brand voice, audience, and publication-rule profiles | No | Private runtime state such as Engram/Postgres or an explicitly private OpenClaw workspace location. |
+| Global/category/channel profile bindings | No | Private runtime state with provenance and backup coverage. |
+| Capability permissions and private config | Usually no | Private runtime config; public docs may describe the contract with fake examples only. |
+| External connector credentials and OAuth/session state | No | `.env`, secret manager, or provider-specific private session store. |
+| Sanitized fixture placeholders | Yes | Repo fixtures/docs when marked fake/demo/sanitized. |
+
+Private profiles are reusable context, not repo-backed skills. Public docs may describe profile shapes and fake examples, but real profile content and real scope bindings stay private.
+
 ## Retention and export rules
 
-- Treat all raw Engram exports, sync archives, SQL dumps, and volume snapshots as private.
+- Treat all raw Engram exports, sync archives, SQL dumps, private profile backups, and volume snapshots as private.
 - Never commit raw Engram exports, Postgres dumps, Discord transcripts, or Buffer response payloads.
 - Promote only sanitized, durable knowledge into repo artifacts:
   - architecture decisions;
@@ -50,6 +66,8 @@ Use this runbook before onboarding any real Discord server, brand, Buffer accoun
 - Disposable smoke-test volumes may be deleted with `docker compose down -v` **only** when they do not contain real memory.
 - If a volume contains real memory, require backup plus explicit human approval before reset or deletion.
 - When exporting for backup, keep files outside the repo and name them as private operational assets.
+- Backup/export must preserve private profile definitions, scope bindings, overrides, disabled bindings, and audit metadata when those features are enabled.
+- Restore validation must prove shared profile references remain shared after restore instead of silently cloning profile content.
 
 ## Fake fixture rules
 
@@ -63,6 +81,7 @@ Required rules:
 - Do not use real customer, employee, creator, or community member names.
 - Do not include screenshots containing private Discord channels, DMs, brand plans, or analytics dashboards.
 - Do not paste real Engram memory entries into docs or PRs.
+- Do not paste real writing profiles, brand voice notes, audience profiles, scope bindings, or private connector configuration into docs or PRs.
 - Clearly label examples as `fake`, `demo`, or `sanitized`.
 
 ## Incident guidance
@@ -104,6 +123,7 @@ Before opening a PR, confirm:
 
 ## Related docs
 
+- `docs/architecture/openclaw-artifact-classification.md`
 - `docs/architecture/public-private-boundaries.md`
 - `docs/adr/0002-engram-namespace-contract.md`
 - `docs/operations/docker-runtime.md`
