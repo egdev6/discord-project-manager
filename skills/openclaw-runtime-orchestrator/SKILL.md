@@ -24,6 +24,7 @@ Discord event envelope
 -> channel guide ref
 -> context pack ref
 -> skill pack ref
+-> artifact classification
 -> intent classification
 -> runner selection
 -> permission/confirmation gate
@@ -42,7 +43,9 @@ Discord event envelope
 ## Hard Rules
 
 - Resolve scope and effective skills before using any workflow skill.
+- Always emit artifact classification before runner selection.
 - Always include `discord-approval-gate` for write-like flows.
+- Private context profile operations such as `create`, `update`, `reference`, `bind`, `clone`, and channel override proposals are write-like when they target durable private runtime state.
 - Do not expose raw Discord IDs, secrets, transcripts, screenshots, or private payloads in repo artifacts.
 - Do not claim live Discord, production, publishing, scheduling, Buffer, or durable write success from no-op/model-mediated checks.
 - Treat Gentle-AI SDD assets as preserved protocol/backend assets under `.openclaw/skills`, not legacy product skills.
@@ -52,6 +55,16 @@ Discord event envelope
 Return a compact metadata block:
 
 ```text
+artifact_classification:
+  artifact_type: <workflow_skill|private_context|runtime_capability|publication_flow|sdd_dev_work|ephemeral_draft>
+  subtype: <profile|scope_binding|skill_contract|capability_config|connector_flow|none>
+  operation: <read|draft|create|update|bind|reference|unbind|clone|execute|handoff>
+  persistence_target: <repo|private-runtime|external-service|ephemeral>
+  approval_required: <true|false>
+  backup_required: <true|false>
+  deployment_required: <true|false>
+  runner_backend: <openclaw-skill-surface|gentle-sdd|response-only>
+  writeback_policy: <auto-save|confirmation-required|draft|reject>
 intent_family: <planning_content|sdd_dev_work|clarification_needed>
 selected_backend_or_runner: <openclaw-skill-surface|gentle-sdd|response-only>
 skill_pack_ref: <resolved-pack-or-none>
@@ -61,6 +74,8 @@ approval_required: <true|false>
 writes_attempted: false
 boundary_notes: <one sentence>
 ```
+
+Keep existing runner behavior small: classification may become richer than the current intent families, but `planning_content`, `sdd_dev_work`, and `clarification_needed` remain the only runner-selection families in this slice.
 
 ## References
 
