@@ -40,6 +40,7 @@ if grep -F "command -v discord-project-manager-approval-guard" "$NOOP_PATH" >/de
 fi
 grep -F "require_guard_field" "$NOOP_PATH" >/dev/null || fail "no-op observation CLI must fail closed when guard fields are missing"
 grep -F "possible private identifier or secret-like value" "$NOOP_PATH" >/dev/null || fail "no-op observation CLI must reject private identifiers or secret-like values"
+grep -F "GITHUB" "$NOOP_PATH" >/dev/null || fail "no-op observation CLI must reject common GitHub token-like values"
 grep -F "YAML metacharacters are not allowed" "$NOOP_PATH" >/dev/null || fail "no-op observation CLI must reject YAML metacharacters"
 grep -F "network_calls_attempted: false" "$NOOP_PATH" >/dev/null || fail "no-op observation CLI must report no network calls"
 grep -F "filesystem_writes_attempted: false" "$NOOP_PATH" >/dev/null || fail "no-op observation CLI must report no filesystem writes"
@@ -110,6 +111,12 @@ if sh "$NOOP_PATH" --route-status matched-route --content-summary "fake id $priv
   fail "no-op observation CLI must reject private identifier-like scalar arguments"
 fi
 grep -F "possible private identifier or secret-like value" "$TMPDIR_CREATED/private-id.err" >/dev/null || fail "private identifier rejection must explain boundary"
+
+github_token_like="GITHUB_TOKEN=ghp_""abcdefghijklmnopqrstuvwxyz123456"
+if sh "$NOOP_PATH" --route-status matched-route --content-summary "$github_token_like" >"$TMPDIR_CREATED/github-token.out" 2>"$TMPDIR_CREATED/github-token.err"; then
+  fail "no-op observation CLI must reject GitHub token-like scalar arguments"
+fi
+grep -F "possible private identifier or secret-like value" "$TMPDIR_CREATED/github-token.err" >/dev/null || fail "GitHub token-like rejection must explain boundary"
 
 malformed_guard_dir="$TMPDIR_CREATED/malformed-guard"
 mkdir -p "$malformed_guard_dir"

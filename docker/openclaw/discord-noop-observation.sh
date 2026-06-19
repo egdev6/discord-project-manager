@@ -30,7 +30,7 @@ reject_unsafe_scalar() {
       exit 2
       ;;
   esac
-  if printf '%s' "$value" | grep -E '[0-9]{17,20}|(DISCORD|ENGRAM|OPENCLAW)_[A-Z0-9_]*=|[A-Za-z0-9_-]{24,}\.[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{20,}' >/dev/null 2>&1; then
+  if printf '%s' "$value" | grep -E '[0-9]{17,20}|(TOKEN|SECRET|PASSWORD|API_KEY|DISCORD|ENGRAM|OPENCLAW|GITHUB|GH)_[A-Z0-9_]*=|gh[pousr]_[A-Za-z0-9_]{20,}|[A-Za-z0-9_-]{24,}\.[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{20,}' >/dev/null 2>&1; then
     echo "unsafe $name: possible private identifier or secret-like value" >&2
     exit 2
   fi
