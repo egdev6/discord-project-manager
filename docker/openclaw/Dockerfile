@@ -36,7 +36,8 @@ COPY --chown=node:node openclaw/config/ /opt/discord-project-manager/openclaw-co
 COPY --chown=root:root docker/openclaw/sync-skills.sh /usr/local/bin/discord-project-manager-sync-skills
 COPY --chown=root:root docker/openclaw/managed-channel-registry.sh /usr/local/bin/discord-project-manager-managed-registry
 COPY --chown=root:root docker/openclaw/discord-approval-guard.sh /usr/local/bin/discord-project-manager-approval-guard
-RUN chmod 0755 /usr/local/bin/discord-project-manager-sync-skills /usr/local/bin/discord-project-manager-managed-registry /usr/local/bin/discord-project-manager-approval-guard /usr/local/bin/engram \
+COPY --chown=root:root docker/openclaw/discord-noop-observation.sh /usr/local/bin/discord-project-manager-noop-observation
+RUN chmod 0755 /usr/local/bin/discord-project-manager-sync-skills /usr/local/bin/discord-project-manager-managed-registry /usr/local/bin/discord-project-manager-approval-guard /usr/local/bin/discord-project-manager-noop-observation /usr/local/bin/engram \
   && engram version
 
 USER node

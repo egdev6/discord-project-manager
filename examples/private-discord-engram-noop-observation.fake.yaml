@@ -27,6 +27,28 @@ objective:
   proves_runtime_behavior: false
   updates_readiness_gate: false
   reason: design alone does not prove the runtime can observe write-like Discord events without prompt execution or persistence
+repo_safe_synthetic_observation_status: synthetic-noop-cli-proven
+synthetic_cli_proof:
+  status: repo-safe-synthetic-cli-proven
+  proof_level: repo-safe-synthetic-runtime-cli
+  runtime_cli_ref: docker/openclaw/discord-noop-observation.sh
+  validator_ref: scripts/validate-discord-noop-observation-cli.sh
+  guard_cli_ref: docker/openclaw/discord-approval-guard.sh
+  live_discord_gateway_delivery_proven: false
+  private_redacted_event_delivery_proven: false
+  readiness_gate_updated: false
+  evidence_allowed_in_repo: sanitized-summary-only
+  proves:
+    - synthetic matched-route write-like preview stops at approval-requested
+    - synthetic unmapped-channel preview stops at needs-route
+    - prompt execution remains none
+    - workspace, filesystem, Engram, publishing, scheduling, and GitHub writes remain blocked
+  does_not_prove:
+    - live Discord gateway delivery
+    - private redacted event ingestion
+    - server-side proposal binding
+    - Engram write/readback
+    - issue 211 completion
 synthetic_event_envelope:
   event_source: synthetic-discord-envelope
   guild_id: <guild-id>

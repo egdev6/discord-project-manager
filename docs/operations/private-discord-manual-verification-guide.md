@@ -341,12 +341,15 @@ bash scripts/validate-private-discord-engram-rehearsal-readiness.sh
 
 Use `examples/private-discord-engram-noop-observation.fake.yaml` and `scripts/validate-private-discord-engram-noop-observation.sh` to review the shape of a future read-only no-op observation path.
 
-This is **design-only-not-proven**. It does not update the readiness gate, does not close #211, and does not prove runtime behavior. The design describes a synthetic or separately approved redacted event preview that must stop at `approval-requested` without prompt execution, workspace writes, Engram writes, filesystem writes, publishing, scheduling, or network calls.
+This remains **design-only-not-proven** for live/private Discord readiness. It does not update the readiness gate, does not close #211, and does not prove live Discord gateway delivery. The design describes a synthetic or separately approved redacted event preview that must stop at `approval-requested` without prompt execution, workspace writes, Engram writes, filesystem writes, publishing, scheduling, or network calls.
 
-Run the no-op observation design validator with:
+The Docker runtime also includes `discord-project-manager-noop-observation`, a repo-safe synthetic CLI that calls `discord-project-manager-approval-guard` and proves the local no-op preview behavior for sanitized synthetic envelopes. The canonical status is `repo_safe_synthetic_observation_status: synthetic-noop-cli-proven`; the proof level is `repo-safe-synthetic-runtime-cli`. It does not prove live Discord gateway delivery or private redacted event ingestion.
+
+Run the no-op observation validators with:
 
 ```bash
 bash scripts/validate-private-discord-engram-noop-observation.sh
+bash scripts/validate-discord-noop-observation-cli.sh
 ```
 
 ## Runtime approval enforcement repair contract
