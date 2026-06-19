@@ -64,8 +64,24 @@ scenarios:
       idempotency_required: true
       reconciliation_required: true
       durable_write_before_approval: false
+  - name: workflow-skill-contract-proposal
+    request_shape: propose a fake repo-backed OpenClaw workflow skill contract
+    classification:
+      artifact_type: workflow_skill
+      subtype: skill_contract
+      operation: draft
+      persistence_target: repo
+      approval_required: true
+      backup_required: false
+      deployment_required: true
+      runner_backend: gentle-sdd
+      writeback_policy: draft
+    safety:
+      repo_review_required: true
+      repo_write_before_claim: false
+      private_content_fixture: sanitized-placeholder-only
   - name: sdd-workflow-skill-handoff
-    request_shape: build a fake OpenClaw workflow skill
+    request_shape: build a fake OpenClaw workflow skill through Gentle SDD
     classification:
       artifact_type: sdd_dev_work
       subtype: workflow_skill

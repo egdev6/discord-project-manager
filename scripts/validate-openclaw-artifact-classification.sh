@@ -37,6 +37,7 @@ for required in \
   "publishing_enabled: false" \
   "scheduling_enabled: false" \
   "buffer_activity_enabled: false" \
+  "artifact_type: workflow_skill" \
   "artifact_type: private_context" \
   "artifact_type: runtime_capability" \
   "artifact_type: publication_flow" \
@@ -108,12 +109,19 @@ for scenario in scenarios:
         raise SystemExit(f"scenario {scenario['name']} confirmation-required must require approval")
     if c["operation"] in write_like_ops and c["approval_required"] != "true":
         raise SystemExit(f"scenario {scenario['name']} write-like operation must require approval")
+    if c["artifact_type"] == "workflow_skill":
+        if c["persistence_target"] != "repo" or c["approval_required"] != "true" or c["deployment_required"] != "true":
+            raise SystemExit(f"scenario {scenario['name']} workflow_skill must target repo, require approval, and require deployment/review path")
+        if c["runner_backend"] != "gentle-sdd" or c["writeback_policy"] != "draft":
+            raise SystemExit(f"scenario {scenario['name']} workflow_skill must stay a gentle-sdd draft proposal before repo write")
+        if not any(k == "repo_review_required" and v == "true" for k, v in scenario["pairs"]):
+            raise SystemExit(f"scenario {scenario['name']} workflow_skill must require repo review in safety metadata")
     if c["artifact_type"] == "private_context" and (c["persistence_target"] != "private-runtime" or c["backup_required"] != "true"):
         raise SystemExit(f"scenario {scenario['name']} private context must target private-runtime and require backup")
     if c["artifact_type"] == "ephemeral_draft" and (c["persistence_target"] != "ephemeral" or c["approval_required"] != "false"):
         raise SystemExit(f"scenario {scenario['name']} ephemeral draft must not require durable persistence")
 
-required_types = {"private_context", "runtime_capability", "publication_flow", "sdd_dev_work", "ephemeral_draft"}
+required_types = {"workflow_skill", "private_context", "runtime_capability", "publication_flow", "sdd_dev_work", "ephemeral_draft"}
 seen = {s["classification"].get("artifact_type") for s in scenarios}
 missing_types = required_types - seen
 if missing_types:
