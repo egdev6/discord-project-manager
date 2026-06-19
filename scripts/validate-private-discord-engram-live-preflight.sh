@@ -49,7 +49,7 @@ done
 
 for required in \
   "Private Discord-to-Engram live preflight report" \
-  'Status: `blocked`' \
+  "Status: \`blocked\`" \
   "The local private runtime and Discord plugin were ready enough for a preflight" \
   "Live Discord message | not run" \
   "Live Engram write/readback | not run" \
