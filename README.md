@@ -249,6 +249,8 @@ Start with the shortest path that matches your goal:
 - **Runtime model:** [`docs/architecture/portable-openclaw-runtime.md`](./docs/architecture/portable-openclaw-runtime.md)
 - **Artifact classification:** [`docs/architecture/openclaw-artifact-classification.md`](./docs/architecture/openclaw-artifact-classification.md)
 - **Discord runtime orchestrator:** [`docs/architecture/discord-runtime-orchestrator.md`](./docs/architecture/discord-runtime-orchestrator.md)
+- **Effective runtime resolver:** [`docs/architecture/discord-effective-runtime-resolver.md`](./docs/architecture/discord-effective-runtime-resolver.md)
+- **Durable change audit:** [`docs/architecture/discord-durable-change-audit.md`](./docs/architecture/discord-durable-change-audit.md)
 - **Security and data handling:** [`docs/security/data-handling.md`](./docs/security/data-handling.md)
 - **Operational Docker guidance:** [`docs/operations/docker-runtime.md`](./docs/operations/docker-runtime.md)
 - **Release workflow:** [`docs/process/release-workflow.md`](./docs/process/release-workflow.md)

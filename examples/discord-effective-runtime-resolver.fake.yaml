@@ -1,0 +1,222 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: discord-effective-runtime-resolver
+live_discord_connection: false
+live_engram_calls: false
+live_prompt_execution: false
+runtime_enforcement_proven: false
+uses_real_discord_ids: false
+raw_discord_chat_logs_included: false
+private_profile_content_included: false
+durable_memory_writes_allowed: false
+workspace_file_writes_allowed: false
+filesystem_access_enabled: false
+browser_automation_enabled: false
+publishing_enabled: false
+scheduling_enabled: false
+buffer_activity_enabled: false
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+source_contracts:
+  - docs/architecture/openclaw-artifact-classification.md
+  - docs/architecture/discord-runtime-orchestrator.md
+  - docs/architecture/discord-scoped-skills-registry.md
+  - docs/architecture/discord-context-skill-packs.md
+  - docs/architecture/discord-memory-gateway.md
+scenarios:
+  - name: shared-profile-category-resolution
+    runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+    routing_status: matched-route
+    resolved_route:
+      project_slug: egdev
+      network_slug: linkedin
+    artifact_classification:
+      artifact_type: private_context
+      subtype: scope_binding
+      operation: bind
+      persistence_target: private-runtime
+      approval_required: true
+      backup_required: true
+      deployment_required: false
+      runner_backend: openclaw-skill-surface
+      writeback_policy: confirmation-required
+    effective_context:
+      included:
+        - ref: profile:writing.demo-linkedin-b2b
+          scope: category:linkedin
+          kind: private_profile_ref
+          provenance: private-runtime/profile-binding
+          reason: matched-route-category-binding
+          content_policy: reference-only-no-private-content
+        - ref: profile:writing.demo-linkedin-b2b
+          scope: category:x
+          kind: private_profile_ref
+          provenance: private-runtime/profile-binding
+          reason: shared-profile-reference-for-reuse
+          content_policy: reference-only-no-private-content
+      excluded: []
+    effective_skills:
+      included:
+        - skill_name: openclaw-runtime-orchestrator
+          class: runtime-core
+          provenance: runtime-core
+          reason: entry-skill
+        - skill_name: scoped-skill-resolver
+          class: runtime-core
+          provenance: runtime-core
+          reason: resolver-required
+        - skill_name: discord-approval-gate
+          class: runtime-core
+          provenance: mandatory-runtime-core
+          reason: write-like-flow
+        - skill_name: brand-context
+          class: scoped-workflow
+          provenance: global-inherited
+          reason: route-category-allows-brand-context
+      excluded:
+        - skill_name: x-queue-planner
+          class: scoped-workflow
+          provenance: channel-disabled
+          reason: not-selected-for-linkedin-drafts
+    effective_capabilities:
+      included:
+        - capability: engram
+          available: true
+          permitted: true
+          config_state: configured-private
+          approval_required: true
+          provenance: runtime-capability-registry
+          reason: private-runtime-write-target-after-approval
+      excluded:
+        - capability: filesystem
+          available: true
+          permitted: false
+          config_state: private-config-required
+          approval_required: true
+          provenance: runtime-capability-registry
+          reason: not-required-for-profile-binding
+    write_safety:
+      approval_gate_required: true
+      required_skill: discord-approval-gate
+      exact_approval_phrase: approve write
+      writes_attempted: false
+  - name: channel-profile-override-resolution
+    runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+    routing_status: matched-route
+    resolved_route:
+      project_slug: egdev
+      network_slug: linkedin
+    artifact_classification:
+      artifact_type: private_context
+      subtype: scope_binding
+      operation: reference
+      persistence_target: private-runtime
+      approval_required: true
+      backup_required: true
+      deployment_required: false
+      runner_backend: openclaw-skill-surface
+      writeback_policy: confirmation-required
+    effective_context:
+      included:
+        - ref: profile:writing.demo-x-short
+          scope: channel:linkedin/experiments
+          kind: private_profile_ref
+          provenance: private-runtime/channel-override
+          reason: channel-specific-profile-override
+          content_policy: reference-only-no-private-content
+      excluded:
+        - ref: profile:writing.demo-linkedin-b2b
+          scope: category:linkedin
+          kind: private_profile_ref
+          provenance: private-runtime/category-binding
+          reason: overridden-by-channel-binding
+          content_policy: reference-only-no-private-content
+    effective_skills:
+      included:
+        - skill_name: discord-approval-gate
+          class: runtime-core
+          provenance: mandatory-runtime-core
+          reason: write-like-flow
+        - skill_name: brand-context
+          class: scoped-workflow
+          provenance: global-inherited
+          reason: profile-workflow-context
+      excluded:
+        - skill_name: content-ledger
+          class: scoped-workflow
+          provenance: channel-disabled
+          reason: not-needed-for-profile-override
+    effective_capabilities:
+      included:
+        - capability: engram
+          available: true
+          permitted: true
+          config_state: configured-private
+          approval_required: true
+          provenance: runtime-capability-registry
+          reason: private-runtime-write-target-after-approval
+      excluded: []
+    write_safety:
+      approval_gate_required: true
+      required_skill: discord-approval-gate
+      exact_approval_phrase: approve write
+      writes_attempted: false
+  - name: filesystem-capability-blocked
+    runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+    routing_status: matched-route
+    resolved_route:
+      project_slug: egdev
+      network_slug: linkedin
+    artifact_classification:
+      artifact_type: runtime_capability
+      subtype: capability_config
+      operation: update
+      persistence_target: private-runtime
+      approval_required: true
+      backup_required: true
+      deployment_required: true
+      runner_backend: openclaw-skill-surface
+      writeback_policy: confirmation-required
+    effective_context:
+      included: []
+      excluded:
+        - ref: local-path:private-placeholder
+          scope: channel:operations
+          kind: capability_config
+          provenance: private-runtime/capability-config
+          reason: private-local-path-not-allowed-in-repo-fixture
+          content_policy: sanitized-placeholder-only
+    effective_skills:
+      included:
+        - skill_name: discord-approval-gate
+          class: runtime-core
+          provenance: mandatory-runtime-core
+          reason: write-like-flow
+      excluded: []
+    effective_capabilities:
+      included: []
+      excluded:
+        - capability: filesystem
+          available: true
+          permitted: false
+          config_state: private-config-required
+          approval_required: true
+          provenance: runtime-capability-registry
+          reason: capability-present-but-not-enabled-for-scope
+    write_safety:
+      approval_gate_required: true
+      required_skill: discord-approval-gate
+      exact_approval_phrase: approve write
+      writes_attempted: false
+non_goals:
+  - live Discord validation
+  - live Engram calls
+  - live prompt execution
+  - raw private profile content
+  - local filesystem access
+  - browser automation
+  - production credentials
+  - publishing
+  - scheduling
+  - Buffer activity
