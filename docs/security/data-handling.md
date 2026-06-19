@@ -94,7 +94,24 @@ docker run --rm \
   alpine tar czf /backup/openclaw-home-demo.tgz -C /source .
 ```
 
-These commands are examples of the expected private recovery path, not public evidence. Do not commit generated backups. Restore validation and RPO/RTO ownership remain follow-up work for #189/#192.
+A sanitized restore rehearsal must happen only in a private runtime environment. Use commands shaped like:
+
+```bash
+# Restore Postgres/Engram into a private rehearsal database/container.
+cat ../private-backups/engram-demo.sql | docker compose exec -T postgres psql \
+  -U "${POSTGRES_USER:-engram}" \
+  "${POSTGRES_DB:-engram_cloud}"
+
+# Restore OpenClaw workspace volume into a private rehearsal volume.
+docker run --rm \
+  -v discord-project-manager_openclaw-home:/target \
+  -v "$PWD/../private-backups:/backup:ro" \
+  alpine sh -lc 'cd /target && tar xzf /backup/openclaw-home-demo.tgz'
+```
+
+After restore, run a sanitized readback check before enabling writes again: resolve the same fake profile binding before and after restore, compare only profile refs/bindings/audit metadata, and confirm shared profile references were not duplicated.
+
+These commands are examples of the expected private recovery path, not public evidence. Do not commit generated backups. Formal RPO/RTO ownership and full end-to-end restore validation remain follow-up work for #189/#192.
 
 ## Fake fixture rules
 
