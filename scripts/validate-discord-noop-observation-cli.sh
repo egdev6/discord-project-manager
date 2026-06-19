@@ -121,7 +121,7 @@ grep -F "possible private identifier or secret-like value" "$TMPDIR_CREATED/gith
 malformed_guard_dir="$TMPDIR_CREATED/malformed-guard"
 mkdir -p "$malformed_guard_dir"
 cp "$NOOP_PATH" "$malformed_guard_dir/discord-noop-observation.sh"
-cat > "$malformed_guard_dir/discord-approval-guard.sh" <<'GUARD'
+cat >"$malformed_guard_dir/discord-approval-guard.sh" <<'GUARD'
 #!/usr/bin/env sh
 printf '%s\n' 'approval_guard_result:' '  response_state: approval-requested'
 GUARD
