@@ -361,6 +361,25 @@ Run the repair contract validator with:
 bash scripts/validate-runtime-approval-enforcement-repair.sh
 ```
 
+## Deterministic approval guard CLI
+
+The Docker runtime includes `discord-project-manager-approval-guard`, a deterministic no-op guard for synthetic/private validation before any workflow runner, prompt, or persistence surface. It does not prove live Discord runtime integration by itself, and it does not authorize writes from caller-supplied arguments. Exact `approve write` moves the result only to `approval-verification-required`; a future server-side binding check must verify the displayed proposal, route, actor, and target before any write-capable runner may persist.
+
+Expected response states:
+
+- `summary-only` for read-only requests;
+- `needs-route` for unmapped write-like requests;
+- `approval-requested` for write-like requests without exact approval or with invalid approval text;
+- `approval-verification-required` after exact `approve write`, still with `persistent_writes_allowed: false` until server-side proposal binding is proven.
+
+Key fields to inspect: `response_state`, `persistent_writes_allowed`, `writes_attempted`, `prompt_execution`, `guard_event_type`, `runtime_namespace`, and `target_namespace`.
+
+Validate it with:
+
+```bash
+bash scripts/validate-discord-approval-guard-cli.sh
+```
+
 ## Sanitized evidence checklist
 
 - [ ] Use placeholders such as `<guild-id>` and `<channel-id>`.
