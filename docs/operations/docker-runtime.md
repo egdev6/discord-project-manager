@@ -141,6 +141,23 @@ docker compose exec openclaw discord-project-manager-managed-registry simulate-e
 
 Each simulation must return sanitized output with `write_executed:false`.
 
+## Runtime boundary harness
+
+The local OpenClaw image also packages a synthetic container-side runtime boundary harness:
+
+```bash
+docker compose run --rm --no-deps openclaw discord-project-manager-runtime-boundary-harness
+```
+
+This command is repo-safe container boundary evidence only. It composes `discord-project-manager-approval-guard` and `discord-project-manager-noop-observation` for synthetic inputs, and it does **not** prove live Discord gateway delivery, private event ingestion, or `available-and-proven` readiness.
+
+Validate the repo and container harness surfaces with:
+
+```bash
+bash scripts/validate-discord-runtime-boundary-harness.sh
+docker compose run --rm --no-deps openclaw discord-project-manager-runtime-boundary-harness
+```
+
 ## Stop
 
 ```bash

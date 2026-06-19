@@ -383,6 +383,24 @@ Validate it with:
 bash scripts/validate-discord-approval-guard-cli.sh
 ```
 
+## Runtime boundary harness
+
+The Docker runtime also includes `discord-project-manager-runtime-boundary-harness`, a repo-safe synthetic container probe that composes `discord-project-manager-approval-guard` and `discord-project-manager-noop-observation` inside the packaged OpenClaw image.
+
+This is **container boundary evidence only**. It does not prove live Discord gateway delivery, private redacted event ingestion, or `available-and-proven` readiness for #211. It keeps #211 blocked while verifying these synthetic boundary expectations:
+
+- matched write-like input without approval stops at `approval-requested`;
+- matched exact `approve write` stops at `approval-verification-required` with `persistent_writes_allowed: false`;
+- unmapped write-like input stops at `needs-route` with `durable_reads_allowed: false`;
+- no-op helper output keeps network/filesystem/workspace/Engram writes blocked.
+
+Validate it with:
+
+```bash
+bash scripts/validate-discord-runtime-boundary-harness.sh
+docker compose run --rm --no-deps openclaw discord-project-manager-runtime-boundary-harness
+```
+
 ## Sanitized evidence checklist
 
 - [ ] Use placeholders such as `<guild-id>` and `<channel-id>`.
