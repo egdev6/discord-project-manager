@@ -117,6 +117,7 @@ Use sanitized refs such as `operator-demo`, `profile:writing.demo-linkedin-b2b`,
 - `docs/architecture/openclaw-artifact-classification.md`
 - `docs/architecture/discord-effective-runtime-resolver.md`
 - `docs/architecture/discord-memory-gateway.md`
+- `docs/operations/private-runtime-backup-restore.md`
 - `docs/security/data-handling.md`
 - `skills/discord-approval-gate/SKILL.md`
 
