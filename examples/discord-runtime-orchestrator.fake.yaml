@@ -16,6 +16,7 @@ buffer_activity_enabled: false
 runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
 contract_dependencies:
   - docs/architecture/channel-context-namespace-mapping.md
+  - docs/architecture/openclaw-artifact-classification.md
   - docs/architecture/discord-memory-gateway.md
   - docs/architecture/discord-context-skill-packs.md
   - docs/architecture/discord-scoped-skills-registry.md
@@ -35,6 +36,16 @@ scenarios:
     pack_refs:
       context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.context_pack
       skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.skill_pack
+    artifact_classification:
+      artifact_type: ephemeral_draft
+      subtype: none
+      operation: draft
+      persistence_target: ephemeral
+      approval_required: false
+      backup_required: false
+      deployment_required: false
+      runner_backend: openclaw-skill-surface
+      writeback_policy: draft
     intent_classification:
       family: planning_content
       write_like: false
@@ -58,6 +69,353 @@ scenarios:
       classification: draft
       via: docs/architecture/discord-memory-gateway.md
       writeback_out_of_scope: true
+  - name: private-profile-create
+    event_envelope:
+      origin_kind: discord-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      routing_status: matched-route
+      resolved_route:
+        project_slug: egdev
+        network_slug: linkedin
+      normalized_channel_name: openclaw-global-profiles
+      user_role: operator-demo
+    pack_refs:
+      context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.context_pack
+      skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.skill_pack
+    artifact_classification:
+      artifact_type: private_context
+      subtype: profile
+      operation: create
+      profile_ref: writing.demo-linkedin-b2b
+      persistence_target: private-runtime
+      approval_required: true
+      backup_required: true
+      deployment_required: false
+      runner_backend: openclaw-skill-surface
+      writeback_policy: confirmation-required
+    intent_classification:
+      family: planning_content
+      write_like: true
+      confidence: reviewable-demo
+    runner_selection:
+      runner_kind: content-planner
+      backend: openclaw-skill-surface
+      selected_skills:
+        - brand-context
+    permission_gate:
+      state: approval-requested
+      required_skill: discord-approval-gate
+      approval_needed: true
+      exact_approval_phrase: approve write
+    execution_metadata:
+      mode: fake-contract
+      prompt_execution: none
+      selected_context_pack: egdev-linkedin-drafts
+      selected_skill_pack: egdev-linkedin-drafts
+      private_content_fixture: sanitized-placeholder-only
+    writeback_policy:
+      classification: confirmation-required
+      via: docs/architecture/discord-memory-gateway.md
+      writeback_out_of_scope: true
+  - name: private-profile-bind-shared
+    event_envelope:
+      origin_kind: discord-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      routing_status: matched-route
+      resolved_route:
+        project_slug: egdev
+        network_slug: linkedin
+      normalized_channel_name: openclaw-global-profiles
+      user_role: operator-demo
+    pack_refs:
+      context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.context_pack
+      skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.skill_pack
+    artifact_classification:
+      artifact_type: private_context
+      subtype: scope_binding
+      operation: bind
+      profile_ref: writing.demo-linkedin-b2b
+      scope_bindings:
+        - category:linkedin
+        - category:x
+      persistence_target: private-runtime
+      approval_required: true
+      backup_required: true
+      deployment_required: false
+      runner_backend: openclaw-skill-surface
+      writeback_policy: confirmation-required
+    intent_classification:
+      family: planning_content
+      write_like: true
+      confidence: reviewable-demo
+    runner_selection:
+      runner_kind: content-planner
+      backend: openclaw-skill-surface
+      selected_skills:
+        - brand-context
+    permission_gate:
+      state: approval-requested
+      required_skill: discord-approval-gate
+      approval_needed: true
+      exact_approval_phrase: approve write
+    execution_metadata:
+      mode: fake-contract
+      prompt_execution: none
+      selected_context_pack: egdev-linkedin-drafts
+      selected_skill_pack: egdev-linkedin-drafts
+      reference_behavior: shared-profile-reference-not-clone
+    writeback_policy:
+      classification: confirmation-required
+      via: docs/architecture/discord-memory-gateway.md
+      writeback_out_of_scope: true
+  - name: private-profile-channel-override
+    event_envelope:
+      origin_kind: discord-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      routing_status: matched-route
+      resolved_route:
+        project_slug: egdev
+        network_slug: linkedin
+      normalized_channel_name: experiments
+      user_role: operator-demo
+    pack_refs:
+      context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.context_pack
+      skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.skill_pack
+    artifact_classification:
+      artifact_type: private_context
+      subtype: scope_binding
+      operation: reference
+      profile_ref: writing.demo-x-short
+      scope_bindings:
+        - channel:linkedin/experiments
+      persistence_target: private-runtime
+      approval_required: true
+      backup_required: true
+      deployment_required: false
+      runner_backend: openclaw-skill-surface
+      writeback_policy: confirmation-required
+    intent_classification:
+      family: planning_content
+      write_like: true
+      confidence: reviewable-demo
+    runner_selection:
+      runner_kind: content-planner
+      backend: openclaw-skill-surface
+      selected_skills:
+        - brand-context
+    permission_gate:
+      state: approval-requested
+      required_skill: discord-approval-gate
+      approval_needed: true
+      exact_approval_phrase: approve write
+    execution_metadata:
+      mode: fake-contract
+      prompt_execution: none
+      selected_context_pack: egdev-linkedin-drafts
+      selected_skill_pack: egdev-linkedin-drafts
+      override_reason: fake-channel-experiment
+    writeback_policy:
+      classification: confirmation-required
+      via: docs/architecture/discord-memory-gateway.md
+      writeback_out_of_scope: true
+  - name: private-profile-clone
+    event_envelope:
+      origin_kind: discord-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      routing_status: matched-route
+      resolved_route:
+        project_slug: egdev
+        network_slug: x
+      normalized_channel_name: experiments
+      user_role: operator-demo
+    pack_refs:
+      context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.context_pack
+      skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.skill_pack
+    artifact_classification:
+      artifact_type: private_context
+      subtype: profile
+      operation: clone
+      profile_ref: writing.demo-x-short
+      source_profile_ref: writing.demo-linkedin-b2b
+      persistence_target: private-runtime
+      approval_required: true
+      backup_required: true
+      deployment_required: false
+      runner_backend: openclaw-skill-surface
+      writeback_policy: confirmation-required
+    intent_classification:
+      family: planning_content
+      write_like: true
+      confidence: reviewable-demo
+    runner_selection:
+      runner_kind: content-planner
+      backend: openclaw-skill-surface
+      selected_skills:
+        - brand-context
+    permission_gate:
+      state: approval-requested
+      required_skill: discord-approval-gate
+      approval_needed: true
+      exact_approval_phrase: approve write
+    execution_metadata:
+      mode: fake-contract
+      prompt_execution: none
+      selected_context_pack: egdev-linkedin-drafts
+      selected_skill_pack: egdev-linkedin-drafts
+      clone_reason: fake-network-specific-style-divergence
+    writeback_policy:
+      classification: confirmation-required
+      via: docs/architecture/discord-memory-gateway.md
+      writeback_out_of_scope: true
+  - name: runtime-capability-filesystem
+    event_envelope:
+      origin_kind: discord-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      routing_status: matched-route
+      resolved_route:
+        project_slug: egdev
+        network_slug: linkedin
+      normalized_channel_name: operations
+      user_role: operator-demo
+    pack_refs:
+      context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.context_pack
+      skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.skill_pack
+    artifact_classification:
+      artifact_type: runtime_capability
+      subtype: capability_config
+      operation: update
+      persistence_target: private-runtime
+      approval_required: true
+      backup_required: true
+      deployment_required: true
+      runner_backend: openclaw-skill-surface
+      writeback_policy: confirmation-required
+    intent_classification:
+      family: planning_content
+      write_like: true
+      confidence: reviewable-demo
+    runner_selection:
+      runner_kind: content-planner
+      backend: openclaw-skill-surface
+      selected_skills:
+        - discord-approval-gate
+    permission_gate:
+      state: approval-requested
+      required_skill: discord-approval-gate
+      approval_needed: true
+      exact_approval_phrase: approve write
+    execution_metadata:
+      mode: fake-contract
+      prompt_execution: none
+      selected_context_pack: egdev-linkedin-drafts
+      selected_skill_pack: egdev-linkedin-drafts
+      private_config_fixture: sanitized-path-placeholder-only
+      deployment_step: runtime-sync-or-image-rebuild-required-before-enable
+      validated_runtime_version_ref: docs-release-baseline-placeholder
+    writeback_policy:
+      classification: confirmation-required
+      via: docs/architecture/discord-memory-gateway.md
+      writeback_out_of_scope: true
+  - name: publication-flow-buffer
+    event_envelope:
+      origin_kind: discord-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      routing_status: matched-route
+      resolved_route:
+        project_slug: egdev
+        network_slug: linkedin
+      normalized_channel_name: queue
+      user_role: operator-demo
+    pack_refs:
+      context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.context_pack
+      skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.skill_pack
+    artifact_classification:
+      artifact_type: publication_flow
+      subtype: connector_flow
+      operation: create
+      persistence_target: external-service
+      approval_required: true
+      backup_required: true
+      deployment_required: true
+      runner_backend: openclaw-skill-surface
+      writeback_policy: confirmation-required
+    intent_classification:
+      family: planning_content
+      write_like: true
+      confidence: reviewable-demo
+    runner_selection:
+      runner_kind: content-planner
+      backend: openclaw-skill-surface
+      selected_skills:
+        - content-ledger
+    permission_gate:
+      state: approval-requested
+      required_skill: discord-approval-gate
+      approval_needed: true
+      exact_approval_phrase: approve write
+    execution_metadata:
+      mode: fake-contract
+      prompt_execution: none
+      selected_context_pack: egdev-linkedin-drafts
+      selected_skill_pack: egdev-linkedin-drafts
+      connector_credentials: private-placeholder-only
+      deployment_step: connector-permission-sync-required-before-enable
+      validated_runtime_version_ref: docs-release-baseline-placeholder
+    writeback_policy:
+      classification: confirmation-required
+      via: docs/architecture/discord-memory-gateway.md
+      writeback_out_of_scope: true
+  - name: workflow-skill-proposal
+    event_envelope:
+      origin_kind: discord-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      routing_status: matched-route
+      resolved_route:
+        project_slug: egdev
+        network_slug: stack-and-flow
+      normalized_channel_name: github
+      user_role: operator-demo
+    pack_refs:
+      context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#stack-and-flow-github.context_pack
+      skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#stack-and-flow-github.skill_pack
+    artifact_classification:
+      artifact_type: workflow_skill
+      subtype: skill_contract
+      operation: draft
+      persistence_target: repo
+      approval_required: true
+      backup_required: false
+      deployment_required: true
+      runner_backend: gentle-sdd
+      writeback_policy: draft
+    intent_classification:
+      family: sdd_dev_work
+      write_like: true
+      confidence: reviewable-demo
+    runner_selection:
+      runner_kind: development-orchestrator
+      backend: gentle-sdd
+      backend_mode: delegated-contract-only
+      selected_skills:
+        - strategy-planner
+        - on-demand-brief-planner
+    permission_gate:
+      state: approval-requested
+      required_skill: discord-approval-gate
+      approval_needed: true
+      exact_approval_phrase: approve write
+    execution_metadata:
+      mode: fake-contract
+      prompt_execution: none
+      selected_context_pack: stack-and-flow-github
+      selected_skill_pack: stack-and-flow-github
+      deployment_step: repo-review-and-runtime-sync-before-enable
+      validated_runtime_version_ref: docs-release-baseline-placeholder
+      note: Repo write remains a proposal until a development session claims and applies it.
+    writeback_policy:
+      classification: draft
+      via: docs/architecture/discord-memory-gateway.md
+      writeback_out_of_scope: true
   - name: sdd-dev-work-flow
     event_envelope:
       origin_kind: discord-channel
@@ -71,9 +429,19 @@ scenarios:
     pack_refs:
       context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#stack-and-flow-github.context_pack
       skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#stack-and-flow-github.skill_pack
+    artifact_classification:
+      artifact_type: sdd_dev_work
+      subtype: workflow_skill
+      operation: handoff
+      persistence_target: repo
+      approval_required: true
+      backup_required: false
+      deployment_required: true
+      runner_backend: gentle-sdd
+      writeback_policy: draft
     intent_classification:
       family: sdd_dev_work
-      write_like: false
+      write_like: true
       confidence: reviewable-demo
     runner_selection:
       runner_kind: development-orchestrator
@@ -83,17 +451,20 @@ scenarios:
         - strategy-planner
         - on-demand-brief-planner
     permission_gate:
-      state: summary-only
+      state: approval-requested
       required_skill: discord-approval-gate
-      approval_needed: false
+      approval_needed: true
+      exact_approval_phrase: approve write
     execution_metadata:
       mode: fake-contract
       prompt_execution: none
       selected_context_pack: stack-and-flow-github
       selected_skill_pack: stack-and-flow-github
+      deployment_step: repo-review-and-runtime-sync-before-enable
+      validated_runtime_version_ref: docs-release-baseline-placeholder
       note: Gentle SDD is one backend for development work, not the primary Discord runtime.
     writeback_policy:
-      classification: reject
+      classification: draft
       reason: runtime handoff modeled only; no live SDD execution in this slice
       writeback_out_of_scope: true
   - name: clarification-fallback
@@ -109,6 +480,16 @@ scenarios:
     pack_refs:
       context_pack_fixture: none
       skill_pack_fixture: none
+    artifact_classification:
+      artifact_type: ephemeral_draft
+      subtype: none
+      operation: read
+      persistence_target: ephemeral
+      approval_required: false
+      backup_required: false
+      deployment_required: false
+      runner_backend: response-only
+      writeback_policy: reject
     intent_classification:
       family: clarification_needed
       write_like: false
