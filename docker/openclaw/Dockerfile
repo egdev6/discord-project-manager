@@ -1,5 +1,5 @@
-ARG OPENCLAW_BASE_IMAGE=ghcr.io/openclaw/openclaw:latest
-ARG ENGRAM_IMAGE=ghcr.io/gentleman-programming/engram:latest
+ARG OPENCLAW_BASE_IMAGE=ghcr.io/openclaw/openclaw@sha256:9f55f0cb32b2925a983f40726440189b8f422ec61ae2a0fb0cf90403cf6d63d7
+ARG ENGRAM_IMAGE=ghcr.io/gentleman-programming/engram@sha256:f9b0d7c24f48076a4c836a1099b8351215bf902dcba7ae02222f2c431f2def38
 
 FROM ${ENGRAM_IMAGE} AS engram-bin
 FROM ${OPENCLAW_BASE_IMAGE}
