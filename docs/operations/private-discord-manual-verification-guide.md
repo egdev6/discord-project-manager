@@ -274,7 +274,7 @@ Run only the tests that fit the currently approved boundary. If a test would req
 | `DV-13` | Ledger contract | Review ledger candidate shape and allowed states | only `draft`, `queued`, `published`, `archived` appear | sanitized ledger checklist |
 | `DV-14` | LinkedIn planning contract | Review a LinkedIn weekly plan candidate | `planning_basis.missing_context` exists and planning stays review-only | sanitized candidate excerpt |
 | `DV-15` | X/brief contract | Review brief or X planning candidate structure | network-separated planning stays bounded and approval-gated | sanitized candidate excerpt |
-| `DV-16` | Evidence hygiene | Inspect captured notes/screenshots | no real IDs, secrets, transcripts, or raw logs are retained | sanitized evidence checklist |
+| `DV-16` | Evidence hygiene | Inspect captured sanitized notes only | no real IDs, secrets, screenshots, transcripts, or raw logs are retained | sanitized evidence checklist |
 | `DV-17` | Safe shutdown | Stop the local runtime | shutdown is clean and non-destructive | sanitized command output |
 
 ## Pass / fail matrix
@@ -292,12 +292,37 @@ Run only the tests that fit the currently approved boundary. If a test would req
 | Workflow contracts | strategy, ledger, LinkedIn, X, and briefs stay bounded and fake-first | live execution, publishing, or durable writes are implied |
 | Evidence | only sanitized notes are kept | real IDs, secrets, transcripts, or private payloads appear |
 
+## Private Discord-to-Engram vertical slice evidence pack
+
+Issue #211 is the release-defining private Discord-to-Engram gate, but the current repo-safe slice is **template/validator only**. It does not close #211, does not prove live Discord behavior, and does not prove durable Engram write/readback. Use this evidence pack before any private rehearsal so reviewers can inspect the intended boundaries without seeing private data.
+
+Repo-safe artifacts:
+
+- `examples/private-discord-engram-vertical-slice.fake.yaml` defines the sanitized evidence shape.
+- `scripts/validate-private-discord-engram-vertical-slice.sh` validates that the fixture stays fake-first, approval-gated, and aligned with the orchestrator/resolver/audit/backup contracts.
+
+The evidence pack must keep these defaults until a separate private rehearsal is explicitly approved and summarized safely:
+
+- `live_discord_connection: false`
+- `live_engram_calls: false`
+- `live_openclaw_prompt_execution: false`
+- `runtime_enforcement_proven: false`
+- `writes_attempted: false`
+- `repo_evidence_status: template-only`
+
+Run the repo-safe validator with:
+
+```bash
+bash scripts/validate-private-discord-engram-vertical-slice.sh
+bash scripts/validate-repo-safe-evidence.sh
+```
+
 ## Sanitized evidence checklist
 
 - [ ] Use placeholders such as `<guild-id>` and `<channel-id>`.
 - [ ] Keep real guild/channel IDs outside the repo.
 - [ ] Do not commit credentials, tokens, or `.env` values.
-- [ ] Do not commit Discord exports, full screenshots with secrets, or transcripts.
+- [ ] Do not commit Discord exports, screenshots, raw logs, or transcripts.
 - [ ] Keep route outcomes, approval states, and namespace notes short and review-safe.
 - [ ] Record whether a test was `pass`, `blocked`, or `not run`.
 
@@ -341,4 +366,4 @@ Treat this guide as operator preparation for a **future gated rehearsal**, not a
 
 ## Next step
 
-Continue #132 with managed Project Manager global/project scaffolding only. Keep execution blocked until the private environment, explicit approval, status/repair preview path, and approval-gate behavior are all available.
+Continue #211 with the repo-safe evidence pack first. Keep live execution blocked until the private environment, explicit approval, status/repair preview path, and approval-gate behavior are all available and separately approved.

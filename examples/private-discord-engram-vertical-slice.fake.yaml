@@ -1,0 +1,170 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: private-discord-engram-vertical-slice
+issue: 211
+live_discord_connection: false
+live_engram_calls: false
+live_openclaw_prompt_execution: false
+runtime_enforcement_proven: false
+uses_real_discord_ids: false
+raw_discord_chat_logs_included: false
+raw_private_payload_included: false
+screenshots_included: false
+secrets_included: false
+workspace_file_writes_allowed: false
+writes_attempted: false
+publishing_enabled: false
+scheduling_enabled: false
+buffer_activity_enabled: false
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+source_contracts:
+  - docs/operations/private-discord-manual-verification-guide.md
+  - docs/operations/discord-approval-responses.md
+  - docs/architecture/discord-runtime-orchestrator.md
+  - docs/architecture/openclaw-artifact-classification.md
+  - docs/architecture/discord-effective-runtime-resolver.md
+  - docs/architecture/discord-durable-change-audit.md
+  - docs/operations/private-runtime-backup-restore.md
+  - docs/security/data-handling.md
+operator_boundary:
+  environment: private-non-production
+  evidence_mode: sanitized-summary-only
+  real_identifiers_committed: false
+  private_credentials_committed: false
+  raw_runtime_exports_committed: false
+  rehearsal_result_claim: not-run
+scenario:
+  scenario_id: demo-private-profile-write-readback
+  operator_request: save a demo writing profile preference for future managed project planning
+  later_readback_request: summarize the saved demo writing profile preference
+  artifact_classification:
+    artifact_type: private_context
+    subtype: profile
+    operation: update
+    persistence_target: private-runtime
+    approval_required: true
+    backup_required: true
+    deployment_required: false
+    runner_backend: openclaw-skill-surface
+    writeback_policy: confirmation-required
+  routing:
+    routing_status: matched-route
+    resolved_route: demo-project/context
+    runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+    durable_target_namespace: discord-project-manager/project/demo-project/private-context
+  effective_resolution:
+    context_refs:
+      - ref: context:demo-project.runtime-boundary
+        scope: project:demo-project
+        provenance: private-runtime/demo
+        reason: matched-managed-project-channel
+    skill_refs:
+      - ref: skill:openclaw-runtime-orchestrator
+        required: true
+        reason: discord-runtime-routing
+      - ref: skill:scoped-skill-resolver
+        required: true
+        reason: effective-skill-resolution
+      - ref: skill:discord-approval-gate
+        required: true
+        reason: write-like-private-runtime-request
+    capability_permissions:
+      - capability: engram
+        available: true
+        permitted: true
+        config_state: configured-private
+        provenance: runtime-capability-registry
+        reason: private-runtime-write-target-after-approval
+      - capability: filesystem
+        available: true
+        permitted: false
+        config_state: private-config-required
+        provenance: runtime-capability-registry
+        reason: filesystem writes are out of scope for this rehearsal contract
+approval_gate:
+  response_state_before_operator_decision: approval-requested
+  exact_approval_phrase_required: approve write
+  allowed_operator_decisions:
+    - approve write
+    - revise: <instruction>
+    - reject
+  durable_writes_before_approval: false
+  workspace_writes_before_approval: false
+  approval_enforcement_runtime_proven: false
+  blocker_reference: docs/operations/discord-approval-responses.md#private-pilot-finding
+write_plan_after_approval:
+  target_namespace: discord-project-manager/project/demo-project/private-context
+  runtime_audit_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+  write_shape: sanitized-demo-profile-reference
+  raw_profile_text_committed: false
+  audit_metadata_required: true
+readback_plan:
+  request_type: sanitized-readback
+  expected_scope: demo-project/private-context
+  expected_response_boundary: summary-only
+  raw_private_payload_returned_to_repo: false
+expected_audit_record_shape:
+  schema_version: 1
+  audit_id: audit-demo-private-discord-engram-slice
+  decision_state: approved
+  actor_ref: operator-demo
+  actor_role: maintainer-demo
+  runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+  route:
+    project_slug: demo-project
+    network_slug: none
+  target:
+    artifact_type: private_context
+    subtype: profile
+    operation: update
+    persistence_target: private-runtime
+    target_ref: profile:writing.demo-private-slice
+    target_namespace: discord-project-manager/project/demo-project/private-context
+  approval:
+    required: true
+    gate: discord-approval-gate
+    accepted_phrase: approve write
+    decision: approve write
+  provenance:
+    source: discord-runtime-orchestrator
+    classification_ref: examples/private-discord-engram-vertical-slice.fake.yaml#scenario.artifact_classification
+    resolver_ref: examples/private-discord-engram-vertical-slice.fake.yaml#scenario.effective_resolution
+    sanitized_input_summary: fake request to save a demo writing profile preference
+  validation:
+    command_ref: scripts/validate-private-discord-engram-vertical-slice.sh
+    result: template-only-not-run
+  rollback:
+    restore_hint: restore previous private profile definition from private backup
+    rollback_scope: private-runtime-profile
+    backup_ref: private-backup://demo/private-discord-engram-before-write.tgz
+    pre_change_snapshot_ref: snapshot:demo-private-profile-before-write
+    restore_command_ref: docs/security/data-handling.md#current-recovery-path
+    verification_step: run sanitized profile readback before resuming writes
+    owner_ref: operator-demo
+  privacy:
+    raw_transcript_stored: false
+    raw_discord_ids_stored: false
+    screenshots_stored: false
+    private_payload_stored: false
+    safe_for_repo: true
+validation_notes:
+  docker_health_checked: not-run
+  discord_message_sent: not-run
+  approval_preview_observed: not-run
+  durable_write_observed: not-run
+  readback_observed: not-run
+  repo_evidence_status: template-only
+non_goals:
+  - live Discord execution
+  - live Engram write/read proof
+  - live OpenClaw prompt execution
+  - production readiness
+  - public Discord readiness
+  - raw private payloads
+  - raw Discord transcripts
+  - screenshots
+  - publishing
+  - scheduling
+  - Buffer activity
