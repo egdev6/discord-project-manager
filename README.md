@@ -247,8 +247,10 @@ Start with the shortest path that matches your goal:
 - **Roadmap baseline:** [`docs/project/roadmap-completion.md`](./docs/project/roadmap-completion.md)
 - **Backlog and issue framing:** [`docs/project/backlog.md`](./docs/project/backlog.md)
 - **Runtime model:** [`docs/architecture/portable-openclaw-runtime.md`](./docs/architecture/portable-openclaw-runtime.md)
-- **Operational Docker guidance:** [`docs/operations/docker-runtime.md`](./docs/operations/docker-runtime.md)
+- **Artifact classification:** [`docs/architecture/openclaw-artifact-classification.md`](./docs/architecture/openclaw-artifact-classification.md)
+- **Discord runtime orchestrator:** [`docs/architecture/discord-runtime-orchestrator.md`](./docs/architecture/discord-runtime-orchestrator.md)
 - **Security and data handling:** [`docs/security/data-handling.md`](./docs/security/data-handling.md)
+- **Operational Docker guidance:** [`docs/operations/docker-runtime.md`](./docs/operations/docker-runtime.md)
 - **Release workflow:** [`docs/process/release-workflow.md`](./docs/process/release-workflow.md)
 - **Shared artifact rules:** [`docs/process/shared-artifact-serialization.md`](./docs/process/shared-artifact-serialization.md)
 
