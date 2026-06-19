@@ -18,13 +18,12 @@ USAGE
 reject_unsafe_scalar() {
   name="$1"
   value="$2"
+  without_basic_control=$(printf '%s' "$value" | tr -d '\n\r\t')
+  if [ "$without_basic_control" != "$value" ]; then
+    echo "unsafe $name: control characters are not allowed" >&2
+    exit 2
+  fi
   case "$value" in
-    *'
-'*|*'
-'*|*'	'*)
-      echo "unsafe $name: control characters are not allowed" >&2
-      exit 2
-      ;;
     *'{'*|*'}'*|*'['*|*']'*|*':'*|*'&'*|*'*'*|*'#'*|*'|'*)
       echo "unsafe $name: YAML metacharacters are not allowed in sanitized no-op output" >&2
       exit 2
@@ -37,7 +36,7 @@ reject_unsafe_scalar() {
 }
 
 find_guard() {
-  script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+  script_dir=$(unset CDPATH; cd -- "$(dirname -- "$0")" && pwd)
 
   if [ -x "$script_dir/discord-project-manager-approval-guard" ]; then
     printf '%s\n' "$script_dir/discord-project-manager-approval-guard"
