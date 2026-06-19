@@ -337,6 +337,18 @@ Run the readiness validator with:
 bash scripts/validate-private-discord-engram-rehearsal-readiness.sh
 ```
 
+## Private Discord-to-Engram no-op observation design
+
+Use `examples/private-discord-engram-noop-observation.fake.yaml` and `scripts/validate-private-discord-engram-noop-observation.sh` to review the shape of a future read-only no-op observation path.
+
+This is **design-only-not-proven**. It does not update the readiness gate, does not close #211, and does not prove runtime behavior. The design describes a synthetic or separately approved redacted event preview that must stop at `approval-requested` without prompt execution, workspace writes, Engram writes, filesystem writes, publishing, scheduling, or network calls.
+
+Run the no-op observation design validator with:
+
+```bash
+bash scripts/validate-private-discord-engram-noop-observation.sh
+```
+
 ## Sanitized evidence checklist
 
 - [ ] Use placeholders such as `<guild-id>` and `<channel-id>`.

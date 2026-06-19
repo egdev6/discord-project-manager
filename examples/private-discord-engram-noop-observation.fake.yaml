@@ -1,0 +1,144 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: private-discord-engram-noop-observation
+issue: 211
+live_discord_connection: false
+live_engram_calls: false
+live_openclaw_prompt_execution: false
+runtime_enforcement_proven: false
+uses_real_discord_ids: false
+raw_discord_chat_logs_included: false
+raw_private_payload_included: false
+screenshots_included: false
+secrets_included: false
+execution_allowed: false
+observation_design_status: design-only-not-proven
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+source_contracts:
+  - docs/operations/private-discord-manual-verification-guide.md
+  - docs/operations/discord-approval-responses.md
+  - examples/private-discord-engram-rehearsal-readiness.fake.yaml
+  - examples/private-discord-engram-vertical-slice.fake.yaml
+  - examples/discord-approval-gate.fake.yaml
+objective:
+  goal: define a read-only no-op observation shape before any private Discord traffic
+  proves_runtime_behavior: false
+  updates_readiness_gate: false
+  reason: design alone does not prove the runtime can observe write-like Discord events without prompt execution or persistence
+synthetic_event_envelope:
+  event_source: synthetic-discord-envelope
+  guild_id: <guild-id>
+  channel_id: <channel-id>
+  message_id: <message-id>
+  author_ref: operator-demo
+  channel_name: demo-project-context
+  content_summary: fake request to save a demo writing profile preference
+  raw_content_committed: false
+  real_identifiers_committed: false
+observation_mode:
+  name: no-op-observation-preview
+  allowed_inputs:
+    - synthetic event envelope
+    - redacted private event envelope after separate approval
+  forbidden_inputs:
+    - public Discord event
+    - production credentials
+    - raw transcript
+    - screenshot
+    - private payload dump
+  prompt_execution_allowed: false
+  workspace_file_writes_allowed: false
+  durable_memory_writes_allowed: false
+  engram_writes_allowed: false
+  filesystem_writes_allowed: false
+  publishing_allowed: false
+  scheduling_allowed: false
+  github_mutations_allowed: false
+  network_calls_allowed:
+    discord_gateway: false
+    engram_cloud: false
+    buffer_or_social_api: false
+expected_preview:
+  response_state: approval-requested
+  approved_for_write_allowed: false
+  routing_outcomes:
+    - route_status: matched-route
+      expected_next_state: approval-requested
+      durable_reads: preview-only
+      durable_writes: none
+    - route_status: unmapped-channel
+      expected_next_state: needs-route
+      durable_reads: none
+      durable_writes: none
+  runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+  target_namespaces:
+    - discord-project-manager/project/demo-project/private-context
+  mandatory_skills:
+    - openclaw-runtime-orchestrator
+    - scoped-skill-resolver
+    - discord-approval-gate
+  artifact_classification:
+    artifact_type: private_context
+    subtype: profile
+    operation: update
+    persistence_target: private-runtime
+    approval_required: true
+    backup_required: true
+    deployment_required: false
+    runner_backend: response-only
+    writeback_policy: confirmation-required
+  no_op_boundaries:
+    writes_attempted: false
+    prompt_execution: none
+    durable_reads: preview-only
+    durable_writes: none
+    audit_trail_mode: response-local-until-decision
+acceptance_checks:
+  - id: no-prompt-execution
+    expected: true
+    evidence: preview reports prompt_execution none
+  - id: no-workspace-writes
+    expected: true
+    evidence: preview reports workspace_file_writes_allowed false
+  - id: approval-requested-only
+    expected: true
+    evidence: preview response_state is approval-requested and not approved-for-write
+  - id: approval-gate-visible
+    expected: true
+    evidence: mandatory_skills includes discord-approval-gate
+  - id: namespace-placeholders-only
+    expected: true
+    evidence: runtime namespace uses <guild-id>/<channel-id>
+blocked_until_proven:
+  readiness_check_id: no-op-observation-path
+  current_status: design-only-not-proven
+  required_future_status: available-and-proven
+  proof_required: separately approved runtime run summary from real no-op observation code path showing no prompt execution and no writes
+  fixture_only_evidence_satisfies_proof: false
+  synthetic_fixture_only_satisfies_proof: false
+  readiness_fixture_ref: examples/private-discord-engram-rehearsal-readiness.fake.yaml
+sanitized_evidence_policy:
+  allowed:
+    - synthetic event summary
+    - placeholder namespace refs
+    - preview state table
+    - pass or blocked status summary
+    - validator command names and pass/fail summaries
+  forbidden:
+    - real Discord guild/channel/user/message IDs
+    - credentials or .env values
+    - screenshots
+    - raw logs
+    - transcripts
+    - private payloads
+    - raw Engram exports
+    - SQL dumps
+non_goals:
+  - executing live Discord messages
+  - proving runtime approval enforcement
+  - proving no-op observation availability
+  - writing to Engram
+  - reading private payloads back from Engram
+  - closing issue 211
