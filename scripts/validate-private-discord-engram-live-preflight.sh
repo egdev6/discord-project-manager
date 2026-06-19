@@ -55,6 +55,7 @@ for required in \
   "Live Engram write/readback | not run" \
   "explicit-execution-approval" \
   "until all three are satisfied" \
+  "after both runtime paths are proven and separate explicit execution approval is granted" \
   "examples/private-discord-engram-live-preflight.fake.yaml" \
   "scripts/validate-private-discord-engram-live-preflight.sh"; do
   grep -F "$required" "$REPORT_PATH" >/dev/null || fail "live preflight report missing marker: $required"
@@ -122,6 +123,8 @@ if gate.get("execution_allowed") is not False or gate.get("readiness_result") !=
 for blocker in ["runtime approval enforcement repair is design-only-not-implemented", "no-op observation path is design-only-not-proven", "explicit execution approval for actual Discord message must be separated from this preflight"]:
     if blocker not in gate.get("blockers", []):
         raise SystemExit(f"missing readiness blocker: {blocker}")
+if "repeat sanitized preflight only after both runtime paths are proven and separate explicit execution approval is granted" not in data.get("next_safe_actions", []):
+    raise SystemExit("next safe actions must include explicit approval before repeated preflight")
 PY
 
 bash scripts/validate-private-discord-engram-rehearsal-readiness.sh >/dev/null

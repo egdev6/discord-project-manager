@@ -47,4 +47,4 @@ Do not send a write-like private Discord message until all three are satisfied: 
 
 1. Implement and prove runtime approval enforcement before write-like Discord traffic.
 2. Implement and prove the read-only no-op observation path.
-3. Repeat this sanitized preflight after both runtime paths are proven.
+3. Repeat this sanitized preflight only after both runtime paths are proven and separate explicit execution approval is granted.

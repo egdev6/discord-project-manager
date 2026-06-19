@@ -57,7 +57,7 @@ readiness_gate:
 next_safe_actions:
   - implement and prove runtime approval enforcement before write-like Discord traffic
   - implement and prove read-only no-op observation path
-  - repeat sanitized preflight after both runtime paths are proven
+  - repeat sanitized preflight only after both runtime paths are proven and separate explicit execution approval is granted
 sanitized_evidence_policy:
   allowed:
     - pass status summary
