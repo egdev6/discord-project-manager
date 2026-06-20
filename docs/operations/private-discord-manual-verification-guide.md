@@ -385,6 +385,18 @@ Run the repair contract validator with:
 bash scripts/validate-runtime-approval-enforcement-repair.sh
 ```
 
+## Runtime approval enforcement proof gate
+
+Use `examples/runtime-approval-enforcement-proof.fake.yaml` and `scripts/validate-runtime-approval-enforcement-proof.sh` to verify the repo-safe synthetic guard proof for #254.
+
+This is a **repo-safe synthetic guard proof**. It validates the deterministic `discord-project-manager-approval-guard` states for write-like input, invalid approval text, exact `approve write`, and unmapped routes. It does not prove live private Discord approval enforcement, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Run the proof gate validator with:
+
+```bash
+bash scripts/validate-runtime-approval-enforcement-proof.sh
+```
+
 ## Deterministic approval guard CLI
 
 The Docker runtime includes `discord-project-manager-approval-guard`, a deterministic no-op guard for synthetic/private validation before any workflow runner, prompt, or persistence surface. It does not prove live Discord runtime integration by itself, and it does not authorize writes from caller-supplied arguments. Exact `approve write` moves the result only to `approval-verification-required`; a future server-side binding check must verify the displayed proposal, route, actor, and target before any write-capable runner may persist.
