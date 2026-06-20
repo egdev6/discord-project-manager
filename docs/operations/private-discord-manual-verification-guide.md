@@ -394,6 +394,24 @@ Run the evidence review packet validator with:
 bash scripts/validate-private-noop-ingestion-evidence-review-packet.sh
 ```
 
+## Private no-op ingestion review harness
+
+Use `discord-project-manager-private-noop-ingestion-review-harness` from the packaged runtime, or `docker/openclaw/private-noop-ingestion-review-harness.sh` locally, to produce deterministic repo-safe summaries for #270.
+
+This is a **repo-safe sanitized review harness**. It exercises only synthetic review scenarios such as `not-run`, `pass-summary`, `missing-approval-binding`, `missing-operator-attestation`, `raw-private-evidence`, `unsupported-success-claim`, and `write-readback-attempt`. Even `pass-summary` remains non-accepting: it is reviewable summary shape only, not accepted proof. It does not prove private no-op ingestion occurred, does not grant private execution approval, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Validate the harness with:
+
+```bash
+bash scripts/validate-private-noop-ingestion-review-harness.sh
+```
+
+Example local harness call:
+
+```bash
+sh docker/openclaw/private-noop-ingestion-review-harness.sh --scenario not-run
+```
+
 ## Private write/readback preflight gate
 
 Use `examples/private-write-readback-preflight-gate.fake.yaml` and `scripts/validate-private-write-readback-preflight-gate.sh` for the first repo-safe #252 slice before any private write/readback execution is even proposed.
