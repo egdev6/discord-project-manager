@@ -1,0 +1,266 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: discord-general-advisor
+live_discord_connection: false
+live_openclaw_execution: false
+live_engram_calls: false
+live_prompt_execution: false
+github_mutations_enabled: false
+uses_real_discord_ids: false
+raw_discord_chat_logs_included: false
+production_credentials: false
+publishing_enabled: false
+scheduling_enabled: false
+buffer_activity_enabled: false
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+contract_dependencies:
+  - skills/discord-general-advisor/SKILL.md
+  - docs/architecture/discord-managed-channel-routing.md
+  - docs/architecture/discord-semantic-channel-guides.md
+  - docs/architecture/discord-scoped-skills-registry.md
+  - docs/architecture/discord-runtime-orchestrator.md
+  - docs/architecture/discord-memory-gateway.md
+  - docs/architecture/discord-gentle-sdd-handoff.md
+  - skills/discord-approval-gate/SKILL.md
+advisor_scenarios:
+  - name: linkedin-project-request
+    input:
+      origin_kind: discord-general-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      question_type: where_should_this_go
+      requested_topic: strategy
+      known_scope: project
+      known_project_ref: project-demo-egdev
+      write_like: false
+    response:
+      advisor_state: route-recommended
+      recommended_route: project:egdev:strategy
+      target_channel_ref: channel-demo-egdev-strategy
+      reason: Project roadmap and tradeoff discussion belongs in the project strategy channel from the semantic guide catalog.
+      required_contracts:
+        - docs/architecture/discord-semantic-channel-guides.md
+        - docs/architecture/discord-managed-channel-routing.md
+      approval_required: false
+      write_executed: false
+      handoff_message: "In project strategy: please review the LinkedIn positioning tradeoff for project-demo-egdev and propose next actions."
+  - name: project-overview-request
+    input:
+      origin_kind: discord-general-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      question_type: where_should_this_go
+      requested_topic: project
+      known_scope: project
+      known_project_ref: project-demo-egdev
+      write_like: false
+    response:
+      advisor_state: route-recommended
+      recommended_route: project:egdev:context
+      target_channel_ref: channel-demo-egdev-context
+      reason: Project-wide assumptions and background belong in the project context channel before downstream strategy or task planning.
+      required_contracts:
+        - docs/architecture/discord-semantic-channel-guides.md
+        - docs/architecture/discord-managed-channel-routing.md
+      approval_required: false
+      write_executed: false
+      handoff_message: "In project context: summarize the project-demo-egdev background and constraints before asking for strategy or task planning."
+  - name: category-selection-question
+    input:
+      origin_kind: discord-general-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      question_type: where_should_this_go
+      requested_topic: category
+      known_scope: project
+      known_project_ref: project-demo-egdev
+      write_like: false
+    response:
+      advisor_state: route-recommended
+      recommended_route: category:project-demo-egdev
+      target_channel_ref: category-demo-egdev
+      reason: Project-specific work belongs in the managed project category resolved from persisted semantic metadata, not display-name inference.
+      required_contracts:
+        - docs/architecture/discord-managed-channel-routing.md
+        - docs/architecture/discord-semantic-channel-guides.md
+      approval_required: false
+      write_executed: false
+      handoff_message: "Move this to the project-demo-egdev managed category, then choose context, strategy, tasks, skills, decisions, or qa based on the action."
+  - name: channel-selection-question
+    input:
+      origin_kind: discord-general-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      question_type: where_should_this_go
+      requested_topic: channel
+      known_scope: project
+      known_project_ref: project-demo-egdev
+      write_like: false
+    response:
+      advisor_state: clarification-needed
+      recommended_route: none
+      target_channel_ref: none
+      reason: Channel choice depends on the semantic field, not only the project name.
+      required_contracts:
+        - docs/architecture/discord-semantic-channel-guides.md
+        - docs/architecture/discord-managed-channel-routing.md
+      approval_required: false
+      write_executed: false
+      clarifying_question: "Which field is this for: context, skills, strategy, tasks, decisions, or qa?"
+  - name: context-question
+    input:
+      origin_kind: discord-general-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      question_type: where_should_this_go
+      requested_topic: context
+      known_scope: project
+      known_project_ref: project-demo-egdev
+      write_like: false
+    response:
+      advisor_state: route-recommended
+      recommended_route: project:egdev:context
+      target_channel_ref: channel-demo-egdev-context
+      reason: Context questions belong in the project context channel so later skills and tasks can inherit the right assumptions.
+      required_contracts:
+        - docs/architecture/discord-semantic-channel-guides.md
+        - docs/architecture/discord-context-skill-packs.md
+      approval_required: false
+      write_executed: false
+      handoff_message: "In project context: add the sanitized assumption or constraint for project-demo-egdev as discussion first, not persisted state."
+  - name: skill-governance-question
+    input:
+      origin_kind: discord-general-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      question_type: where_should_this_go
+      requested_topic: skill
+      known_scope: project
+      known_project_ref: project-demo-egdev
+      write_like: true
+    response:
+      advisor_state: blocked-write-like
+      recommended_route: project:egdev:skills
+      target_channel_ref: channel-demo-egdev-skills
+      reason: Skill enablement or overrides belong in the project skills channel and scoped-skill registry, with approval before persistence.
+      required_contracts:
+        - docs/architecture/discord-scoped-skills-registry.md
+        - skills/discord-approval-gate/SKILL.md
+      approval_required: true
+      approval_skill: discord-approval-gate
+      exact_approval_phrase: approve write
+      write_executed: false
+      handoff_message: "In project skills: propose the skill enablement or override for project-demo-egdev; do not persist until approval is requested and granted."
+  - name: private-writing-preference
+    input:
+      origin_kind: discord-general-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      question_type: where_should_this_go
+      requested_topic: profile
+      known_scope: project
+      known_project_ref: project-demo-egdev
+      write_like: true
+    response:
+      advisor_state: blocked-write-like
+      recommended_route: private-runtime:profile-binding
+      target_channel_ref: project:egdev:context
+      reason: Private writing preferences are private runtime profile state and must not be persisted from advisory chat without exact approval.
+      required_contracts:
+        - docs/architecture/discord-memory-gateway.md
+        - skills/discord-approval-gate/SKILL.md
+        - docs/architecture/discord-runtime-orchestrator.md
+      approval_required: true
+      approval_skill: discord-approval-gate
+      exact_approval_phrase: approve write
+      write_executed: false
+      handoff_message: "In project context: propose a private writing-profile preference for project-demo-egdev; do not persist until approval is requested and granted."
+  - name: new-capability-request
+    input:
+      origin_kind: discord-general-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      question_type: where_should_this_go
+      requested_topic: capability
+      known_scope: global
+      known_project_ref: unknown
+      write_like: true
+    response:
+      advisor_state: blocked-write-like
+      recommended_route: global:config
+      target_channel_ref: channel-demo-global-config
+      reason: Runtime capability enablement belongs in config/skills governance and requires approval before private runtime or deployment changes.
+      required_contracts:
+        - docs/architecture/discord-semantic-channel-guides.md
+        - docs/architecture/discord-runtime-orchestrator.md
+        - skills/discord-approval-gate/SKILL.md
+      approval_required: true
+      approval_skill: discord-approval-gate
+      exact_approval_phrase: approve write
+      write_executed: false
+      handoff_message: "In global config: evaluate the requested runtime capability as a proposal only, including approval, deployment, and rollback requirements."
+  - name: social-bootstrap-request
+    input:
+      origin_kind: discord-general-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      question_type: handoff_copy
+      requested_topic: analytics
+      known_scope: project
+      known_project_ref: project-demo-egdev
+      write_like: false
+    response:
+      advisor_state: route-recommended
+      recommended_route: project:egdev:strategy
+      target_channel_ref: channel-demo-egdev-strategy
+      reason: Social bootstrap and owned-channel strategy are planning inputs before later analytics ingestion capabilities are approved.
+      required_contracts:
+        - docs/architecture/discord-semantic-channel-guides.md
+        - docs/architecture/discord-managed-channel-routing.md
+      approval_required: false
+      write_executed: false
+      handoff_message: "In project strategy: outline the owned-channel bootstrap question for project-demo-egdev and list source channels without importing private data."
+  - name: publishing-request
+    input:
+      origin_kind: discord-general-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      question_type: architecture_help
+      requested_topic: publishing
+      known_scope: project
+      known_project_ref: project-demo-egdev
+      write_like: true
+    response:
+      advisor_state: blocked-write-like
+      recommended_route: publishing-connector-readiness
+      target_channel_ref: project:egdev:strategy
+      reason: Publishing and scheduling require connector readiness, explicit approval, and must not execute from advisory chat.
+      required_contracts:
+        - docs/architecture/discord-runtime-orchestrator.md
+        - docs/architecture/discord-memory-gateway.md
+        - skills/discord-approval-gate/SKILL.md
+      approval_required: true
+      approval_skill: discord-approval-gate
+      exact_approval_phrase: approve write
+      write_executed: false
+      handoff_message: "In project strategy: evaluate publishing connector readiness for project-demo-egdev as a proposal only; do not publish or schedule."
+  - name: ambiguous-route-question
+    input:
+      origin_kind: discord-general-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      question_type: clarify_route
+      requested_topic: task
+      known_scope: unknown
+      known_project_ref: unknown
+      write_like: false
+    response:
+      advisor_state: clarification-needed
+      recommended_route: none
+      target_channel_ref: none
+      reason: The advisor cannot safely choose a project or channel without the target project and task type.
+      required_contracts:
+        - docs/architecture/discord-managed-channel-routing.md
+      approval_required: false
+      write_executed: false
+      clarifying_question: "Which project and channel type should this task belong to: context, strategy, tasks, skills, decisions, or qa?"
+non_goals:
+  - live Discord routing
+  - OpenClaw execution
+  - prompt execution
+  - durable writes
+  - GitHub mutations
+  - publishing
+  - scheduling
+  - Buffer activity

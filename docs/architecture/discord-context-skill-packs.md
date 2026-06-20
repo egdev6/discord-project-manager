@@ -66,7 +66,7 @@ Use the Skill Pack to describe only the skills prepared for the current turn.
 | `size_policy` | Defines item limits and truncation behavior for skill selection. |
 | `writeback_out_of_scope` | Confirms that packs do not persist writes directly. |
 
-For this slice, `discord-approval-gate` is always present in `mandatory_skills` and in `effective_skills` for write-like flows. Runtime-core skills (`openclaw-runtime-orchestrator`, `scoped-skill-resolver`, `discord-approval-gate`) may be available to prepare the pack, but product workflow skills only appear in `effective_skills` when the scoped resolver selected them for the current route.
+For this slice, `discord-approval-gate` is always present in `mandatory_skills` and in `effective_skills` for write-like flows. Runtime-core skills (`openclaw-runtime-orchestrator`, `scoped-skill-resolver`, `discord-approval-gate`, `discord-general-advisor`) may be available to prepare the pack, but product workflow skills only appear in `effective_skills` when the scoped resolver selected them for the current route.
 
 ## Provenance and exclusion rules
 

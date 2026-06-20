@@ -16,6 +16,7 @@ active_openclaw_skills:
   - openclaw-runtime-orchestrator
   - scoped-skill-resolver
   - discord-approval-gate
+  - discord-general-advisor
   - brand-context
   - content-ledger
   - strategy-planner
@@ -28,6 +29,7 @@ classifications:
     - openclaw-runtime-orchestrator
     - scoped-skill-resolver
     - discord-approval-gate
+    - discord-general-advisor
   scoped-workflow:
     - brand-context
     - content-ledger
@@ -43,6 +45,7 @@ skill_policy:
   openclaw-runtime-orchestrator: keep
   scoped-skill-resolver: keep
   discord-approval-gate: keep
+  discord-general-advisor: keep
   brand-context: migrate-behind-scoped-resolution
   content-ledger: migrate-behind-scoped-resolution
   strategy-planner: migrate-behind-scoped-resolution

@@ -76,6 +76,7 @@ The runtime inventory is listed in `openclaw/config/skill-inventory.yaml` and sy
 | `openclaw-runtime-orchestrator` | Runtime core | keep | Entry point for intent classification, runner selection, and backend boundary reporting. |
 | `scoped-skill-resolver` | Runtime core | keep | Resolve global/category/channel skill layers and explain inclusions/exclusions. |
 | `discord-approval-gate` | Runtime core | keep | Global mandatory gate for write-like intents. |
+| `discord-general-advisor` | Runtime core | keep | Response-only routing and operational architecture advice before workflow execution. |
 | `brand-context` | Scoped workflow | migrate-behind-scoped-resolution | Global reusable baseline; inheritable by category. |
 | `content-ledger` | Scoped workflow | migrate-behind-scoped-resolution | Category or channel utility, not globally preferred by default. |
 | `strategy-planner` | Scoped workflow | migrate-behind-scoped-resolution | Global reusable planner for categories that need strategy guidance. |
@@ -112,5 +113,6 @@ Each included or excluded item must include provenance and reason. Capability av
 - [ ] Control channels are placeholders, not real Discord IDs.
 - [ ] Inheritance is explicit, never automatic.
 - [ ] `discord-approval-gate` remains globally enabled.
+- [ ] `discord-general-advisor` remains response-only and globally available for routing advice.
 - [ ] Runtime audit namespace is `discord-project-manager/runtime/discord/<guild-id>/<channel-id>`.
 - [ ] No live Discord, public Discord, production credential, publishing, scheduling, or Buffer claims are introduced.
