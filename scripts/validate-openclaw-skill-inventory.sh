@@ -30,6 +30,7 @@ expected_skills=(
   openclaw-runtime-orchestrator
   scoped-skill-resolver
   discord-approval-gate
+  discord-general-advisor
   brand-context
   content-ledger
   strategy-planner
@@ -67,6 +68,7 @@ done
 for required in \
   "openclaw-runtime-orchestrator" \
   "scoped-skill-resolver" \
+  "discord-general-advisor" \
   "runtime-core" \
   "scoped workflow" \
   "Gentle-AI SDD assets"; do
@@ -75,7 +77,8 @@ done
 
 for required in \
   "skills/openclaw-runtime-orchestrator/SKILL.md" \
-  "skills/scoped-skill-resolver/SKILL.md"; do
+  "skills/scoped-skill-resolver/SKILL.md" \
+  "skills/discord-general-advisor/SKILL.md"; do
   grep -F "$required" "$ORCHESTRATOR_DOC_PATH" >/dev/null || fail "orchestrator doc missing new core skill reference: $required"
 done
 
@@ -90,11 +93,11 @@ done
 grep -F "openclaw/config/skill-inventory.yaml" "$PACKS_DOC_PATH" >/dev/null || fail "packs doc missing inventory reference"
 grep -F "openclaw/config/skill-inventory.yaml" "$CONFIG_README_PATH" >/dev/null || fail "config README missing inventory reference"
 
-if grep -E '\b[0-9]{17,20}\b' "$INVENTORY_PATH" skills/openclaw-runtime-orchestrator/SKILL.md skills/scoped-skill-resolver/SKILL.md >/dev/null; then
+if grep -E '\b[0-9]{17,20}\b' "$INVENTORY_PATH" skills/openclaw-runtime-orchestrator/SKILL.md skills/scoped-skill-resolver/SKILL.md skills/discord-general-advisor/SKILL.md >/dev/null; then
   fail "skill inventory artifacts must not expose raw Discord snowflake-like IDs"
 fi
 
-if grep -E 'BUFFER_[A-Z0-9_]+|DISCORD_[A-Z0-9_]+|OPENAI_[A-Z0-9_]+|ANTHROPIC_[A-Z0-9_]+|GITHUB_TOKEN|ENGRAM_[A-Z0-9_]+' "$INVENTORY_PATH" skills/openclaw-runtime-orchestrator/SKILL.md skills/scoped-skill-resolver/SKILL.md >/dev/null; then
+if grep -E 'BUFFER_[A-Z0-9_]+|DISCORD_[A-Z0-9_]+|OPENAI_[A-Z0-9_]+|ANTHROPIC_[A-Z0-9_]+|GITHUB_TOKEN|ENGRAM_[A-Z0-9_]+' "$INVENTORY_PATH" skills/openclaw-runtime-orchestrator/SKILL.md skills/scoped-skill-resolver/SKILL.md skills/discord-general-advisor/SKILL.md >/dev/null; then
   fail "skill inventory artifacts must not contain credential variable names"
 fi
 

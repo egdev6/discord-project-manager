@@ -28,6 +28,7 @@ managed_skill_names() {
     openclaw-runtime-orchestrator \
     scoped-skill-resolver \
     discord-approval-gate \
+    discord-general-advisor \
     brand-context \
     content-ledger \
     strategy-planner \

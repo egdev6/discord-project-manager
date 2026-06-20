@@ -37,6 +37,7 @@ The orchestrator depends on:
 
 - `skills/openclaw-runtime-orchestrator/SKILL.md` as the OpenClaw-facing runtime-core entry skill;
 - `skills/scoped-skill-resolver/SKILL.md` as the deterministic effective-skill resolver before workflow skills are used;
+- `skills/discord-general-advisor/SKILL.md` for response-only operational architecture and routing advice;
 - `openclaw/config/skill-inventory.yaml` for the curated active skill inventory synced into the OpenClaw workspace;
 - `docs/architecture/channel-context-namespace-mapping.md` for origin resolution, `runtime_namespace`, `routing_status`, and `resolved_route`;
 - `docs/architecture/discord-managed-channel-routing.md`, `examples/discord-managed-channel-routing.fake.yaml`, and `scripts/validate-discord-managed-channel-routing.sh` for persisted semantic metadata routing of managed Project Manager channels;
@@ -113,7 +114,7 @@ The active OpenClaw skill surface is curated, not “everything in `skills/` mea
 
 | Class | Active skills | Runtime rule |
 | --- | --- | --- |
-| Runtime core | `openclaw-runtime-orchestrator`, `scoped-skill-resolver`, `discord-approval-gate` | Available to classify, resolve, and gate every Discord-originated turn. |
+| Runtime core | `openclaw-runtime-orchestrator`, `scoped-skill-resolver`, `discord-approval-gate`, `discord-general-advisor` | Available to classify, resolve, advise, and gate every Discord-originated turn. |
 | Scoped workflow | `brand-context`, `content-ledger`, `strategy-planner`, `linkedin-weekly-planner`, `x-queue-planner`, `on-demand-brief-planner` | Invoked only when selected by global/category/channel scoped resolution. |
 | Preserved protocol | Gentle-AI SDD assets under `.openclaw/skills` | Used only through the `gentle-sdd` backend boundary for `sdd_dev_work`; product workflow skills are not selected as the executor for OpenClaw skill-development handoffs. |
 
