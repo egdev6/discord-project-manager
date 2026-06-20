@@ -339,7 +339,7 @@ Still required before any private write/readback execution:
 - approval-gate lifecycle contract remains green;
 - runtime approval enforcement proven in the live/private runtime path, including server-side proposal binding;
 - private backup/restore contract remains green;
-- private redacted no-op event ingestion proven and sanitized review completed before write-like Discord traffic.
+- private redacted no-op event ingestion proven, no-op runbook gate followed, and sanitized review completed before write-like Discord traffic.
 
 Run the readiness validator with:
 
@@ -424,6 +424,8 @@ Validate the runbook gate with:
 ```bash
 bash scripts/validate-private-noop-execution-runbook-gate.sh
 ```
+
+The readiness gate cross-checks this runbook gate as `repo-safe-operator-sequence-only`; that status is still blocked and does not grant execution.
 
 ## Private write/readback preflight gate
 
