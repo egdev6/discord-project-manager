@@ -1,0 +1,109 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: private-noop-execution-result-packet
+issue: 278
+parent_issue: 211
+live_discord_connection: false
+live_engram_calls: false
+live_openclaw_prompt_execution: false
+live_discord_message_received: false
+live_discord_message_sent: false
+live_engram_write_attempted: false
+live_readback_attempted: false
+uses_real_discord_ids: false
+raw_discord_chat_logs_included: false
+raw_private_payload_included: false
+screenshots_included: false
+secrets_included: false
+result_packet_proof_level: repo-safe-result-schema-only
+private_noop_execution_result_recorded: false
+private_noop_execution_passed: false
+private_noop_execution_failed: false
+private_noop_evidence_reviewed: false
+readiness_gate_updated: false
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+source_contracts:
+  - examples/private-discord-engram-rehearsal-readiness.fake.yaml
+  - examples/private-noop-execution-runbook-gate.fake.yaml
+  - examples/private-noop-ingestion-evidence-review-packet.fake.yaml
+  - docker/openclaw/private-noop-ingestion-review-harness.sh
+  - docs/operations/private-discord-manual-verification-guide.md
+result_packet:
+  result_state: not-run
+  approval_binding_ref: approval/<approval-record-id>
+  runbook_gate_ref: private-noop-execution-runbook-gate
+  route_ref: route/<project-key>/private-context
+  runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+  target_namespace: discord-project-manager/project/<project-key>/private-context
+  operation_fingerprint: fingerprint/<operation-fingerprint>
+  sanitized_noop_summary_present: false
+  operator_attestation_present: false
+  harness_review_state: not-run
+  raw_private_values_present: false
+  write_readback_attempted: false
+  readiness_claimed: false
+fail_closed_matrix:
+  - id: not-run
+    expected_state: blocked
+    expected_acceptance_allowed: false
+    reason: private no-op execution result has not been recorded
+  - id: missing-approval-binding
+    expected_state: blocked
+    expected_acceptance_allowed: false
+    reason: approval binding is missing
+  - id: missing-runbook-gate
+    expected_state: blocked
+    expected_acceptance_allowed: false
+    reason: runbook gate reference is missing
+  - id: raw-private-evidence
+    expected_state: blocked
+    expected_acceptance_allowed: false
+    reason: raw private evidence is forbidden
+  - id: write-readback-attempt
+    expected_state: blocked
+    expected_acceptance_allowed: false
+    reason: write/readback attempts are outside no-op result packet
+  - id: readiness-overclaim
+    expected_state: blocked
+    expected_acceptance_allowed: false
+    reason: no-op result packet cannot claim available-and-proven readiness
+execution_gate:
+  accepted_now: false
+  readiness_result: blocked
+  stop_reasons:
+    - private no-op execution result has not been recorded
+    - private no-op evidence has not been reviewed
+    - write/readback remains blocked
+    - readiness remains blocked
+    - issue 211 must remain open
+  next_safe_actions:
+    - record only sanitized no-op result after separately approved private run
+    - review result with the repo-safe harness contract
+    - "keep #211 open until write/readback is separately approved executed and reviewed"
+sanitized_evidence_policy:
+  allowed:
+    - sanitized no-op outcome summary
+    - approval binding summary without identifiers
+    - runbook gate summary
+    - harness review status
+    - blocked write/readback status
+  forbidden:
+    - real Discord guild/channel/user/message IDs
+    - credentials or .env values
+    - screenshots
+    - raw logs
+    - transcripts
+    - private payloads
+    - raw event payloads
+    - raw Engram exports
+    - SQL dumps
+non_goals:
+  - proving private no-op execution occurred
+  - granting private execution approval
+  - executing live Discord messages from repo validation
+  - executing an Engram write
+  - executing a live readback from Engram
+  - updating readiness to available-and-proven
+  - closing issue 211
