@@ -8,7 +8,10 @@ PREFLIGHT_GATE_FIXTURE="examples/private-write-readback-preflight-gate.fake.yaml
 PROPOSAL_BINDING_FIXTURE="examples/proposal-binding-boundary.fake.yaml"
 RUNTIME_NAMESPACE_CONTRACT="discord-project-manager/runtime/discord/<guild-id>/<channel-id>"
 
-fail() { echo "ERROR: $*" >&2; exit 1; }
+fail() {
+  echo "ERROR: $*" >&2
+  exit 1
+}
 require_cmd() { command -v "$1" >/dev/null 2>&1 || fail "required command not found on PATH: $1"; }
 require_cmd grep
 require_cmd python3
