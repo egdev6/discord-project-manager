@@ -370,6 +370,18 @@ Run the ingestion packet validator with:
 bash scripts/validate-private-redacted-noop-ingestion-packet.sh
 ```
 
+## Private execution approval packet
+
+Use `examples/private-execution-approval-packet.fake.yaml` and `scripts/validate-private-execution-approval-packet.sh` to review the repo-safe decision packet for #266.
+
+This is a **repo-safe decision packet**. It defines the exact approval phrase, one-proposal scope, binding fields, blocked approval matrix, and fail-closed next actions required before any private execution approval may be granted outside repo artifacts. It does not grant private execution approval, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Run the approval packet validator with:
+
+```bash
+bash scripts/validate-private-execution-approval-packet.sh
+```
+
 ## Private write/readback preflight gate
 
 Use `examples/private-write-readback-preflight-gate.fake.yaml` and `scripts/validate-private-write-readback-preflight-gate.sh` for the first repo-safe #252 slice before any private write/readback execution is even proposed.

@@ -1,0 +1,113 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: private-execution-approval-packet
+issue: 266
+parent_issue: 211
+live_discord_connection: false
+live_engram_calls: false
+live_openclaw_prompt_execution: false
+live_discord_message_sent: false
+live_engram_write_attempted: false
+live_readback_attempted: false
+uses_real_discord_ids: false
+raw_discord_chat_logs_included: false
+raw_private_payload_included: false
+screenshots_included: false
+secrets_included: false
+execution_approval_proof_level: repo-safe-decision-packet
+private_execution_approval_granted: false
+readiness_gate_updated: false
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+source_contracts:
+  - examples/private-discord-engram-rehearsal-readiness.fake.yaml
+  - examples/proposal-binding-boundary.fake.yaml
+  - examples/private-topology-readiness-packet.fake.yaml
+  - examples/private-redacted-noop-ingestion-packet.fake.yaml
+  - docs/operations/private-discord-manual-verification-guide.md
+approval_packet:
+  approval_state: not-granted
+  exact_approval_phrase: approve write
+  approval_scope: single-displayed-proposal-only
+  proposal_ref: proposal/<proposal-id>
+  route_ref: route/<project-key>/private-context
+  actor_ref: <operator-ref>
+  runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+  target_namespace: discord-project-manager/project/<project-key>/private-context
+  operation_fingerprint: fingerprint/<operation-fingerprint>
+  evidence_schema_ref: private-redacted-noop-ingestion-packet
+  approval_record_committed: false
+  broad_approval_allowed: false
+  stale_approval_allowed: false
+  cross_target_approval_allowed: false
+  approval_replay_allowed: false
+  raw_private_values_printed: false
+approval_matrix:
+  - id: no-approval
+    input_decision: none
+    expected_state: blocked
+    expected_execution_allowed: false
+    reason: explicit approval is not granted
+  - id: exact-phrase-unbound
+    input_decision: approve write
+    expected_state: blocked
+    expected_execution_allowed: false
+    reason: approval is not bound to proposal route actor target and fingerprint
+  - id: broad-approval
+    input_decision: approve all writes
+    expected_state: blocked
+    expected_execution_allowed: false
+    reason: broad approval is not allowed
+  - id: stale-approval
+    input_decision: approve write
+    expected_state: blocked
+    expected_execution_allowed: false
+    reason: stale approval is not allowed
+  - id: cross-target-approval
+    input_decision: approve write
+    expected_state: blocked
+    expected_execution_allowed: false
+    reason: cross-target approval is not allowed
+  - id: repo-artifact-approval
+    input_decision: approve write
+    expected_state: blocked
+    expected_execution_allowed: false
+    reason: repo artifacts cannot grant private execution approval
+execution_gate:
+  allowed_now: false
+  readiness_result: blocked
+  stop_reasons:
+    - private execution approval is not granted
+    - repo artifacts cannot grant private execution approval
+    - approval must be granted outside repo for one displayed proposal only
+    - private redacted no-op ingestion summary must be reviewed before write/readback
+    - no private write/readback was executed by this issue
+  next_safe_actions:
+    - request explicit private execution approval outside repo after reviewing sanitized packets
+    - bind approval to one proposal route actor target namespace and operation fingerprint
+    - "keep #211 open until actual private execution and readback are separately approved executed and reviewed"
+sanitized_evidence_policy:
+  allowed:
+    - approval state summary
+    - placeholder namespace refs
+    - blocked status summaries
+    - validator command names and pass/fail summaries
+    - operator decision summary without identifiers
+  forbidden:
+    - real Discord guild/channel/user/message IDs
+    - credentials or .env values
+    - screenshots
+    - raw logs
+    - transcripts
+    - private payloads
+    - raw event payloads
+    - raw Engram exports
+    - SQL dumps
+non_goals:
+  - granting private execution approval
+  - executing live Discord messages
+  - executing an Engram write
+  - executing a live readback from Engram
+  - updating readiness to available-and-proven
+  - closing issue 211
