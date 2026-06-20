@@ -418,6 +418,18 @@ Run the proof gate validator with:
 bash scripts/validate-runtime-approval-enforcement-proof.sh
 ```
 
+## Proposal binding proof gate
+
+Use `examples/proposal-binding-boundary.fake.yaml` and `scripts/validate-proposal-binding-boundary.sh` to verify the repo-safe synthetic proposal binding proof for #260.
+
+This is a **repo-safe synthetic proposal binding proof**. It validates that exact `approve write` remains scoped to the displayed proposal, route, actor, runtime namespace, target namespace, and operation fingerprint. Missing, stale, mismatched, cross-target, or invalid approvals stay blocked. It does not prove live private proposal binding, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Run the proof gate validator with:
+
+```bash
+bash scripts/validate-proposal-binding-boundary.sh
+```
+
 ## Deterministic approval guard CLI
 
 The Docker runtime includes `discord-project-manager-approval-guard`, a deterministic no-op guard for synthetic/private validation before any workflow runner, prompt, or persistence surface. It does not prove live Discord runtime integration by itself, and it does not authorize writes from caller-supplied arguments. Exact `approve write` moves the result only to `approval-verification-required`; a future server-side binding check must verify the displayed proposal, route, actor, and target before any write-capable runner may persist.

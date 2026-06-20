@@ -11,6 +11,7 @@ NOOP_PROOF_FIXTURE="examples/private-discord-engram-noop-observation-proof.fake.
 REPAIR_FIXTURE="examples/runtime-approval-enforcement-repair.fake.yaml"
 APPROVAL_PROOF_FIXTURE="examples/runtime-approval-enforcement-proof.fake.yaml"
 PREFLIGHT_GATE_FIXTURE="examples/private-write-readback-preflight-gate.fake.yaml"
+PROPOSAL_BINDING_FIXTURE="examples/proposal-binding-boundary.fake.yaml"
 RUNTIME_NAMESPACE_CONTRACT="discord-project-manager/runtime/discord/<guild-id>/<channel-id>"
 
 fail() {
@@ -25,7 +26,7 @@ require_cmd() {
 require_cmd grep
 require_cmd python3
 
-for path in "$FIXTURE_PATH" "$GUIDE_PATH" "$APPROVAL_DOC" "$SLICE_FIXTURE" "$APPROVAL_FIXTURE" "$NOOP_FIXTURE" "$NOOP_PROOF_FIXTURE" "$REPAIR_FIXTURE" "$APPROVAL_PROOF_FIXTURE" "$PREFLIGHT_GATE_FIXTURE"; do
+for path in "$FIXTURE_PATH" "$GUIDE_PATH" "$APPROVAL_DOC" "$SLICE_FIXTURE" "$APPROVAL_FIXTURE" "$NOOP_FIXTURE" "$NOOP_PROOF_FIXTURE" "$REPAIR_FIXTURE" "$APPROVAL_PROOF_FIXTURE" "$PREFLIGHT_GATE_FIXTURE" "$PROPOSAL_BINDING_FIXTURE"; do
   [[ -f "$path" ]] || fail "required path not found: $path"
 done
 
@@ -50,6 +51,8 @@ for required in \
   "proof_ref: examples/runtime-approval-enforcement-proof.fake.yaml" \
   "id: no-op-observation-path" \
   "proof_ref: examples/private-discord-engram-noop-observation-proof.fake.yaml" \
+  "id: server-side-proposal-binding" \
+  "proof_ref: examples/proposal-binding-boundary.fake.yaml" \
   "id: explicit-human-approval" \
   "status: not-granted" \
   "allowed_now: false" \
@@ -128,6 +131,7 @@ required_contracts = {
     "examples/runtime-approval-enforcement-repair.fake.yaml",
     "examples/runtime-approval-enforcement-proof.fake.yaml",
     "examples/private-write-readback-preflight-gate.fake.yaml",
+    "examples/proposal-binding-boundary.fake.yaml",
     "docs/operations/runtime-version-baseline.md",
 }
 if set(data.get("source_contracts", [])) != required_contracts:
@@ -138,6 +142,7 @@ noop_proof = load_yaml("examples/private-discord-engram-noop-observation-proof.f
 for proof_name, proof in [
     ("runtime approval enforcement proof", approval_proof),
     ("no-op observation proof", noop_proof),
+    ("proposal binding proof", load_yaml("examples/proposal-binding-boundary.fake.yaml")),
 ]:
     fail_closed = proof.get("fail_closed_expectations", {})
     if fail_closed.get("current_readiness_status") != "repo-safe-synthetic-proof-only":
@@ -168,6 +173,7 @@ required_checks = {
     "approval-gate-lifecycle",
     "runtime-approval-enforcement",
     "no-op-observation-path",
+    "server-side-proposal-binding",
     "private-discord-topology",
     "explicit-human-approval",
     "private-backup-restore-ready",
@@ -190,6 +196,10 @@ if checks["no-op-observation-path"].get("contract_ref") != "examples/private-dis
     raise SystemExit("no-op observation path must reference no-op design contract")
 if checks["no-op-observation-path"].get("proof_ref") != "examples/private-discord-engram-noop-observation-proof.fake.yaml":
     raise SystemExit("no-op observation path must reference synthetic proof")
+if checks["server-side-proposal-binding"].get("status") != "repo-safe-synthetic-proof-only":
+    raise SystemExit("server-side proposal binding must remain repo-safe-synthetic-proof-only until live/private proof exists")
+if checks["server-side-proposal-binding"].get("proof_ref") != "examples/proposal-binding-boundary.fake.yaml":
+    raise SystemExit("server-side proposal binding must reference synthetic proof")
 if checks["explicit-human-approval"].get("status") != "not-granted":
     raise SystemExit("explicit human approval must remain not-granted")
 if checks["private-discord-topology"].get("status") != "required-outside-repo":
@@ -204,6 +214,7 @@ expected_required_state = {
     "approval-gate-lifecycle": "repo-contract-ready",
     "runtime-approval-enforcement": "available-and-proven",
     "no-op-observation-path": "available-and-proven",
+    "server-side-proposal-binding": "available-and-proven",
     "private-discord-topology": "prepared-outside-repo",
     "explicit-human-approval": "granted",
     "private-backup-restore-ready": "repo-contract-ready",
@@ -214,6 +225,7 @@ stop_reasons = set(execution.get("stop_reasons", []))
 for required in [
     "runtime approval enforcement is repo-safe-synthetic-proof-only, not live/private available-and-proven",
     "no-op observation path is repo-safe-synthetic-proof-only, not live/private available-and-proven",
+    "server-side proposal binding is repo-safe-synthetic-proof-only, not live/private available-and-proven",
     "explicit execution approval is not granted",
     "private topology and credentials are not represented in repo-safe evidence",
     "private redacted event ingestion and server-side proposal binding are not proven",
@@ -240,7 +252,7 @@ bash scripts/validate-runtime-version-baseline.sh >/dev/null
 bash scripts/validate-discord-approval-gate.sh >/dev/null
 bash scripts/validate-private-runtime-backup-restore.sh >/dev/null
 
-review_paths=("$FIXTURE_PATH" "$GUIDE_PATH" "$APPROVAL_DOC" "$SLICE_FIXTURE" "$APPROVAL_FIXTURE" "$NOOP_FIXTURE" "$NOOP_PROOF_FIXTURE" "$REPAIR_FIXTURE" "$APPROVAL_PROOF_FIXTURE" "$PREFLIGHT_GATE_FIXTURE")
+review_paths=("$FIXTURE_PATH" "$GUIDE_PATH" "$APPROVAL_DOC" "$SLICE_FIXTURE" "$APPROVAL_FIXTURE" "$NOOP_FIXTURE" "$NOOP_PROOF_FIXTURE" "$REPAIR_FIXTURE" "$APPROVAL_PROOF_FIXTURE" "$PREFLIGHT_GATE_FIXTURE" "$PROPOSAL_BINDING_FIXTURE")
 
 if grep -E '\b[0-9]{17,20}\b' "${review_paths[@]}" >/dev/null; then
   fail "private rehearsal readiness artifacts must not expose raw Discord snowflake-like IDs"
