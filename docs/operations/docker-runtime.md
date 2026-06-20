@@ -141,6 +141,26 @@ docker compose exec openclaw discord-project-manager-managed-registry simulate-e
 
 Each simulation must return sanitized output with `write_executed:false`.
 
+
+## Admin UX preview harness
+
+The local OpenClaw image packages a repo-safe synthetic admin UX preview harness:
+
+```bash
+docker compose run --rm --no-deps openclaw discord-project-manager-admin-ux-preview-harness
+```
+
+This command emits sanitized read-only summaries and approval-gated previews for the fake admin UX contract. It does not read live Discord, Engram/private runtime, private profile bodies, exports, SQL dumps, screenshots, raw logs, transcripts, or credentials.
+
+Validate the repo and container harness surfaces with:
+
+```bash
+bash scripts/validate-discord-admin-ux-preview-harness.sh
+ADMIN_UX_PREVIEW_HARNESS_DOCKER_SMOKE=1 \
+  bash scripts/validate-discord-admin-ux-preview-harness.sh
+docker compose run --rm --no-deps openclaw discord-project-manager-admin-ux-preview-harness
+```
+
 ## Runtime boundary harness
 
 The local OpenClaw image also packages a synthetic container-side runtime boundary harness:

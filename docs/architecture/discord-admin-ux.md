@@ -61,6 +61,10 @@ The admin UX depends on:
 - Do not commit real Discord IDs, private profile content, screenshots, raw logs, transcripts, raw exports, SQL dumps, secrets, or private payloads.
 - Do not claim live Discord behavior, durable writes, prompt execution, production readiness, publishing, or scheduling.
 
+## Synthetic preview harness
+
+The repo-safe synthetic preview harness is `docker/openclaw/discord-admin-ux-preview-harness.sh`, installed in the OpenClaw image as `discord-project-manager-admin-ux-preview-harness`. It emits sanitized summaries and approval-gated previews for the fixture families only. It does not read live Discord, Engram/private runtime, private profile bodies, exports, SQL dumps, screenshots, raw logs, transcripts, or credentials. Validate it with `scripts/validate-discord-admin-ux-preview-harness.sh`.
+
 ## Non-goals
 
 This contract does not:
