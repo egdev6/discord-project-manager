@@ -6,6 +6,7 @@ FIXTURE_PATH="examples/private-discord-noop-rehearsal-evidence.fake.yaml"
 GUIDE_PATH="docs/operations/private-discord-manual-verification-guide.md"
 READINESS_FIXTURE="examples/private-discord-engram-rehearsal-readiness.fake.yaml"
 RUNTIME_NAMESPACE_CONTRACT="discord-project-manager/runtime/discord/<guild-id>/<channel-id>"
+DISCORD_SNOWFLAKE_LIKE_PATTERN='\b[0-9]{17,20}\b'
 
 fail() {
   echo "ERROR: $*" >&2
@@ -131,7 +132,7 @@ for forbidden in ["real Discord guild/channel/user/role/message IDs", "credentia
 PY
 
 review_paths=("$PLAN_PATH" "$FIXTURE_PATH" "$GUIDE_PATH")
-if grep -E '\b[0-9]{17,20}\b' "${review_paths[@]}" >/dev/null; then
+if grep -E "$DISCORD_SNOWFLAKE_LIKE_PATTERN" "${review_paths[@]}" >/dev/null; then
   fail "private no-op rehearsal artifacts must not expose raw Discord snowflake-like IDs"
 fi
 
@@ -139,8 +140,11 @@ if grep -E 'execution_approval_granted: true|rehearsal_executed: true|live_disco
   fail "private no-op rehearsal artifacts must not claim execution, readiness, or production behavior"
 fi
 
+bash scripts/validate-discord-approval-guard-cli.sh >/dev/null
+bash scripts/validate-discord-noop-observation-cli.sh >/dev/null
 bash scripts/validate-discord-runtime-boundary-harness.sh >/dev/null
 bash scripts/validate-private-discord-engram-rehearsal-readiness.sh >/dev/null
+bash scripts/validate-repo-safe-evidence.sh >/dev/null
 
 echo "Validated private Discord no-op rehearsal preparation plan."
 echo "Plan: $PLAN_PATH"
