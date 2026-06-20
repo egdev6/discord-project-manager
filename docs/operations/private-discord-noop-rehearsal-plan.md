@@ -65,6 +65,8 @@ Abort before observing any event if:
 
 ## Current result
 
-Current result: `not-run`.
+Current result: `pass-summary`.
 
-No live Discord message was sent. No private event was observed. No Engram write/readback was attempted. #211 remains blocked.
+A private no-op observation rehearsal was completed with summary-minimum evidence only. The observed response was response-only, classified as a read operation with ephemeral persistence, and reported `writes_attempted: false`.
+
+No write-like live Discord message was sent. No Engram write/readback was attempted. No raw Discord IDs, credentials, screenshots, logs, transcripts, private payloads, raw Engram exports, SQL dumps, backup archives, or volume dumps were recorded publicly. #211 remains blocked for the deferred write/readback slice.

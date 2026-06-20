@@ -33,7 +33,7 @@ for required in \
   "bash scripts/validate-discord-runtime-boundary-harness.sh" \
   "bash scripts/validate-private-discord-engram-rehearsal-readiness.sh" \
   "bash scripts/validate-repo-safe-evidence.sh" \
-  "Current result: \`not-run\`" \
+  "Current result: \`pass-summary\`" \
   "#211 remains blocked"; do
   grep -F "$required" "$PLAN_PATH" >/dev/null || fail "plan missing marker: $required"
 done
@@ -42,16 +42,19 @@ for required in \
   "contract: private-discord-noop-rehearsal-evidence" \
   "issue: 233" \
   "parent_issue: 211" \
-  "execution_approval_granted: false" \
-  "rehearsal_executed: false" \
+  "execution_approval_granted: true" \
+  "execution_approval_scope: private-noop-observation-only" \
+  "rehearsal_executed: true" \
+  "private_noop_event_observed: true" \
+  "write_like_live_discord_message_sent: false" \
   "live_discord_message_sent: false" \
-  "live_discord_event_observed: false" \
   "live_engram_write_readback_attempted: false" \
   "readiness_available_and_proven: false" \
   "runtime_namespace_contract: $RUNTIME_NAMESPACE_CONTRACT" \
-  "current_status: not-granted" \
-  "result_state: not-run" \
-  "issue_211_status: blocked"; do
+  "current_status: granted-for-noop-only" \
+  "result_state: pass-summary" \
+  "writes_attempted: false" \
+  "issue_211_status: blocked-for-write-readback"; do
   grep -F "$required" "$FIXTURE_PATH" >/dev/null || fail "fixture missing marker: $required"
 done
 
@@ -74,10 +77,8 @@ runtime = sys.argv[2]
 data = yaml.safe_load(fixture.read_text())
 
 false_flags = [
-    "execution_approval_granted",
-    "rehearsal_executed",
+    "write_like_live_discord_message_sent",
     "live_discord_message_sent",
-    "live_discord_event_observed",
     "live_engram_write_readback_attempted",
     "live_openclaw_prompt_execution",
     "runtime_enforcement_proven",
@@ -107,8 +108,10 @@ required_gate_ids = {
 gates = {item.get("id"): item for item in data.get("pre_execution_gates", [])}
 if set(gates) != required_gate_ids:
     raise SystemExit("pre-execution gates mismatch")
-if gates["explicit-noop-execution-approval"].get("current_status") != "not-granted":
-    raise SystemExit("explicit approval must remain not-granted")
+if gates["explicit-noop-execution-approval"].get("current_status") != "granted-for-noop-only":
+    raise SystemExit("explicit approval must be scoped to no-op only")
+if data.get("execution_approval_scope") != "private-noop-observation-only":
+    raise SystemExit("execution approval scope must remain private-noop-observation-only")
 
 boundaries = data.get("planned_no_op_boundaries", {})
 for key, value in boundaries.items():
@@ -116,11 +119,16 @@ for key, value in boundaries.items():
         raise SystemExit(f"planned no-op boundary must keep {key}: false")
 summary = data.get("current_summary", {})
 expected = {
-    "result_state": "not-run",
-    "live_discord_message": "not-sent",
-    "private_event_observation": "not-run",
+    "result_state": "pass-summary",
+    "observed_response_mode": "response-only",
+    "observed_operation": "read",
+    "observed_persistence_target": "ephemeral",
+    "observed_writeback_policy": "reject",
+    "writes_attempted": False,
+    "live_discord_message": "no-write-like-message-sent",
+    "private_event_observation": "pass-summary",
     "engram_write_readback": "not-run",
-    "issue_211_status": "blocked",
+    "issue_211_status": "blocked-for-write-readback",
 }
 for key, value in expected.items():
     if summary.get(key) != value:
@@ -136,8 +144,8 @@ if grep -E "$DISCORD_SNOWFLAKE_LIKE_PATTERN" "${review_paths[@]}" >/dev/null; th
   fail "private no-op rehearsal artifacts must not expose raw Discord snowflake-like IDs"
 fi
 
-if grep -E 'execution_approval_granted: true|rehearsal_executed: true|live_discord_message_sent: true|live_discord_event_observed: true|live_engram_write_readback_attempted: true|readiness_available_and_proven: true|production-ready|live Discord passed' "${review_paths[@]}" >/dev/null; then
-  fail "private no-op rehearsal artifacts must not claim execution, readiness, or production behavior"
+if grep -E 'write_like_live_discord_message_sent: true|live_discord_message_sent: true|live_engram_write_readback_attempted: true|readiness_available_and_proven: true|production-ready|live Discord passed|approve write persistence passed' "${review_paths[@]}" >/dev/null; then
+  fail "private no-op rehearsal artifacts must not claim write-like execution, readiness, or production behavior"
 fi
 
 bash scripts/validate-discord-approval-guard-cli.sh >/dev/null

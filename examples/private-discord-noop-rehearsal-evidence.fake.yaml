@@ -5,10 +5,12 @@ privacy_reviewed: true
 contract: private-discord-noop-rehearsal-evidence
 issue: 233
 parent_issue: 211
-execution_approval_granted: false
-rehearsal_executed: false
+execution_approval_granted: true
+execution_approval_scope: private-noop-observation-only
+rehearsal_executed: true
+private_noop_event_observed: true
+write_like_live_discord_message_sent: false
 live_discord_message_sent: false
-live_discord_event_observed: false
 live_engram_write_readback_attempted: false
 live_openclaw_prompt_execution: false
 runtime_enforcement_proven: false
@@ -50,7 +52,7 @@ pre_execution_gates:
     current_status: required-pass-before-public-evidence
   - id: explicit-noop-execution-approval
     required_before_execution: true
-    current_status: not-granted
+    current_status: granted-for-noop-only
 planned_evidence_policy:
   allowed:
     - pass status summary
@@ -81,12 +83,17 @@ planned_no_op_boundaries:
   scheduling_allowed: false
   github_mutations_allowed: false
 current_summary:
-  result_state: not-run
-  reason: preparation only; explicit execution approval has not been granted
-  live_discord_message: not-sent
-  private_event_observation: not-run
+  result_state: pass-summary
+  reason: private no-op observation completed with summary-minimum evidence only
+  observed_response_mode: response-only
+  observed_operation: read
+  observed_persistence_target: ephemeral
+  observed_writeback_policy: reject
+  writes_attempted: false
+  live_discord_message: no-write-like-message-sent
+  private_event_observation: pass-summary
   engram_write_readback: not-run
-  issue_211_status: blocked
+  issue_211_status: blocked-for-write-readback
 non_goals:
   - executing live Discord messages
   - proving live Engram write/readback
