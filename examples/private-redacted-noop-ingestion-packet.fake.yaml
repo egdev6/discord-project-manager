@@ -1,0 +1,132 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: private-redacted-noop-ingestion-packet
+issue: 264
+parent_issue: 211
+live_discord_connection: false
+live_engram_calls: false
+live_openclaw_prompt_execution: false
+live_discord_message_sent: false
+live_engram_write_attempted: false
+live_readback_attempted: false
+uses_real_discord_ids: false
+raw_discord_chat_logs_included: false
+raw_private_payload_included: false
+screenshots_included: false
+secrets_included: false
+private_redacted_event_ingestion_proof_level: repo-safe-schema-packet
+private_redacted_event_ingestion_proven: false
+readiness_gate_updated: false
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+source_contracts:
+  - examples/private-discord-engram-rehearsal-readiness.fake.yaml
+  - examples/private-topology-readiness-packet.fake.yaml
+  - examples/private-discord-engram-noop-observation-proof.fake.yaml
+  - docs/operations/private-discord-manual-verification-guide.md
+redacted_event_envelope:
+  event_source: private-discord-redacted-envelope
+  guild_ref: <guild-id>
+  channel_ref: <channel-id>
+  message_ref: <message-id>
+  actor_ref: <operator-ref>
+  route_ref: route/<project-key>/private-context
+  runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+  target_namespace: discord-project-manager/project/<project-key>/private-context
+  content_summary: redacted write-like no-op observation request
+  raw_content_committed: false
+  raw_event_payload_committed: false
+  placeholders_only: true
+no_op_ingestion_expectations:
+  expected_status: pending-private-run
+  expected_response_state: approval-requested
+  expected_guard_event_type: guard-denial
+  prompt_execution: none
+  persistent_writes_allowed: false
+  workspace_file_writes_allowed: false
+  filesystem_writes_allowed: false
+  memory_writes_allowed: false
+  engram_writes_allowed: false
+  network_calls_attempted: false
+  publishing_attempted: false
+  scheduling_attempted: false
+  github_mutations_attempted: false
+  writes_attempted: false
+  evidence_policy: sanitized-summary-only
+private_run_evidence_schema:
+  required_sections:
+    - topology_summary
+    - redacted_event_summary
+    - route_result
+    - approval_state
+    - no_op_boundaries
+    - blocked_reason
+    - operator_decision
+  allowed_result_values:
+    - not-run
+    - pending-private-run
+    - blocked
+    - pass-summary
+  forbidden_result_values:
+    - live-write-passed
+    - live-readback-passed
+    - production-ready
+private_checklist:
+  - id: private-topology-prepared
+    status: pending-private-run
+    evidence_allowed_in_repo: placeholder-summary-only
+    fail_closed_if_missing: true
+  - id: redacted-event-captured
+    status: pending-private-run
+    evidence_allowed_in_repo: sanitized-summary-only
+    fail_closed_if_missing: true
+  - id: no-op-ingestion-executed
+    status: not-run
+    evidence_allowed_in_repo: sanitized-summary-only
+    fail_closed_if_missing: true
+  - id: prompt-and-write-surfaces-blocked
+    status: not-run
+    evidence_allowed_in_repo: sanitized-summary-only
+    fail_closed_if_missing: true
+  - id: sanitized-evidence-reviewed
+    status: not-reviewed
+    evidence_allowed_in_repo: review-summary-only
+    fail_closed_if_missing: true
+execution_gate:
+  allowed_now: false
+  readiness_result: blocked
+  stop_reasons:
+    - private redacted no-op ingestion is not run in repo
+    - raw event payloads are forbidden in repo
+    - prompt execution and write surfaces must remain blocked
+    - explicit write/readback execution approval is not granted
+    - no private write/readback was executed by this issue
+  next_safe_actions:
+    - run private redacted no-op ingestion outside repo with summary-only evidence
+    - review sanitized no-op ingestion summary before any write-like traffic
+    - "keep #211 open until actual private execution and readback are separately approved executed and reviewed"
+sanitized_evidence_policy:
+  allowed:
+    - redacted event summary
+    - placeholder namespace refs
+    - blocked status summaries
+    - pending-private-run summaries
+    - validator command names and pass/fail summaries
+  forbidden:
+    - real Discord guild/channel/user/message IDs
+    - credentials or .env values
+    - screenshots
+    - raw logs
+    - transcripts
+    - private payloads
+    - raw event payloads
+    - raw Engram exports
+    - SQL dumps
+non_goals:
+  - executing live Discord messages
+  - executing an Engram write
+  - executing a live readback from Engram
+  - proving private redacted event ingestion
+  - updating readiness to available-and-proven
+  - closing issue 211
