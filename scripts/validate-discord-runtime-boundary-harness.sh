@@ -70,6 +70,12 @@ assert_contains "$normal_output" "noop_network_calls_attempted: false"
 assert_contains "$normal_output" "noop_filesystem_writes_attempted: false"
 assert_contains "$normal_output" "noop_workspace_file_writes_allowed: false"
 assert_contains "$normal_output" "noop_engram_writes_allowed: false"
+assert_contains "$normal_output" "noop_publishing_attempted: false"
+assert_contains "$normal_output" "noop_scheduling_attempted: false"
+assert_contains "$normal_output" "noop_github_mutations_attempted: false"
+assert_contains "$normal_output" "approval_memory_writes_allowed: false"
+assert_contains "$normal_output" "approval_publishing_allowed: false"
+assert_contains "$normal_output" "approval_scheduling_allowed: false"
 assert_contains "$normal_output" "issue_211_status: blocked"
 
 cat >"$TMPDIR_CREATED/discord-project-manager-noop-observation" <<'NOOP_MALFORMED'
@@ -120,6 +126,9 @@ noop_observation_result:
   guard_event_type: guard-denial
   network_calls_attempted: false
   filesystem_writes_attempted: false
+  publishing_attempted: false
+  scheduling_attempted: false
+  github_mutations_attempted: false
 EOF
 NOOP_UNEXPECTED
 cat >"$TMPDIR_CREATED/discord-project-manager-approval-guard" <<'GUARD_VALID'
@@ -188,6 +197,9 @@ noop_observation_result:
   guard_event_type: guard-denial
   network_calls_attempted: false
   filesystem_writes_attempted: false
+  publishing_attempted: false
+  scheduling_attempted: false
+  github_mutations_attempted: false
 EOF
 NOOP_VALID
 cat >"$TMPDIR_CREATED/discord-project-manager-approval-guard" <<'GUARD_MALFORMED'

@@ -92,6 +92,9 @@ assert_field_equals "$matched_no_approval_output" "writes_attempted" "false" "ma
 assert_field_equals "$matched_no_approval_output" "prompt_execution" "none" "matched no approval scenario"
 assert_field_equals "$matched_no_approval_output" "network_calls_attempted" "false" "matched no approval scenario"
 assert_field_equals "$matched_no_approval_output" "filesystem_writes_attempted" "false" "matched no approval scenario"
+assert_field_equals "$matched_no_approval_output" "publishing_attempted" "false" "matched no approval scenario"
+assert_field_equals "$matched_no_approval_output" "scheduling_attempted" "false" "matched no approval scenario"
+assert_field_equals "$matched_no_approval_output" "github_mutations_attempted" "false" "matched no approval scenario"
 
 matched_exact_approval_output=$(sh "$approval_guard_path" \
   --route-status matched-route \
@@ -105,7 +108,10 @@ assert_field_equals "$matched_exact_approval_output" "write_like" "true" "matche
 assert_field_equals "$matched_exact_approval_output" "response_state" "approval-verification-required" "matched exact approval scenario"
 assert_field_equals "$matched_exact_approval_output" "persistent_writes_allowed" "false" "matched exact approval scenario"
 assert_field_equals "$matched_exact_approval_output" "workspace_file_writes_allowed" "false" "matched exact approval scenario"
+assert_field_equals "$matched_exact_approval_output" "memory_writes_allowed" "false" "matched exact approval scenario"
 assert_field_equals "$matched_exact_approval_output" "engram_writes_allowed" "false" "matched exact approval scenario"
+assert_field_equals "$matched_exact_approval_output" "publishing_allowed" "false" "matched exact approval scenario"
+assert_field_equals "$matched_exact_approval_output" "scheduling_allowed" "false" "matched exact approval scenario"
 assert_field_equals "$matched_exact_approval_output" "writes_attempted" "false" "matched exact approval scenario"
 assert_field_equals "$matched_exact_approval_output" "prompt_execution" "none" "matched exact approval scenario"
 
@@ -124,6 +130,9 @@ assert_field_equals "$unmapped_output" "writes_attempted" "false" "unmapped scen
 assert_field_equals "$unmapped_output" "prompt_execution" "none" "unmapped scenario"
 assert_field_equals "$unmapped_output" "network_calls_attempted" "false" "unmapped scenario"
 assert_field_equals "$unmapped_output" "filesystem_writes_attempted" "false" "unmapped scenario"
+assert_field_equals "$unmapped_output" "publishing_attempted" "false" "unmapped scenario"
+assert_field_equals "$unmapped_output" "scheduling_attempted" "false" "unmapped scenario"
+assert_field_equals "$unmapped_output" "github_mutations_attempted" "false" "unmapped scenario"
 
 cat <<EOF
 runtime_boundary_harness_result:
@@ -144,5 +153,11 @@ runtime_boundary_harness_result:
   noop_filesystem_writes_attempted: false
   noop_workspace_file_writes_allowed: false
   noop_engram_writes_allowed: false
+  noop_publishing_attempted: false
+  noop_scheduling_attempted: false
+  noop_github_mutations_attempted: false
+  approval_memory_writes_allowed: false
+  approval_publishing_allowed: false
+  approval_scheduling_allowed: false
   issue_211_status: blocked
 EOF
