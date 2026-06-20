@@ -298,7 +298,7 @@ assert_output "$unmapped" \
 
 rm -f "$matched_denial" "$invalid_approval" "$exact_approval" "$unmapped"
 
-bash scripts/validate-runtime-approval-enforcement-repair.sh >/dev/null
+PRIVATE_READINESS_CROSSCHECK_SKIP=1 bash scripts/validate-runtime-approval-enforcement-repair.sh >/dev/null
 bash scripts/validate-discord-approval-guard-cli.sh >/dev/null
 bash scripts/validate-private-write-readback-preflight-gate.sh >/dev/null
 bash scripts/validate-repo-safe-evidence.sh >/dev/null

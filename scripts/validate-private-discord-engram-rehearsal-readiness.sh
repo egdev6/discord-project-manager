@@ -12,6 +12,9 @@ REPAIR_FIXTURE="examples/runtime-approval-enforcement-repair.fake.yaml"
 APPROVAL_PROOF_FIXTURE="examples/runtime-approval-enforcement-proof.fake.yaml"
 PREFLIGHT_GATE_FIXTURE="examples/private-write-readback-preflight-gate.fake.yaml"
 PROPOSAL_BINDING_FIXTURE="examples/proposal-binding-boundary.fake.yaml"
+NOOP_REVIEW_PACKET_FIXTURE="examples/private-noop-ingestion-evidence-review-packet.fake.yaml"
+NOOP_REVIEW_HARNESS="docker/openclaw/private-noop-ingestion-review-harness.sh"
+NOOP_REVIEW_HARNESS_VALIDATOR="scripts/validate-private-noop-ingestion-review-harness.sh"
 RUNTIME_NAMESPACE_CONTRACT="discord-project-manager/runtime/discord/<guild-id>/<channel-id>"
 
 fail() {
@@ -26,7 +29,7 @@ require_cmd() {
 require_cmd grep
 require_cmd python3
 
-for path in "$FIXTURE_PATH" "$GUIDE_PATH" "$APPROVAL_DOC" "$SLICE_FIXTURE" "$APPROVAL_FIXTURE" "$NOOP_FIXTURE" "$NOOP_PROOF_FIXTURE" "$REPAIR_FIXTURE" "$APPROVAL_PROOF_FIXTURE" "$PREFLIGHT_GATE_FIXTURE" "$PROPOSAL_BINDING_FIXTURE"; do
+for path in "$FIXTURE_PATH" "$GUIDE_PATH" "$APPROVAL_DOC" "$SLICE_FIXTURE" "$APPROVAL_FIXTURE" "$NOOP_FIXTURE" "$NOOP_PROOF_FIXTURE" "$REPAIR_FIXTURE" "$APPROVAL_PROOF_FIXTURE" "$PREFLIGHT_GATE_FIXTURE" "$PROPOSAL_BINDING_FIXTURE" "$NOOP_REVIEW_PACKET_FIXTURE" "$NOOP_REVIEW_HARNESS" "$NOOP_REVIEW_HARNESS_VALIDATOR"; do
   [[ -f "$path" ]] || fail "required path not found: $path"
 done
 
@@ -53,11 +56,17 @@ for required in \
   "proof_ref: examples/private-discord-engram-noop-observation-proof.fake.yaml" \
   "id: server-side-proposal-binding" \
   "proof_ref: examples/proposal-binding-boundary.fake.yaml" \
+  "id: no-op-ingestion-review-harness" \
+  "status: repo-safe-synthetic-review-only" \
+  "packet_ref: examples/private-noop-ingestion-evidence-review-packet.fake.yaml" \
+  "harness_ref: docker/openclaw/private-noop-ingestion-review-harness.sh" \
+  "validator_ref: scripts/validate-private-noop-ingestion-review-harness.sh" \
   "id: explicit-human-approval" \
   "status: not-granted" \
   "allowed_now: false" \
-  "private redacted event ingestion and server-side proposal binding are not proven" \
+  "private redacted event ingestion, no-op ingestion review, and server-side proposal binding are not proven" \
   "prove private redacted no-op event ingestion before write-like traffic" \
+  "review private no-op ingestion sanitized summary with the repo-safe harness contract" \
   "prove server-side proposal binding before writes"; do
   grep -F "$required" "$FIXTURE_PATH" >/dev/null || fail "readiness fixture missing marker: $required"
 done
@@ -132,6 +141,9 @@ required_contracts = {
     "examples/runtime-approval-enforcement-proof.fake.yaml",
     "examples/private-write-readback-preflight-gate.fake.yaml",
     "examples/proposal-binding-boundary.fake.yaml",
+    "examples/private-noop-ingestion-evidence-review-packet.fake.yaml",
+    "docker/openclaw/private-noop-ingestion-review-harness.sh",
+    "scripts/validate-private-noop-ingestion-review-harness.sh",
     "docs/operations/runtime-version-baseline.md",
 }
 if set(data.get("source_contracts", [])) != required_contracts:
@@ -174,6 +186,7 @@ required_checks = {
     "runtime-approval-enforcement",
     "no-op-observation-path",
     "server-side-proposal-binding",
+    "no-op-ingestion-review-harness",
     "private-discord-topology",
     "explicit-human-approval",
     "private-backup-restore-ready",
@@ -200,6 +213,14 @@ if checks["server-side-proposal-binding"].get("status") != "repo-safe-synthetic-
     raise SystemExit("server-side proposal binding must remain repo-safe-synthetic-proof-only until live/private proof exists")
 if checks["server-side-proposal-binding"].get("proof_ref") != "examples/proposal-binding-boundary.fake.yaml":
     raise SystemExit("server-side proposal binding must reference synthetic proof")
+if checks["no-op-ingestion-review-harness"].get("status") != "repo-safe-synthetic-review-only":
+    raise SystemExit("no-op ingestion review harness must remain repo-safe-synthetic-review-only until private review exists")
+if checks["no-op-ingestion-review-harness"].get("packet_ref") != "examples/private-noop-ingestion-evidence-review-packet.fake.yaml":
+    raise SystemExit("no-op ingestion review harness must reference evidence review packet")
+if checks["no-op-ingestion-review-harness"].get("harness_ref") != "docker/openclaw/private-noop-ingestion-review-harness.sh":
+    raise SystemExit("no-op ingestion review harness must reference harness")
+if checks["no-op-ingestion-review-harness"].get("validator_ref") != "scripts/validate-private-noop-ingestion-review-harness.sh":
+    raise SystemExit("no-op ingestion review harness must reference validator")
 if checks["explicit-human-approval"].get("status") != "not-granted":
     raise SystemExit("explicit human approval must remain not-granted")
 if checks["private-discord-topology"].get("status") != "required-outside-repo":
@@ -215,6 +236,7 @@ expected_required_state = {
     "runtime-approval-enforcement": "available-and-proven",
     "no-op-observation-path": "available-and-proven",
     "server-side-proposal-binding": "available-and-proven",
+    "no-op-ingestion-review-harness": "private-pass-summary-reviewed",
     "private-discord-topology": "prepared-outside-repo",
     "explicit-human-approval": "granted",
     "private-backup-restore-ready": "repo-contract-ready",
@@ -226,15 +248,17 @@ for required in [
     "runtime approval enforcement is repo-safe-synthetic-proof-only, not live/private available-and-proven",
     "no-op observation path is repo-safe-synthetic-proof-only, not live/private available-and-proven",
     "server-side proposal binding is repo-safe-synthetic-proof-only, not live/private available-and-proven",
+    "no-op ingestion review harness is repo-safe-synthetic-review-only, not private-pass-summary-reviewed",
     "explicit execution approval is not granted",
     "private topology and credentials are not represented in repo-safe evidence",
-    "private redacted event ingestion and server-side proposal binding are not proven",
+    "private redacted event ingestion, no-op ingestion review, and server-side proposal binding are not proven",
 ]:
     if required not in stop_reasons:
         raise SystemExit(f"missing stop reason: {required}")
 if execution.get("permitted_next_actions") != [
     "prepare private topology outside repo with sanitized placeholders only",
     "prove private redacted no-op event ingestion before write-like traffic",
+    "review private no-op ingestion sanitized summary with the repo-safe harness contract",
     "prove server-side proposal binding before writes",
 ]:
     raise SystemExit("permitted next actions drifted")
@@ -251,8 +275,9 @@ PY
 bash scripts/validate-runtime-version-baseline.sh >/dev/null
 bash scripts/validate-discord-approval-gate.sh >/dev/null
 bash scripts/validate-private-runtime-backup-restore.sh >/dev/null
+PRIVATE_READINESS_CROSSCHECK_SKIP=1 bash "$NOOP_REVIEW_HARNESS_VALIDATOR" >/dev/null
 
-review_paths=("$FIXTURE_PATH" "$GUIDE_PATH" "$APPROVAL_DOC" "$SLICE_FIXTURE" "$APPROVAL_FIXTURE" "$NOOP_FIXTURE" "$NOOP_PROOF_FIXTURE" "$REPAIR_FIXTURE" "$APPROVAL_PROOF_FIXTURE" "$PREFLIGHT_GATE_FIXTURE" "$PROPOSAL_BINDING_FIXTURE")
+review_paths=("$FIXTURE_PATH" "$GUIDE_PATH" "$APPROVAL_DOC" "$SLICE_FIXTURE" "$APPROVAL_FIXTURE" "$NOOP_FIXTURE" "$NOOP_PROOF_FIXTURE" "$REPAIR_FIXTURE" "$APPROVAL_PROOF_FIXTURE" "$PREFLIGHT_GATE_FIXTURE" "$PROPOSAL_BINDING_FIXTURE" "$NOOP_REVIEW_PACKET_FIXTURE" "$NOOP_REVIEW_HARNESS")
 
 if grep -E '\b[0-9]{17,20}\b' "${review_paths[@]}" >/dev/null; then
   fail "private rehearsal readiness artifacts must not expose raw Discord snowflake-like IDs"

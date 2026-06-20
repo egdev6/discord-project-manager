@@ -328,7 +328,8 @@ The current repo-safe status after #252, #254, and #256 is:
 - private write/readback preflight gate exists and remains blocked;
 - runtime approval enforcement has repo-safe synthetic guard proof only;
 - no-op observation has repo-safe synthetic no-op proof only;
-- neither proof upgrades #211 readiness to live/private `available-and-proven`.
+- no-op ingestion evidence review has a repo-safe synthetic harness only;
+- none of these proofs upgrade #211 readiness to live/private `available-and-proven`.
 
 Still required before any private write/readback execution:
 
@@ -338,7 +339,7 @@ Still required before any private write/readback execution:
 - approval-gate lifecycle contract remains green;
 - runtime approval enforcement proven in the live/private runtime path, including server-side proposal binding;
 - private backup/restore contract remains green;
-- private redacted no-op event ingestion proven before write-like Discord traffic.
+- private redacted no-op event ingestion proven and sanitized review completed before write-like Discord traffic.
 
 Run the readiness validator with:
 

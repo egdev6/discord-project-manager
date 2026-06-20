@@ -132,7 +132,7 @@ if grep -E 'acceptance_allowed: true|live_discord_connection: true|live_engram_c
   fail "review harness artifacts must not claim private execution, readiness, closure, or production behavior"
 fi
 
-bash "$REVIEW_PACKET_VALIDATOR" >/dev/null
+PRIVATE_NOOP_EVIDENCE_SKIP_READINESS_CROSSCHECK=1 bash "$REVIEW_PACKET_VALIDATOR" >/dev/null
 bash scripts/validate-repo-safe-evidence.sh >/dev/null
 
 echo "Validated private no-op ingestion review harness."

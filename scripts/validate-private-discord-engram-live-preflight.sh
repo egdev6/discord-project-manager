@@ -127,7 +127,9 @@ if "repeat sanitized preflight only after both runtime paths are proven and sepa
     raise SystemExit("next safe actions must include explicit approval before repeated preflight")
 PY
 
-bash scripts/validate-private-discord-engram-rehearsal-readiness.sh >/dev/null
+if [[ "${PRIVATE_READINESS_CROSSCHECK_SKIP:-0}" != "1" ]]; then
+  bash scripts/validate-private-discord-engram-rehearsal-readiness.sh >/dev/null
+fi
 bash scripts/validate-repo-safe-evidence.sh >/dev/null
 
 review_paths=("$FIXTURE_PATH" "$REPORT_PATH")

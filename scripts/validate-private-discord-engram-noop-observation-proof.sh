@@ -346,9 +346,9 @@ assert_noop_output "$unmapped" "unmapped-channel" "needs-route" "guard-needs-rou
 
 rm -f "$matched" "$unmapped"
 
-bash scripts/validate-private-discord-engram-noop-observation.sh >/dev/null
+PRIVATE_READINESS_CROSSCHECK_SKIP=1 bash scripts/validate-private-discord-engram-noop-observation.sh >/dev/null
 bash scripts/validate-discord-noop-observation-cli.sh >/dev/null
-bash scripts/validate-runtime-approval-enforcement-proof.sh >/dev/null
+PRIVATE_READINESS_CROSSCHECK_SKIP=1 bash scripts/validate-runtime-approval-enforcement-proof.sh >/dev/null
 bash scripts/validate-repo-safe-evidence.sh >/dev/null
 
 review_paths=("$FIXTURE_PATH" "$GUIDE_PATH")
