@@ -373,6 +373,18 @@ bash scripts/validate-private-discord-engram-noop-observation.sh
 bash scripts/validate-discord-noop-observation-cli.sh
 ```
 
+## Private Discord-to-Engram no-op observation proof gate
+
+Use `examples/private-discord-engram-noop-observation-proof.fake.yaml` and `scripts/validate-private-discord-engram-noop-observation-proof.sh` to verify the repo-safe synthetic no-op proof for #256.
+
+This is a **repo-safe synthetic no-op proof**. It validates `discord-project-manager-noop-observation` for matched-route and unmapped-channel synthetic envelopes. It does not prove live private no-op observation, does not prove live Discord gateway delivery, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Run the proof gate validator with:
+
+```bash
+bash scripts/validate-private-discord-engram-noop-observation-proof.sh
+```
+
 ## Runtime approval enforcement repair contract
 
 Use `examples/runtime-approval-enforcement-repair.fake.yaml` and `scripts/validate-runtime-approval-enforcement-repair.sh` to review the required runtime repair before live Discord traffic.
