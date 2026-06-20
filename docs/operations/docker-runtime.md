@@ -141,7 +141,6 @@ docker compose exec openclaw discord-project-manager-managed-registry simulate-e
 
 Each simulation must return sanitized output with `write_executed:false`.
 
-
 ## Admin UX preview harness
 
 The local OpenClaw image packages a repo-safe synthetic admin UX preview harness:
