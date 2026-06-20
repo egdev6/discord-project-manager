@@ -37,7 +37,11 @@ for required in \
   "runtime_namespace_contract: $RUNTIME_NAMESPACE_CONTRACT" \
   "name: matched-route-sdd-handoff" \
   "name: global-governance-approval-proposal" \
-  "name: repo-artifact-claim-proposal"; do
+  "name: repo-artifact-claim-proposal" \
+  "development_intent: openclaw_skill_development" \
+  "target_path: skills/demo-openclaw-workflow/SKILL.md" \
+  "validation_evidence:" \
+  "runtime_sync_requirements:"; do
   grep -F "$required" "$FIXTURE_PATH" >/dev/null || fail "fixture missing required marker: $required"
 done
 
@@ -58,6 +62,10 @@ for required in \
   "Return envelope" \
   "Writeback target scopes" \
   "Shared-artifact claims" \
+  "development_intent" \
+  "validation_evidence" \
+  "runtime_sync_requirements" \
+  "skills/{name}/SKILL.md" \
   "must not query Discord directly" \
   "approve write" \
   "single_writer: true" \
@@ -93,8 +101,8 @@ awk -v runtime="$RUNTIME_NAMESPACE_CONTRACT" '
       }
     }
     if (scenario == "repo-artifact-claim-proposal") {
-      if (artifact_kind != "repo-doc" || artifact_write_executed != "false" || serialization_ref != "docs/process/shared-artifact-serialization.md" || claim_required != "true" || release_required != "true" || single_writer != "true" || claim_write_executed != "false") {
-        print "repo artifact proposal must include serialization claim metadata and no write execution" > "/dev/stderr"
+      if (development_intent != "openclaw_skill_development" || artifact_kind != "repo-skill" || target_path != "skills/demo-openclaw-workflow/SKILL.md" || artifact_write_executed != "false" || serialization_ref != "docs/process/shared-artifact-serialization.md" || claim_target_path != "skills/demo-openclaw-workflow/SKILL.md" || claim_required != "true" || release_required != "true" || single_writer != "true" || claim_write_executed != "false" || has_validation_evidence != 1 || has_runtime_sync_requirements != 1) {
+        print "repo skill proposal must include openclaw skill intent, target path, serialization claim metadata, validation evidence, runtime sync requirements, and no write execution" > "/dev/stderr"
         exit 1
       }
     }
@@ -104,7 +112,8 @@ awk -v runtime="$RUNTIME_NAMESPACE_CONTRACT" '
     finish_scenario()
     scenario = $3
     has_runtime = has_routing_status = has_resolved_route = has_project_slug = has_network_slug = has_route = has_intent = has_context_ref = has_skill_ref = has_gate = has_mode = has_exec = has_prompt = has_summary = has_artifact_marker = has_writeback_marker = 0
-    approval_policy = execution_state = artifact_mode = writeback_mode = proposal_scope = target_namespace = topic_key = approval_state = approval_phrase = write_executed = artifact_kind = artifact_write_executed = serialization_ref = claim_required = release_required = single_writer = claim_write_executed = route_status = ""
+    approval_policy = execution_state = artifact_mode = writeback_mode = proposal_scope = target_namespace = topic_key = approval_state = approval_phrase = write_executed = artifact_kind = target_path = artifact_write_executed = serialization_ref = claim_target_path = claim_required = release_required = single_writer = claim_write_executed = route_status = development_intent = ""
+    has_validation_evidence = has_runtime_sync_requirements = 0
     section = "scenario"
     next
   }
@@ -120,6 +129,7 @@ awk -v runtime="$RUNTIME_NAMESPACE_CONTRACT" '
   section == "handoff" && /skill_pack_ref:/ && /stack-and-flow-github.skill_pack/ { has_skill_ref = 1; next }
   section == "handoff" && /- discord-approval-gate/ { has_gate = 1; next }
   section == "handoff" && /execution_mode:/ && $NF == "delegated-contract-only" { has_mode = 1; next }
+  section == "handoff" && /development_intent:/ { development_intent = $NF; next }
   section == "handoff" && /approval_policy:/ { approval_policy = $NF; next }
   section == "return" && /execution_state:/ { execution_state = $NF; has_exec = 1; next }
   section == "return" && /prompt_execution:/ && $NF == "none" { has_prompt = 1; next }
@@ -133,13 +143,16 @@ awk -v runtime="$RUNTIME_NAMESPACE_CONTRACT" '
   section == "return" && /approval_phrase:/ { approval_phrase = $(NF-1) " " $NF; next }
   section == "return" && /write_executed:/ && artifact_kind == "" && serialization_ref == "" { write_executed = $NF; next }
   section == "return" && /artifact_kind:/ { artifact_kind = $NF; next }
-  section == "return" && /target_path:/ { next }
+  section == "return" && /target_path:/ && artifact_kind != "" && serialization_ref == "" { target_path = $NF; next }
   section == "return" && /write_executed:/ && artifact_kind != "" && serialization_ref == "" { artifact_write_executed = $NF; next }
   section == "return" && /serialization_contract_ref:/ { serialization_ref = $NF; next }
+  section == "return" && /target_path:/ && serialization_ref != "" { claim_target_path = $NF; next }
   section == "return" && /claim_required:/ { claim_required = $NF; next }
   section == "return" && /release_required:/ { release_required = $NF; next }
   section == "return" && /single_writer:/ { single_writer = $NF; next }
   section == "return" && /write_executed:/ && serialization_ref != "" { claim_write_executed = $NF; next }
+  section == "return" && /^      validation_evidence:/ { has_validation_evidence = 1; next }
+  section == "return" && /^      runtime_sync_requirements:/ { has_runtime_sync_requirements = 1; next }
   END { finish_scenario() }
 ' "$FIXTURE_PATH" || fail "fixture handoff scenarios are inconsistent"
 

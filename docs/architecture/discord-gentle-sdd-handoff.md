@@ -34,6 +34,8 @@ Gentle receives resolved context and skills from OpenClaw. It must not query Dis
 | `skill_pack_ref` or sanitized snapshot | Reviewable skill input with `discord-approval-gate` included. |
 | `mandatory_skills` | Required safety skills for the turn. |
 | `requested_sdd_mode` | Bounded requested mode or phase, not live execution. |
+| `development_intent` | Optional narrowed intent such as `openclaw_skill_development` for repo-backed OpenClaw skill work. |
+| `target_artifact_paths[]` | Optional proposed repo paths such as `skills/{name}/SKILL.md`, still proposal-only. |
 | `execution_mode` | `delegated-contract-only` in this slice. |
 | `approval_policy` | Whether a returned proposal needs `approve write`. |
 
@@ -51,6 +53,8 @@ Gentle returns reviewable outputs only.
 | `artifact_proposals[]` | Optional repo-artifact proposals with no write executed. |
 | `writeback_proposals[]` | Optional Memory Gateway proposals with target namespace and topic key. |
 | `shared_artifact_claims[]` | Optional claim/release metadata when repo artifacts or issue metadata are proposed. |
+| `validation_evidence[]` | Commands or checks Gentle expects the owning repo session to run before enabling the proposal. |
+| `runtime_sync_requirements[]` | Whether Docker rebuild, skill sync, restart, or release promotion is required after approval and merge. |
 
 ## Writeback target scopes
 
@@ -74,6 +78,8 @@ If Gentle proposes repo artifacts such as `openspec/`, `docs/`, `skills/`, or Gi
 - `single_writer: true`;
 - `write_executed: false` until the owning session claims and applies the change.
 
+For OpenClaw skill development, product capability skills must target `skills/{name}/SKILL.md` as repo-backed artifacts and must report whether `openclaw/config/skill-inventory.yaml`, scoped-skill registry docs/fixtures, Docker image rebuild, skill sync, or runtime restart are required.
+
 ## Non-goals
 
 This contract does not:
@@ -91,6 +97,7 @@ This contract does not:
 - [ ] Gentle receives resolved context/skills and does not query Discord directly.
 - [ ] Return envelope includes summary, artifact proposals, and writeback proposals.
 - [ ] Global governance proposals stay `approval-requested` until exact `approve write`.
+- [ ] OpenClaw skill-development handoffs use `development_intent: openclaw_skill_development` and proposal-only `skills/{name}/SKILL.md` targets.
 - [ ] Repo-artifact proposals include claim/release metadata and `single_writer: true`.
 - [ ] Prompt execution remains `none`.
 - [ ] No raw Discord IDs, credential env names, live/prod claims, or GitHub mutation claims are introduced.

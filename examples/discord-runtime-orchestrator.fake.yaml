@@ -365,7 +365,7 @@ scenarios:
       classification: confirmation-required
       via: docs/architecture/discord-memory-gateway.md
       writeback_out_of_scope: true
-  - name: workflow-skill-proposal
+  - name: openclaw-skill-development-flow
     event_envelope:
       origin_kind: discord-channel
       runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
@@ -381,6 +381,7 @@ scenarios:
     artifact_classification:
       artifact_type: workflow_skill
       subtype: skill_contract
+      development_intent: openclaw_skill_development
       operation: draft
       persistence_target: repo
       approval_required: true
@@ -396,9 +397,8 @@ scenarios:
       runner_kind: development-orchestrator
       backend: gentle-sdd
       backend_mode: delegated-contract-only
-      selected_skills:
-        - strategy-planner
-        - on-demand-brief-planner
+      selected_skills: none
+      preserved_protocol_backend: .openclaw/skills
     permission_gate:
       state: approval-requested
       required_skill: discord-approval-gate
@@ -409,9 +409,12 @@ scenarios:
       prompt_execution: none
       selected_context_pack: stack-and-flow-github
       selected_skill_pack: stack-and-flow-github
-      deployment_step: repo-review-and-runtime-sync-before-enable
+      target_skill_path: skills/demo-openclaw-workflow/SKILL.md
+      inventory_update_required: true
+      scoped_registry_update_required: true
+      deployment_step: repo-review-skill-sync-and-runtime-rebuild-before-enable
       validated_runtime_version_ref: docs-release-baseline-placeholder
-      note: Repo write remains a proposal until a development session claims and applies it.
+      note: Repo skill write remains a proposal until a development session claims and applies it.
     writeback_policy:
       classification: draft
       via: docs/architecture/discord-memory-gateway.md
@@ -447,9 +450,8 @@ scenarios:
       runner_kind: development-orchestrator
       backend: gentle-sdd
       backend_mode: delegated-contract-only
-      selected_skills:
-        - strategy-planner
-        - on-demand-brief-planner
+      selected_skills: none
+      preserved_protocol_backend: .openclaw/skills
     permission_gate:
       state: approval-requested
       required_skill: discord-approval-gate
