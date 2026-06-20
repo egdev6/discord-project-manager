@@ -131,6 +131,7 @@ noop_observation_result:
   response_state: $response_state
   persistent_writes_allowed: $persistent_writes_allowed
   workspace_file_writes_allowed: $workspace_file_writes_allowed
+  memory_writes_allowed: false
   engram_writes_allowed: $engram_writes_allowed
   durable_reads_allowed: $durable_reads_allowed
   writes_attempted: $writes_attempted

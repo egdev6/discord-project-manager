@@ -72,6 +72,7 @@ assert_contains "$matched" "write_like: true"
 assert_contains "$matched" "response_state: approval-requested"
 assert_contains "$matched" "persistent_writes_allowed: false"
 assert_contains "$matched" "workspace_file_writes_allowed: false"
+assert_contains "$matched" "memory_writes_allowed: false"
 assert_contains "$matched" "engram_writes_allowed: false"
 assert_contains "$matched" "writes_attempted: false"
 assert_contains "$matched" "prompt_execution: none"
@@ -87,6 +88,7 @@ assert_contains "$unmapped" "route_status: unmapped-channel"
 assert_contains "$unmapped" "response_state: needs-route"
 assert_contains "$unmapped" "durable_reads_allowed: false"
 assert_contains "$unmapped" "persistent_writes_allowed: false"
+assert_contains "$unmapped" "memory_writes_allowed: false"
 assert_contains "$unmapped" "writes_attempted: false"
 assert_contains "$unmapped" "guard_event_type: guard-needs-route"
 
@@ -94,6 +96,7 @@ readonly="$(run_noop --route-status matched-route --content-summary 'summarize f
 assert_contains "$readonly" "write_like: false"
 assert_contains "$readonly" "response_state: summary-only"
 assert_contains "$readonly" "persistent_writes_allowed: false"
+assert_contains "$readonly" "memory_writes_allowed: false"
 assert_contains "$readonly" "writes_attempted: false"
 
 if sh "$NOOP_PATH" --route-status matched-route --content-summary $'fake\n  persistent_writes_allowed: true' >"$TMPDIR_CREATED/injection.out" 2>"$TMPDIR_CREATED/injection.err"; then
