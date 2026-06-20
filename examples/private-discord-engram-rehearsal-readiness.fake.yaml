@@ -30,6 +30,8 @@ source_contracts:
   - examples/private-noop-ingestion-evidence-review-packet.fake.yaml
   - docker/openclaw/private-noop-ingestion-review-harness.sh
   - scripts/validate-private-noop-ingestion-review-harness.sh
+  - examples/private-noop-execution-runbook-gate.fake.yaml
+  - scripts/validate-private-noop-execution-runbook-gate.sh
   - docs/operations/runtime-version-baseline.md
 operator_inputs:
   private_non_production_guild: required-outside-repo
@@ -81,6 +83,13 @@ readiness_checks:
     packet_ref: examples/private-noop-ingestion-evidence-review-packet.fake.yaml
     harness_ref: docker/openclaw/private-noop-ingestion-review-harness.sh
     validator_ref: scripts/validate-private-noop-ingestion-review-harness.sh
+  - id: private-noop-execution-runbook-gate
+    status: repo-safe-operator-sequence-only
+    required_before_execution: true
+    evidence_allowed_in_repo: validator-output-only
+    blocker: repo-safe no-op execution runbook gate exists, but private no-op execution is not approved or run
+    fixture_ref: examples/private-noop-execution-runbook-gate.fake.yaml
+    validator_ref: scripts/validate-private-noop-execution-runbook-gate.sh
   - id: private-discord-topology
     status: required-outside-repo
     required_before_execution: true
@@ -106,6 +115,7 @@ execution_gate:
     no-op-observation-path: available-and-proven
     server-side-proposal-binding: available-and-proven
     no-op-ingestion-review-harness: private-pass-summary-reviewed
+    private-noop-execution-runbook-gate: private-noop-execution-approved-and-run
     private-discord-topology: prepared-outside-repo
     explicit-human-approval: granted
     private-backup-restore-ready: repo-contract-ready
@@ -114,12 +124,14 @@ execution_gate:
     - no-op observation path is repo-safe-synthetic-proof-only, not live/private available-and-proven
     - server-side proposal binding is repo-safe-synthetic-proof-only, not live/private available-and-proven
     - no-op ingestion review harness is repo-safe-synthetic-review-only, not private-pass-summary-reviewed
+    - private no-op execution runbook gate is repo-safe-operator-sequence-only, not private-noop-execution-approved-and-run
     - explicit execution approval is not granted
     - private topology and credentials are not represented in repo-safe evidence
-    - private redacted event ingestion, no-op ingestion review, and server-side proposal binding are not proven
+    - private redacted event ingestion, no-op runbook execution, no-op ingestion review, and server-side proposal binding are not proven
   permitted_next_actions:
     - prepare private topology outside repo with sanitized placeholders only
     - prove private redacted no-op event ingestion before write-like traffic
+    - follow the private no-op execution runbook gate outside repo after explicit approval
     - review private no-op ingestion sanitized summary with the repo-safe harness contract
     - prove server-side proposal binding before writes
 sanitized_evidence_policy:
