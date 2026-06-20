@@ -413,6 +413,18 @@ Example local harness call:
 sh docker/openclaw/private-noop-ingestion-review-harness.sh --scenario not-run
 ```
 
+## Private no-op execution runbook gate
+
+Use `examples/private-noop-execution-runbook-gate.fake.yaml` and `scripts/validate-private-noop-execution-runbook-gate.sh` to review the repo-safe runbook gate for #274.
+
+This is **repo-safe operator sequence only**. It defines the future private no-op-only sequence, prerequisite gates, fail-closed matrix, and sanitized evidence policy. It does not prove private no-op execution occurred, does not grant private no-op execution approval, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Validate the runbook gate with:
+
+```bash
+bash scripts/validate-private-noop-execution-runbook-gate.sh
+```
+
 ## Private write/readback preflight gate
 
 Use `examples/private-write-readback-preflight-gate.fake.yaml` and `scripts/validate-private-write-readback-preflight-gate.sh` for the first repo-safe #252 slice before any private write/readback execution is even proposed.
