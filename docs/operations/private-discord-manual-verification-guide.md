@@ -401,6 +401,18 @@ bash scripts/validate-discord-runtime-boundary-harness.sh
 docker compose run --rm --no-deps openclaw discord-project-manager-runtime-boundary-harness
 ```
 
+## Private Discord no-op rehearsal plan
+
+Use `docs/operations/private-discord-noop-rehearsal-plan.md`, `examples/private-discord-noop-rehearsal-evidence.fake.yaml`, and `scripts/validate-private-discord-noop-rehearsal-plan.sh` to prepare a future private/redacted no-op observation rehearsal.
+
+This preparation **does not grant execution approval**. It does not send a live Discord message, observe a private event, write/read back Engram data, update readiness to `available-and-proven`, or close #211. It only defines the gates, stop rules, and summary-minimum evidence shape for a later separately approved no-op rehearsal.
+
+Validate it with:
+
+```bash
+bash scripts/validate-private-discord-noop-rehearsal-plan.sh
+```
+
 ## Sanitized evidence checklist
 
 - [ ] Use placeholders such as `<guild-id>` and `<channel-id>`.
