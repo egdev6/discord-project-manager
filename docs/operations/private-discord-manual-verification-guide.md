@@ -358,6 +358,18 @@ Run the topology packet validator with:
 bash scripts/validate-private-topology-readiness-packet.sh
 ```
 
+## Private redacted no-op ingestion packet
+
+Use `examples/private-redacted-noop-ingestion-packet.fake.yaml` and `scripts/validate-private-redacted-noop-ingestion-packet.sh` to review the repo-safe schema packet for #264.
+
+This is a **repo-safe schema packet**. It defines the placeholder event envelope, no-op boundary expectations, private-run evidence schema, and fail-closed checklist for a future private redacted no-op ingestion run. It does not prove private redacted event ingestion, does not include raw Discord payloads, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Run the ingestion packet validator with:
+
+```bash
+bash scripts/validate-private-redacted-noop-ingestion-packet.sh
+```
+
 ## Private write/readback preflight gate
 
 Use `examples/private-write-readback-preflight-gate.fake.yaml` and `scripts/validate-private-write-readback-preflight-gate.sh` for the first repo-safe #252 slice before any private write/readback execution is even proposed.
