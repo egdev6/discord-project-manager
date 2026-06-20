@@ -87,6 +87,7 @@ assert_field_equals "$matched_no_approval_output" "write_like" "true" "matched n
 assert_field_equals "$matched_no_approval_output" "response_state" "approval-requested" "matched no approval scenario"
 assert_field_equals "$matched_no_approval_output" "persistent_writes_allowed" "false" "matched no approval scenario"
 assert_field_equals "$matched_no_approval_output" "workspace_file_writes_allowed" "false" "matched no approval scenario"
+assert_field_equals "$matched_no_approval_output" "memory_writes_allowed" "false" "matched no approval scenario"
 assert_field_equals "$matched_no_approval_output" "engram_writes_allowed" "false" "matched no approval scenario"
 assert_field_equals "$matched_no_approval_output" "writes_attempted" "false" "matched no approval scenario"
 assert_field_equals "$matched_no_approval_output" "prompt_execution" "none" "matched no approval scenario"
@@ -125,6 +126,7 @@ assert_field_equals "$unmapped_output" "response_state" "needs-route" "unmapped 
 assert_field_equals "$unmapped_output" "durable_reads_allowed" "false" "unmapped scenario"
 assert_field_equals "$unmapped_output" "persistent_writes_allowed" "false" "unmapped scenario"
 assert_field_equals "$unmapped_output" "workspace_file_writes_allowed" "false" "unmapped scenario"
+assert_field_equals "$unmapped_output" "memory_writes_allowed" "false" "unmapped scenario"
 assert_field_equals "$unmapped_output" "engram_writes_allowed" "false" "unmapped scenario"
 assert_field_equals "$unmapped_output" "writes_attempted" "false" "unmapped scenario"
 assert_field_equals "$unmapped_output" "prompt_execution" "none" "unmapped scenario"
@@ -152,6 +154,7 @@ runtime_boundary_harness_result:
   noop_network_calls_attempted: false
   noop_filesystem_writes_attempted: false
   noop_workspace_file_writes_allowed: false
+  noop_memory_writes_allowed: false
   noop_engram_writes_allowed: false
   noop_publishing_attempted: false
   noop_scheduling_attempted: false

@@ -69,6 +69,7 @@ assert_contains "$normal_output" "unmapped_durable_reads_allowed: false"
 assert_contains "$normal_output" "noop_network_calls_attempted: false"
 assert_contains "$normal_output" "noop_filesystem_writes_attempted: false"
 assert_contains "$normal_output" "noop_workspace_file_writes_allowed: false"
+assert_contains "$normal_output" "noop_memory_writes_allowed: false"
 assert_contains "$normal_output" "noop_engram_writes_allowed: false"
 assert_contains "$normal_output" "noop_publishing_attempted: false"
 assert_contains "$normal_output" "noop_scheduling_attempted: false"
@@ -119,6 +120,7 @@ noop_observation_result:
   response_state: $state
   persistent_writes_allowed: false
   workspace_file_writes_allowed: false
+  memory_writes_allowed: false
   engram_writes_allowed: false
   durable_reads_allowed: $durable_reads
   writes_attempted: false
@@ -190,6 +192,7 @@ noop_observation_result:
   response_state: $state
   persistent_writes_allowed: false
   workspace_file_writes_allowed: false
+  memory_writes_allowed: false
   engram_writes_allowed: false
   durable_reads_allowed: $durable_reads
   writes_attempted: false
