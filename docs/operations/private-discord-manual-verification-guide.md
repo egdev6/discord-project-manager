@@ -382,6 +382,18 @@ Run the approval packet validator with:
 bash scripts/validate-private-execution-approval-packet.sh
 ```
 
+## Private no-op ingestion evidence review packet
+
+Use `examples/private-noop-ingestion-evidence-review-packet.fake.yaml` and `scripts/validate-private-noop-ingestion-evidence-review-packet.sh` to review the repo-safe review packet for #268.
+
+This is a **repo-safe review packet**. It defines the sanitized fields, review matrix, operator-attestation requirement, and fail-closed stop rules for a future private redacted no-op ingestion evidence review. It does not prove private no-op ingestion occurred, does not grant private execution approval, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Run the evidence review packet validator with:
+
+```bash
+bash scripts/validate-private-noop-ingestion-evidence-review-packet.sh
+```
+
 ## Private write/readback preflight gate
 
 Use `examples/private-write-readback-preflight-gate.fake.yaml` and `scripts/validate-private-write-readback-preflight-gate.sh` for the first repo-safe #252 slice before any private write/readback execution is even proposed.
