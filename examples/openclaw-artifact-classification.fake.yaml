@@ -1,0 +1,121 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: openclaw-artifact-classification
+live_discord_connection: false
+live_engram_calls: false
+live_prompt_execution: false
+uses_real_discord_ids: false
+private_profile_content_included: false
+secrets_included: false
+workspace_file_writes_allowed: false
+publishing_enabled: false
+scheduling_enabled: false
+buffer_activity_enabled: false
+scenarios:
+  - name: private-profile-create
+    request_shape: remember a fake LinkedIn writing style
+    classification:
+      artifact_type: private_context
+      subtype: profile
+      operation: create
+      persistence_target: private-runtime
+      approval_required: true
+      backup_required: true
+      deployment_required: false
+      runner_backend: openclaw-skill-surface
+      writeback_policy: confirmation-required
+    safety:
+      private_content_fixture: sanitized-placeholder-only
+      approval_gate_required: true
+      durable_write_before_approval: false
+  - name: runtime-capability-filesystem
+    request_shape: enable fake local filesystem drafts capability
+    classification:
+      artifact_type: runtime_capability
+      subtype: capability_config
+      operation: update
+      persistence_target: private-runtime
+      approval_required: true
+      backup_required: true
+      deployment_required: true
+      runner_backend: openclaw-skill-surface
+      writeback_policy: confirmation-required
+    safety:
+      private_config_fixture: sanitized-path-placeholder-only
+      approval_gate_required: true
+      durable_write_before_approval: false
+  - name: publication-flow-buffer
+    request_shape: create a fake Buffer publication flow
+    classification:
+      artifact_type: publication_flow
+      subtype: connector_flow
+      operation: create
+      persistence_target: external-service
+      approval_required: true
+      backup_required: true
+      deployment_required: true
+      runner_backend: openclaw-skill-surface
+      writeback_policy: confirmation-required
+    safety:
+      connector_credentials: private-placeholder-only
+      retry_policy_required: true
+      idempotency_required: true
+      reconciliation_required: true
+      durable_write_before_approval: false
+  - name: workflow-skill-contract-proposal
+    request_shape: propose a fake repo-backed OpenClaw workflow skill contract
+    classification:
+      artifact_type: workflow_skill
+      subtype: skill_contract
+      operation: draft
+      persistence_target: repo
+      approval_required: true
+      backup_required: false
+      deployment_required: true
+      runner_backend: gentle-sdd
+      writeback_policy: draft
+    safety:
+      repo_review_required: true
+      repo_write_before_claim: false
+      private_content_fixture: sanitized-placeholder-only
+  - name: sdd-workflow-skill-handoff
+    request_shape: build a fake OpenClaw workflow skill through Gentle SDD
+    classification:
+      artifact_type: sdd_dev_work
+      subtype: workflow_skill
+      operation: handoff
+      persistence_target: repo
+      approval_required: true
+      backup_required: false
+      deployment_required: true
+      runner_backend: gentle-sdd
+      writeback_policy: draft
+    safety:
+      gentle_is_backend_only: true
+      repo_write_before_claim: false
+  - name: ephemeral-draft
+    request_shape: draft fake post ideas
+    classification:
+      artifact_type: ephemeral_draft
+      subtype: none
+      operation: draft
+      persistence_target: ephemeral
+      approval_required: false
+      backup_required: false
+      deployment_required: false
+      runner_backend: openclaw-skill-surface
+      writeback_policy: draft
+    safety:
+      durable_write_allowed: false
+non_goals:
+  - live Discord validation
+  - live Engram calls
+  - live prompt execution
+  - real private profile content
+  - real filesystem paths
+  - production credentials
+  - publishing
+  - scheduling
+  - Buffer activity

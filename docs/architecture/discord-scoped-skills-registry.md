@@ -1,6 +1,6 @@
 # Discord scoped skills registry
 
-This contract defines a fake-first scoped skills registry for Discord control channels. It makes global, category, and channel skill selection reviewable before any durable registry write happens.
+This contract defines a fake-first scoped skills registry for Discord control channels. It makes global, category, and channel skill selection reviewable before any durable registry write happens. The effective runtime resolver in `docs/architecture/discord-effective-runtime-resolver.md` consumes this registry together with context and capability policy.
 
 This is a contract only. It does not prove live Discord routing, runtime enforcement, real Engram writes, public Discord validation, Buffer activity, publishing, or scheduling.
 
@@ -94,6 +94,16 @@ This issue defines the registry/control-channel contract only. Follow-up workflo
 - #63 `feat(flow): define strategy planning workflow`
 - #64 `feat(flow): define LinkedIn weekly planning workflow`
 - #65 `feat(flow): define on-demand brief workflow`
+
+## Effective resolver handoff
+
+The scoped registry is an input, not the whole runtime decision. Before workflow execution, `skills/scoped-skill-resolver/SKILL.md` should emit one effective runtime envelope:
+
+- `effective_context` for public context refs, private profile refs, bindings, overrides, and exclusions;
+- `effective_skills` for included/excluded runtime-core, scoped-workflow, and preserved-protocol skills;
+- `effective_capabilities` for available/permitted/blocked capabilities and private config state.
+
+Each included or excluded item must include provenance and reason. Capability availability must stay separate from scoped permission/configuration.
 
 ## Validation checklist
 
