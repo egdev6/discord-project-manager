@@ -33,7 +33,7 @@ for required in \
   "bash scripts/validate-discord-runtime-boundary-harness.sh" \
   "bash scripts/validate-private-discord-engram-rehearsal-readiness.sh" \
   "bash scripts/validate-repo-safe-evidence.sh" \
-  'Current result: `not-run`' \
+  "Current result: \`not-run\`" \
   "#211 remains blocked"; do
   grep -F "$required" "$PLAN_PATH" >/dev/null || fail "plan missing marker: $required"
 done
