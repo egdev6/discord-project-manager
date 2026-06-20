@@ -57,10 +57,31 @@ if [[ "${GITHUB_EVENT_NAME:-}" != "pull_request" && "$FORCE" != "1" ]]; then
   exit 0
 fi
 
+if [[ -n "${GITHUB_BASE_REF:-}" ]]; then
+  if [[ -f .git/shallow ]]; then
+    git fetch --no-tags --unshallow origin "${GITHUB_BASE_REF}:refs/remotes/origin/${GITHUB_BASE_REF}" >/dev/null 2>&1 ||
+      git fetch --no-tags --deepen=200 origin "${GITHUB_BASE_REF}:refs/remotes/origin/${GITHUB_BASE_REF}" >/dev/null 2>&1 || true
+  else
+    git fetch --no-tags origin "${GITHUB_BASE_REF}:refs/remotes/origin/${GITHUB_BASE_REF}" >/dev/null 2>&1 || true
+  fi
+fi
+
+if ! git rev-parse --verify "$BASE_REF^{commit}" >/dev/null 2>&1; then
+  if [[ -n "${GITHUB_BASE_REF:-}" ]]; then
+    git fetch --no-tags --depth=1 origin "${GITHUB_BASE_REF}:refs/remotes/origin/${GITHUB_BASE_REF}" >/dev/null 2>&1 || true
+  fi
+fi
+
 git rev-parse --verify "$BASE_REF^{commit}" >/dev/null || fail "base ref not found: $BASE_REF"
 git rev-parse --verify "$HEAD_REF^{commit}" >/dev/null || fail "head ref not found: $HEAD_REF"
 
-mapfile -t release_files < <(git diff --name-only "${BASE_REF}...${HEAD_REF}" | grep -E '^docs/releases/v[0-9]+\.[0-9]+\.[0-9]+([-.][A-Za-z0-9._-]+)?\.md$' | LC_ALL=C sort || true)
+if git merge-base "$BASE_REF" "$HEAD_REF" >/dev/null 2>&1; then
+  diff_range="${BASE_REF}...${HEAD_REF}"
+else
+  diff_range="${BASE_REF}..${HEAD_REF}"
+fi
+
+mapfile -t release_files < <(git diff --name-only "$diff_range" | grep -E '^docs/releases/v[0-9]+\.[0-9]+\.[0-9]+([-.][A-Za-z0-9._-]+)?\.md$' | LC_ALL=C sort || true)
 
 if [[ ${#release_files[@]} -eq 0 ]]; then
   fail "release promotion to main must include docs/releases/vX.Y.Z.md"

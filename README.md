@@ -284,7 +284,7 @@ Use the backlog and roadmap artifacts to decide the next approved slice, then va
 </div>
 
 <!-- MARKDOWN LINKS & IMAGES -->
-[version-shield]: https://img.shields.io/badge/version-pre--release-7C3AED?style=for-the-badge
+[version-shield]: https://img.shields.io/badge/version-beta-7C3AED?style=for-the-badge
 [issues-shield]: https://img.shields.io/github/issues/egdev6/discord-project-manager?style=for-the-badge
 [stars-shield]: https://img.shields.io/github/stars/egdev6/discord-project-manager?style=for-the-badge
 [releases-url]: ./docs/project/roadmap-completion.md
