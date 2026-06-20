@@ -25,8 +25,8 @@ for path in "$PLAN_PATH" "$FIXTURE_PATH" "$GUIDE_PATH" "$READINESS_FIXTURE"; do
 done
 
 for required in \
-  "Status: preparation only" \
-  "does not grant execution approval" \
+  "Status: private no-op pass-summary recorded" \
+  "approval was scoped to no-op observation only" \
   "summary-minimum" \
   "bash scripts/validate-discord-approval-guard-cli.sh" \
   "bash scripts/validate-discord-noop-observation-cli.sh" \

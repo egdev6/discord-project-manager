@@ -1,12 +1,12 @@
 # Private Discord no-op rehearsal plan
 
-Status: preparation only. This plan does not grant execution approval and does not prove live Discord gateway delivery.
+Status: private no-op pass-summary recorded. Execution approval was granted only for no-op observation and did not authorize writes, Engram write/readback, or live write-like Discord messages. This plan does not prove live Discord gateway delivery beyond the sanitized no-op observation summary.
 
 ## Purpose
 
-Prepare a summary-minimum evidence path for a future private, non-production, redacted no-op observation rehearsal for #211.
+Record the summary-minimum evidence path used for a private, non-production, redacted no-op observation rehearsal for #211.
 
-The rehearsal may only observe a no-op event after a separate explicit approval. It must not send a write-like live Discord message, write to Engram, execute prompts, mutate workspace files, publish, schedule, mutate GitHub, or expose private payloads.
+The rehearsal approval was scoped to no-op observation only. It did not authorize sending a write-like live Discord message, writing to Engram, executing prompts, mutating workspace files, publishing, scheduling, mutating GitHub, or exposing private payloads.
 
 ## Required gates before execution
 
