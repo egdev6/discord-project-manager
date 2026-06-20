@@ -7,7 +7,10 @@ APPROVAL_DOC="docs/operations/discord-approval-responses.md"
 SLICE_FIXTURE="examples/private-discord-engram-vertical-slice.fake.yaml"
 APPROVAL_FIXTURE="examples/discord-approval-gate.fake.yaml"
 NOOP_FIXTURE="examples/private-discord-engram-noop-observation.fake.yaml"
+NOOP_PROOF_FIXTURE="examples/private-discord-engram-noop-observation-proof.fake.yaml"
 REPAIR_FIXTURE="examples/runtime-approval-enforcement-repair.fake.yaml"
+APPROVAL_PROOF_FIXTURE="examples/runtime-approval-enforcement-proof.fake.yaml"
+PREFLIGHT_GATE_FIXTURE="examples/private-write-readback-preflight-gate.fake.yaml"
 RUNTIME_NAMESPACE_CONTRACT="discord-project-manager/runtime/discord/<guild-id>/<channel-id>"
 
 fail() {
@@ -22,7 +25,7 @@ require_cmd() {
 require_cmd grep
 require_cmd python3
 
-for path in "$FIXTURE_PATH" "$GUIDE_PATH" "$APPROVAL_DOC" "$SLICE_FIXTURE" "$APPROVAL_FIXTURE" "$NOOP_FIXTURE" "$REPAIR_FIXTURE"; do
+for path in "$FIXTURE_PATH" "$GUIDE_PATH" "$APPROVAL_DOC" "$SLICE_FIXTURE" "$APPROVAL_FIXTURE" "$NOOP_FIXTURE" "$NOOP_PROOF_FIXTURE" "$REPAIR_FIXTURE" "$APPROVAL_PROOF_FIXTURE" "$PREFLIGHT_GATE_FIXTURE"; do
   [[ -f "$path" ]] || fail "required path not found: $path"
 done
 
@@ -43,14 +46,16 @@ for required in \
   "readiness_result: blocked" \
   "runtime_namespace_contract: $RUNTIME_NAMESPACE_CONTRACT" \
   "id: runtime-approval-enforcement" \
-  "status: design-only-not-implemented" \
+  "status: repo-safe-synthetic-proof-only" \
+  "proof_ref: examples/runtime-approval-enforcement-proof.fake.yaml" \
   "id: no-op-observation-path" \
-  "status: design-only-not-proven" \
+  "proof_ref: examples/private-discord-engram-noop-observation-proof.fake.yaml" \
   "id: explicit-human-approval" \
   "status: not-granted" \
   "allowed_now: false" \
-  "implement and prove read-only no-op observation path" \
-  "implement and prove runtime approval enforcement before live traffic"; do
+  "private redacted event ingestion and server-side proposal binding are not proven" \
+  "prove private redacted no-op event ingestion before write-like traffic" \
+  "prove server-side proposal binding before writes"; do
   grep -F "$required" "$FIXTURE_PATH" >/dev/null || fail "readiness fixture missing marker: $required"
 done
 
@@ -68,9 +73,29 @@ import sys
 from pathlib import Path
 import yaml
 
+class UniqueKeyLoader(yaml.SafeLoader):
+    pass
+
+def construct_mapping(loader, node, deep=False):
+    mapping = {}
+    for key_node, value_node in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        if key in mapping:
+            raise SystemExit(f"duplicate YAML key rejected: {key}")
+        mapping[key] = loader.construct_object(value_node, deep=deep)
+    return mapping
+
+UniqueKeyLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+    construct_mapping,
+)
+
 fixture = Path(sys.argv[1])
 runtime = sys.argv[2]
-data = yaml.safe_load(fixture.read_text())
+data = yaml.load(fixture.read_text(), Loader=UniqueKeyLoader)
+
+def load_yaml(path):
+    return yaml.load(Path(path).read_text(), Loader=UniqueKeyLoader)
 
 false_flags = [
     "live_discord_connection",
@@ -99,11 +124,28 @@ required_contracts = {
     "examples/private-discord-engram-vertical-slice.fake.yaml",
     "examples/discord-approval-gate.fake.yaml",
     "examples/private-discord-engram-noop-observation.fake.yaml",
+    "examples/private-discord-engram-noop-observation-proof.fake.yaml",
     "examples/runtime-approval-enforcement-repair.fake.yaml",
+    "examples/runtime-approval-enforcement-proof.fake.yaml",
+    "examples/private-write-readback-preflight-gate.fake.yaml",
     "docs/operations/runtime-version-baseline.md",
 }
 if set(data.get("source_contracts", [])) != required_contracts:
     raise SystemExit("source contracts drifted")
+
+approval_proof = load_yaml("examples/runtime-approval-enforcement-proof.fake.yaml")
+noop_proof = load_yaml("examples/private-discord-engram-noop-observation-proof.fake.yaml")
+for proof_name, proof in [
+    ("runtime approval enforcement proof", approval_proof),
+    ("no-op observation proof", noop_proof),
+]:
+    fail_closed = proof.get("fail_closed_expectations", {})
+    if fail_closed.get("current_readiness_status") != "repo-safe-synthetic-proof-only":
+        raise SystemExit(f"{proof_name} current readiness must match readiness fixture repo-safe synthetic status")
+    if fail_closed.get("required_future_status") != "available-and-proven":
+        raise SystemExit(f"{proof_name} must still require future live/private available-and-proven status")
+    if fail_closed.get("updates_readiness_fixture_now") is not False:
+        raise SystemExit(f"{proof_name} must not update readiness fixture to executable")
 
 inputs = data.get("operator_inputs", {})
 for key in ["private_non_production_guild", "private_non_production_channel", "non_production_credentials"]:
@@ -115,7 +157,12 @@ for key in ["real_identifiers_committed", "credentials_committed"]:
     if inputs.get(key) is not False:
         raise SystemExit(f"operator input hygiene must keep {key}: false")
 
-checks = {item.get("id"): item for item in data.get("readiness_checks", [])}
+readiness_items = data.get("readiness_checks", [])
+readiness_ids = [item.get("id") for item in readiness_items]
+if len(readiness_ids) != len(set(readiness_ids)):
+    duplicates = sorted({item_id for item_id in readiness_ids if readiness_ids.count(item_id) > 1})
+    raise SystemExit(f"duplicate readiness check ids rejected: {duplicates}")
+checks = {item.get("id"): item for item in readiness_items}
 required_checks = {
     "runtime-baseline",
     "approval-gate-lifecycle",
@@ -131,14 +178,18 @@ for check_id, check in checks.items():
     if check.get("required_before_execution") is not True:
         raise SystemExit(f"readiness check must be required: {check_id}")
 
-if checks["runtime-approval-enforcement"].get("status") != "design-only-not-implemented":
-    raise SystemExit("runtime approval enforcement must remain design-only-not-implemented until implemented and proven")
+if checks["runtime-approval-enforcement"].get("status") != "repo-safe-synthetic-proof-only":
+    raise SystemExit("runtime approval enforcement must remain repo-safe-synthetic-proof-only until live/private proof exists")
 if checks["runtime-approval-enforcement"].get("contract_ref") != "examples/runtime-approval-enforcement-repair.fake.yaml":
     raise SystemExit("runtime approval enforcement must reference repair contract")
-if checks["no-op-observation-path"].get("status") != "design-only-not-proven":
-    raise SystemExit("no-op observation path must remain design-only-not-proven until implemented and proven")
+if checks["runtime-approval-enforcement"].get("proof_ref") != "examples/runtime-approval-enforcement-proof.fake.yaml":
+    raise SystemExit("runtime approval enforcement must reference synthetic proof")
+if checks["no-op-observation-path"].get("status") != "repo-safe-synthetic-proof-only":
+    raise SystemExit("no-op observation path must remain repo-safe-synthetic-proof-only until live/private proof exists")
 if checks["no-op-observation-path"].get("contract_ref") != "examples/private-discord-engram-noop-observation.fake.yaml":
     raise SystemExit("no-op observation path must reference no-op design contract")
+if checks["no-op-observation-path"].get("proof_ref") != "examples/private-discord-engram-noop-observation-proof.fake.yaml":
+    raise SystemExit("no-op observation path must reference synthetic proof")
 if checks["explicit-human-approval"].get("status") != "not-granted":
     raise SystemExit("explicit human approval must remain not-granted")
 if checks["private-discord-topology"].get("status") != "required-outside-repo":
@@ -161,14 +212,19 @@ if required_state != expected_required_state:
     raise SystemExit("required execution gate state drifted")
 stop_reasons = set(execution.get("stop_reasons", []))
 for required in [
-    "runtime approval enforcement repair is design-only-not-implemented",
-    "no-op observation path is design-only-not-proven",
+    "runtime approval enforcement is repo-safe-synthetic-proof-only, not live/private available-and-proven",
+    "no-op observation path is repo-safe-synthetic-proof-only, not live/private available-and-proven",
     "explicit execution approval is not granted",
     "private topology and credentials are not represented in repo-safe evidence",
+    "private redacted event ingestion and server-side proposal binding are not proven",
 ]:
     if required not in stop_reasons:
         raise SystemExit(f"missing stop reason: {required}")
-if execution.get("permitted_next_actions") != ["implement and prove read-only no-op observation path", "implement and prove runtime approval enforcement before live traffic"]:
+if execution.get("permitted_next_actions") != [
+    "prepare private topology outside repo with sanitized placeholders only",
+    "prove private redacted no-op event ingestion before write-like traffic",
+    "prove server-side proposal binding before writes",
+]:
     raise SystemExit("permitted next actions drifted")
 
 policy = data.get("sanitized_evidence_policy", {})
@@ -184,7 +240,7 @@ bash scripts/validate-runtime-version-baseline.sh >/dev/null
 bash scripts/validate-discord-approval-gate.sh >/dev/null
 bash scripts/validate-private-runtime-backup-restore.sh >/dev/null
 
-review_paths=("$FIXTURE_PATH" "$GUIDE_PATH" "$APPROVAL_DOC" "$SLICE_FIXTURE" "$APPROVAL_FIXTURE" "$NOOP_FIXTURE" "$REPAIR_FIXTURE")
+review_paths=("$FIXTURE_PATH" "$GUIDE_PATH" "$APPROVAL_DOC" "$SLICE_FIXTURE" "$APPROVAL_FIXTURE" "$NOOP_FIXTURE" "$NOOP_PROOF_FIXTURE" "$REPAIR_FIXTURE" "$APPROVAL_PROOF_FIXTURE" "$PREFLIGHT_GATE_FIXTURE")
 
 if grep -E '\b[0-9]{17,20}\b' "${review_paths[@]}" >/dev/null; then
   fail "private rehearsal readiness artifacts must not expose raw Discord snowflake-like IDs"

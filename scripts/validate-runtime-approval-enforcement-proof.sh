@@ -52,7 +52,7 @@ for required in \
   "id: matched-write-exact-approval" \
   "id: unmapped-write-like-route" \
   "repo_safe_synthetic_status: synthetic-guard-cli-proven" \
-  "current_readiness_status: design-only-not-implemented" \
+  "current_readiness_status: repo-safe-synthetic-proof-only" \
   "required_future_status: available-and-proven" \
   "updates_readiness_fixture_now: false"; do
   grep -F "$required" "$FIXTURE_PATH" >/dev/null || fail "approval enforcement proof fixture missing marker: $required"
@@ -154,7 +154,12 @@ expected = {
     "matched-write-exact-approval": ("approval-verification-required", "guard-approval-verification-required", True, True, True),
     "unmapped-write-like-route": ("needs-route", "guard-needs-route", False, False, False),
 }
-probes = {item.get("id"): item for item in data.get("synthetic_probe_matrix", [])}
+probe_items = data.get("synthetic_probe_matrix", [])
+probe_ids = [item.get("id") for item in probe_items]
+if len(probe_ids) != len(set(probe_ids)):
+    duplicates = sorted({item_id for item_id in probe_ids if probe_ids.count(item_id) > 1})
+    raise SystemExit(f"duplicate synthetic probe ids rejected: {duplicates}")
+probes = {item.get("id"): item for item in probe_items}
 if set(probes) != set(expected):
     raise SystemExit("synthetic probe matrix coverage drifted")
 for probe_id, (state, event, exact, durable_reads, audit_required) in expected.items():
@@ -193,8 +198,8 @@ for required in [
         raise SystemExit(f"missing required before private execution: {required}")
 if fail_closed.get("readiness_check_id") != "runtime-approval-enforcement":
     raise SystemExit("readiness check id mismatch")
-if fail_closed.get("current_readiness_status") != "design-only-not-implemented":
-    raise SystemExit("current readiness must remain design-only-not-implemented")
+if fail_closed.get("current_readiness_status") != "repo-safe-synthetic-proof-only":
+    raise SystemExit("current readiness must remain repo-safe-synthetic-proof-only")
 if fail_closed.get("repo_safe_synthetic_status") != "synthetic-guard-cli-proven":
     raise SystemExit("repo-safe synthetic status mismatch")
 if fail_closed.get("required_future_status") != "available-and-proven":
