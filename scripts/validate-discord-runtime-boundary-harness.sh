@@ -44,7 +44,7 @@ grep -F "discord-project-manager-runtime-boundary-harness" "$RUNTIME_DOC_PATH" >
 grep -F "issue_211_status: blocked" "$HARNESS_PATH" >/dev/null || fail "harness must report issue 211 blocked"
 
 run_harness() {
-  sh "$HARNESS_PATH" "$@"
+  sh "$HARNESS_PATH"
 }
 
 assert_contains() {
