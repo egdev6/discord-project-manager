@@ -1,0 +1,95 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: private-discord-noop-rehearsal-evidence
+issue: 233
+parent_issue: 211
+execution_approval_granted: false
+rehearsal_executed: false
+live_discord_message_sent: false
+live_discord_event_observed: false
+live_engram_write_readback_attempted: false
+live_openclaw_prompt_execution: false
+runtime_enforcement_proven: false
+readiness_available_and_proven: false
+uses_real_discord_ids: false
+raw_discord_chat_logs_included: false
+raw_private_payload_included: false
+screenshots_included: false
+secrets_included: false
+raw_engram_exports_included: false
+sql_dumps_included: false
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+source_contracts:
+  - docs/operations/private-discord-noop-rehearsal-plan.md
+  - docs/operations/private-discord-manual-verification-guide.md
+  - examples/private-discord-engram-rehearsal-readiness.fake.yaml
+  - examples/private-discord-engram-noop-observation.fake.yaml
+  - scripts/validate-discord-runtime-boundary-harness.sh
+pre_execution_gates:
+  - id: approval-guard-cli
+    command_ref: bash scripts/validate-discord-approval-guard-cli.sh
+    required_before_execution: true
+    current_status: repo-contract-ready
+  - id: noop-observation-cli
+    command_ref: bash scripts/validate-discord-noop-observation-cli.sh
+    required_before_execution: true
+    current_status: repo-contract-ready
+  - id: runtime-boundary-harness
+    command_ref: bash scripts/validate-discord-runtime-boundary-harness.sh
+    required_before_execution: true
+    current_status: container-boundary-synthetic-ready
+  - id: rehearsal-readiness
+    command_ref: bash scripts/validate-private-discord-engram-rehearsal-readiness.sh
+    required_before_execution: true
+    current_status: blocked-until-explicit-approval
+  - id: repo-safe-evidence
+    command_ref: bash scripts/validate-repo-safe-evidence.sh
+    required_before_execution: true
+    current_status: required-pass-before-public-evidence
+  - id: explicit-noop-execution-approval
+    required_before_execution: true
+    current_status: not-granted
+planned_evidence_policy:
+  allowed:
+    - pass status summary
+    - blocked status summary
+    - not-run status summary
+    - placeholder namespace refs
+    - validator command names and pass/fail summaries
+    - sanitized no-op state table
+    - explicit operator decision summary without identifiers
+  forbidden:
+    - real Discord guild/channel/user/role/message IDs
+    - credentials or .env values
+    - screenshots
+    - raw logs
+    - transcripts
+    - private payloads
+    - raw Engram exports
+    - SQL dumps
+    - backup archives
+planned_no_op_boundaries:
+  prompt_execution_allowed: false
+  network_side_effects_allowed: false
+  workspace_file_writes_allowed: false
+  filesystem_writes_allowed: false
+  durable_memory_writes_allowed: false
+  engram_writes_allowed: false
+  publishing_allowed: false
+  scheduling_allowed: false
+  github_mutations_allowed: false
+current_summary:
+  result_state: not-run
+  reason: preparation only; explicit execution approval has not been granted
+  live_discord_message: not-sent
+  private_event_observation: not-run
+  engram_write_readback: not-run
+  issue_211_status: blocked
+non_goals:
+  - executing live Discord messages
+  - proving live Engram write/readback
+  - storing private topology in git
+  - claiming production readiness
+  - closing issue 211
