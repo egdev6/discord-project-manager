@@ -5,8 +5,8 @@ services:
       context: .
       dockerfile: docker/openclaw/Dockerfile
       args:
-        OPENCLAW_BASE_IMAGE: ${OPENCLAW_BASE_IMAGE:-ghcr.io/openclaw/openclaw:latest}
-        ENGRAM_IMAGE: ${ENGRAM_IMAGE:-ghcr.io/gentleman-programming/engram:latest}
+        OPENCLAW_BASE_IMAGE: ${OPENCLAW_BASE_IMAGE:-ghcr.io/openclaw/openclaw@sha256:9f55f0cb32b2925a983f40726440189b8f422ec61ae2a0fb0cf90403cf6d63d7}
+        ENGRAM_IMAGE: ${ENGRAM_IMAGE:-ghcr.io/gentleman-programming/engram@sha256:f9b0d7c24f48076a4c836a1099b8351215bf902dcba7ae02222f2c431f2def38}
     profiles: ["setup"]
     env_file:
       - path: .env
@@ -31,8 +31,8 @@ services:
       context: .
       dockerfile: docker/openclaw/Dockerfile
       args:
-        OPENCLAW_BASE_IMAGE: ${OPENCLAW_BASE_IMAGE:-ghcr.io/openclaw/openclaw:latest}
-        ENGRAM_IMAGE: ${ENGRAM_IMAGE:-ghcr.io/gentleman-programming/engram:latest}
+        OPENCLAW_BASE_IMAGE: ${OPENCLAW_BASE_IMAGE:-ghcr.io/openclaw/openclaw@sha256:9f55f0cb32b2925a983f40726440189b8f422ec61ae2a0fb0cf90403cf6d63d7}
+        ENGRAM_IMAGE: ${ENGRAM_IMAGE:-ghcr.io/gentleman-programming/engram@sha256:f9b0d7c24f48076a4c836a1099b8351215bf902dcba7ae02222f2c431f2def38}
     restart: unless-stopped
     env_file:
       - path: .env
@@ -60,7 +60,7 @@ services:
         condition: service_started
 
   postgres:
-    image: postgres:16-alpine
+    image: ${POSTGRES_IMAGE:-postgres@sha256:e013e867e712fec275706a6c51c966f0bb0c93cfa8f51000f85a15f9865a28cb}
     restart: unless-stopped
     env_file:
       - path: .env
@@ -78,7 +78,7 @@ services:
       - engram-postgres:/var/lib/postgresql/data
 
   engram:
-    image: ${ENGRAM_IMAGE:-ghcr.io/gentleman-programming/engram:latest}
+    image: ${ENGRAM_IMAGE:-ghcr.io/gentleman-programming/engram@sha256:f9b0d7c24f48076a4c836a1099b8351215bf902dcba7ae02222f2c431f2def38}
     restart: unless-stopped
     env_file:
       - path: .env

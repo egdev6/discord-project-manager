@@ -5,9 +5,9 @@ This runbook covers the M1 portable runtime foundation. It is suitable for local
 ## Prerequisites
 
 - Docker Desktop or Docker Engine with Docker Compose.
-- Access to the public images:
-  - `ghcr.io/openclaw/openclaw:latest` as the OpenClaw base image
-  - `ghcr.io/gentleman-programming/engram:latest`
+- Access to the public images listed in `docs/operations/runtime-version-baseline.md`:
+  - OpenClaw base image pinned by digest
+  - Engram image pinned by digest
   - `postgres:16-alpine`
 
 Compose builds a small local image, `discord-project-manager-openclaw:local`, from `docker/openclaw/Dockerfile`. That image bakes the repo's tracked `skills/` and `openclaw/config/` seed files on top of the official OpenClaw image.
@@ -20,6 +20,16 @@ On this WSL machine, Docker Desktop was reachable through the Windows binary:
 ```
 
 Use plain `docker` if your shell has Docker integration enabled. If Docker is installed but the socket is not accessible, use `sudo docker ...` for the pilot or fix local Docker group permissions outside the repo.
+
+## Runtime version baseline
+
+The default Compose/Dockerfile image values are pinned for repeatable v0.2.0 validation. See `docs/operations/runtime-version-baseline.md` for the validated OpenClaw, Engram, Gentle-AI, and Postgres versions plus the override policy.
+
+Validate the static baseline with:
+
+```bash
+bash scripts/validate-runtime-version-baseline.sh
+```
 
 ## First-time setup
 
@@ -131,6 +141,23 @@ docker compose exec openclaw discord-project-manager-managed-registry simulate-e
 
 Each simulation must return sanitized output with `write_executed:false`.
 
+## Runtime boundary harness
+
+The local OpenClaw image also packages a synthetic container-side runtime boundary harness:
+
+```bash
+docker compose run --rm --no-deps openclaw discord-project-manager-runtime-boundary-harness
+```
+
+This command is repo-safe container boundary evidence only. It composes `discord-project-manager-approval-guard` and `discord-project-manager-noop-observation` for synthetic inputs, and it does **not** prove live Discord gateway delivery, private event ingestion, or `available-and-proven` readiness.
+
+Validate the repo and container harness surfaces with:
+
+```bash
+bash scripts/validate-discord-runtime-boundary-harness.sh
+docker compose run --rm --no-deps openclaw discord-project-manager-runtime-boundary-harness
+```
+
 ## Stop
 
 ```bash
@@ -196,6 +223,7 @@ The Engram MCP server configured by Gentle-AI is a stdio process (`engram mcp --
 Validate the packaging contract without Docker credentials:
 
 ```bash
+bash scripts/validate-runtime-version-baseline.sh
 bash scripts/validate-openclaw-gentle-ai-runtime.sh
 ```
 

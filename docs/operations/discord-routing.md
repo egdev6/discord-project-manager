@@ -112,7 +112,7 @@ For this documentation-only routing slice, validate with:
 
 ```bash
 git diff --check
-npx --yes yaml-lint examples/discord-channel-scaffolding-status-repair.fake.yaml examples/discord-managed-channel-routing.fake.yaml examples/discord-project-manager-project-create.fake.yaml examples/discord-project-manager-project-delete.fake.yaml examples/discord-project-manager-global-init.fake.yaml examples/discord-semantic-channel-guides.fake.yaml examples/openclaw-global-channel-guides.fake.yaml examples/discord-channel-context.fake.yaml examples/discord-topology-reconciliation.fake.yaml examples/discord-context-provisioning.fake.yaml examples/discord-approval-gate.fake.yaml examples/discord-runtime-orchestrator.fake.yaml examples/discord-gentle-sdd-handoff.fake.yaml examples/openclaw-global-brand-context-refresh.fake.yaml examples/content-ledger-utility-flow.fake.yaml examples/category-strategy-planning-flow.fake.yaml examples/linkedin-weekly-planning-flow.fake.yaml examples/on-demand-brief-flow.fake.yaml
+npx --yes yaml-lint examples/discord-channel-scaffolding-status-repair.fake.yaml examples/discord-managed-channel-routing.fake.yaml examples/discord-project-manager-project-create.fake.yaml examples/discord-project-manager-project-delete.fake.yaml examples/discord-project-manager-global-init.fake.yaml examples/discord-semantic-channel-guides.fake.yaml examples/openclaw-global-channel-guides.fake.yaml examples/discord-channel-context.fake.yaml examples/discord-topology-reconciliation.fake.yaml examples/discord-context-provisioning.fake.yaml examples/discord-approval-gate.fake.yaml examples/discord-runtime-orchestrator.fake.yaml examples/discord-effective-runtime-resolver.fake.yaml examples/discord-durable-change-audit.fake.yaml examples/private-runtime-backup-restore.fake.yaml examples/discord-gentle-sdd-handoff.fake.yaml examples/openclaw-global-brand-context-refresh.fake.yaml examples/content-ledger-utility-flow.fake.yaml examples/category-strategy-planning-flow.fake.yaml examples/linkedin-weekly-planning-flow.fake.yaml examples/on-demand-brief-flow.fake.yaml
 bash scripts/validate-discord-channel-scaffolding-status-repair.sh
 bash scripts/validate-discord-managed-channel-routing.sh
 bash scripts/validate-discord-project-manager-project-create.sh
@@ -124,6 +124,9 @@ bash scripts/validate-discord-topology-reconciliation.sh
 bash scripts/validate-discord-context-provisioning.sh
 bash scripts/validate-discord-approval-gate.sh
 bash scripts/validate-discord-runtime-orchestrator.sh
+bash scripts/validate-discord-effective-runtime-resolver.sh
+bash scripts/validate-discord-durable-change-audit.sh
+bash scripts/validate-private-runtime-backup-restore.sh
 bash scripts/validate-discord-gentle-sdd-handoff.sh
 bash scripts/validate-openclaw-global-brand-context-refresh.sh
 bash scripts/validate-content-ledger-utility-flow.sh
