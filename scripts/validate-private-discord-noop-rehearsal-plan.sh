@@ -63,7 +63,7 @@ for required in \
   "docs/operations/private-discord-noop-rehearsal-plan.md" \
   "examples/private-discord-noop-rehearsal-evidence.fake.yaml" \
   "scripts/validate-private-discord-noop-rehearsal-plan.sh" \
-  "does not grant execution approval"; do
+  "no-op-only execution approval was granted"; do
   grep -F "$required" "$GUIDE_PATH" >/dev/null || fail "guide missing rehearsal marker: $required"
 done
 
