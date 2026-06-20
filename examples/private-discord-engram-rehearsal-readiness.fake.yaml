@@ -26,6 +26,7 @@ source_contracts:
   - examples/runtime-approval-enforcement-repair.fake.yaml
   - examples/runtime-approval-enforcement-proof.fake.yaml
   - examples/private-write-readback-preflight-gate.fake.yaml
+  - examples/proposal-binding-boundary.fake.yaml
   - docs/operations/runtime-version-baseline.md
 operator_inputs:
   private_non_production_guild: required-outside-repo
@@ -63,6 +64,12 @@ readiness_checks:
     blocker: repo-safe synthetic no-op proof exists, but private redacted event ingestion must be proven before any private Discord write-like request
     contract_ref: examples/private-discord-engram-noop-observation.fake.yaml
     proof_ref: examples/private-discord-engram-noop-observation-proof.fake.yaml
+  - id: server-side-proposal-binding
+    status: repo-safe-synthetic-proof-only
+    required_before_execution: true
+    evidence_allowed_in_repo: sanitized-summary-only
+    blocker: repo-safe synthetic proposal binding proof exists, but live/private server-side proposal binding must be implemented and proven before writes
+    proof_ref: examples/proposal-binding-boundary.fake.yaml
   - id: private-discord-topology
     status: required-outside-repo
     required_before_execution: true
@@ -86,12 +93,14 @@ execution_gate:
     approval-gate-lifecycle: repo-contract-ready
     runtime-approval-enforcement: available-and-proven
     no-op-observation-path: available-and-proven
+    server-side-proposal-binding: available-and-proven
     private-discord-topology: prepared-outside-repo
     explicit-human-approval: granted
     private-backup-restore-ready: repo-contract-ready
   stop_reasons:
     - runtime approval enforcement is repo-safe-synthetic-proof-only, not live/private available-and-proven
     - no-op observation path is repo-safe-synthetic-proof-only, not live/private available-and-proven
+    - server-side proposal binding is repo-safe-synthetic-proof-only, not live/private available-and-proven
     - explicit execution approval is not granted
     - private topology and credentials are not represented in repo-safe evidence
     - private redacted event ingestion and server-side proposal binding are not proven
