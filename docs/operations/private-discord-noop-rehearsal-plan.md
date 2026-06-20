@@ -1,12 +1,12 @@
 # Private Discord no-op rehearsal plan
 
-Status: preparation only. This plan does not grant execution approval and does not prove live Discord gateway delivery.
+Status: private no-op pass-summary recorded. Execution approval was granted only for no-op observation and did not authorize writes, Engram write/readback, or live write-like Discord messages. This plan does not prove live Discord gateway delivery beyond the sanitized no-op observation summary.
 
 ## Purpose
 
-Prepare a summary-minimum evidence path for a future private, non-production, redacted no-op observation rehearsal for #211.
+Record the summary-minimum evidence path used for a private, non-production, redacted no-op observation rehearsal for #211.
 
-The rehearsal may only observe a no-op event after a separate explicit approval. It must not send a write-like live Discord message, write to Engram, execute prompts, mutate workspace files, publish, schedule, mutate GitHub, or expose private payloads.
+The rehearsal approval was scoped to no-op observation only. It did not authorize sending a write-like live Discord message, writing to Engram, executing prompts, mutating workspace files, publishing, scheduling, mutating GitHub, or exposing private payloads.
 
 ## Required gates before execution
 
@@ -65,6 +65,8 @@ Abort before observing any event if:
 
 ## Current result
 
-Current result: `not-run`.
+Current result: `pass-summary`.
 
-No live Discord message was sent. No private event was observed. No Engram write/readback was attempted. #211 remains blocked.
+A private no-op observation rehearsal was completed with summary-minimum evidence only. The observed response was response-only, classified as a read operation with ephemeral persistence, and reported `writes_attempted: false`.
+
+No write-like live Discord message was sent. No Engram write/readback was attempted. No raw Discord IDs, credentials, screenshots, logs, transcripts, private payloads, raw Engram exports, SQL dumps, backup archives, or volume dumps were recorded publicly. #211 remains blocked for the deferred write/readback slice.

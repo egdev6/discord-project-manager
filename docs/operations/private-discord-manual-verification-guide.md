@@ -403,9 +403,9 @@ docker compose run --rm --no-deps openclaw discord-project-manager-runtime-bound
 
 ## Private Discord no-op rehearsal plan
 
-Use `docs/operations/private-discord-noop-rehearsal-plan.md`, `examples/private-discord-noop-rehearsal-evidence.fake.yaml`, and `scripts/validate-private-discord-noop-rehearsal-plan.sh` to prepare a future private/redacted no-op observation rehearsal.
+Use `docs/operations/private-discord-noop-rehearsal-plan.md`, `examples/private-discord-noop-rehearsal-evidence.fake.yaml`, and `scripts/validate-private-discord-noop-rehearsal-plan.sh` to review the private/redacted no-op observation rehearsal summary.
 
-This preparation **does not grant execution approval**. It does not send a live Discord message, observe a private event, write/read back Engram data, update readiness to `available-and-proven`, or close #211. It only defines the gates, stop rules, and summary-minimum evidence shape for a later separately approved no-op rehearsal.
+A no-op-only execution approval was granted and the result is recorded as `pass-summary`. This did not authorize a write-like live Discord message, Engram write/readback, prompt execution, workspace/filesystem writes, publishing, scheduling, GitHub mutations, readiness `available-and-proven`, or closure of #211. It records the gates, stop rules, and summary-minimum evidence shape for the approved no-op observation only.
 
 Validate it with:
 
