@@ -1,0 +1,107 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: private-topology-readiness-packet
+issue: 262
+parent_issue: 211
+live_discord_connection: false
+live_engram_calls: false
+live_openclaw_prompt_execution: false
+live_discord_message_sent: false
+live_engram_write_attempted: false
+live_readback_attempted: false
+uses_real_discord_ids: false
+raw_discord_chat_logs_included: false
+raw_private_payload_included: false
+screenshots_included: false
+secrets_included: false
+private_topology_proof_level: repo-safe-placeholder-readiness
+private_topology_prepared_for_live_execution: false
+readiness_gate_updated: false
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+source_contracts:
+  - examples/private-discord-engram-rehearsal-readiness.fake.yaml
+  - examples/private-write-readback-preflight-gate.fake.yaml
+  - examples/proposal-binding-boundary.fake.yaml
+  - docs/operations/private-discord-manual-verification-guide.md
+placeholder_topology:
+  guild_ref: <guild-id>
+  channel_ref: <channel-id>
+  actor_ref: <operator-ref>
+  message_ref: <message-id>
+  project_ref: project/<project-key>
+  runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+  durable_target_namespace: discord-project-manager/project/<project-key>/private-context
+  readback_target_namespace: discord-project-manager/project/<project-key>/private-context
+  placeholders_only: true
+  raw_values_printed: false
+private_environment_requirements:
+  discord_bot_token: required-outside-repo
+  discord_guild_id: required-outside-repo
+  discord_channel_id: required-outside-repo
+  engram_access_token: required-outside-repo
+  openclaw_gateway_secret: required-outside-repo
+  raw_env_values_allowed_in_repo: false
+  env_file_committed: false
+private_checklist:
+  - id: non-production-guild-selected
+    status: pending-private-run
+    evidence_allowed_in_repo: placeholder-summary-only
+    fail_closed_if_missing: true
+  - id: managed-channel-selected
+    status: pending-private-run
+    evidence_allowed_in_repo: placeholder-summary-only
+    fail_closed_if_missing: true
+  - id: runtime-namespace-previewed
+    status: repo-placeholder-ready
+    evidence_allowed_in_repo: placeholder-summary-only
+    fail_closed_if_missing: true
+  - id: durable-target-namespace-previewed
+    status: repo-placeholder-ready
+    evidence_allowed_in_repo: placeholder-summary-only
+    fail_closed_if_missing: true
+  - id: credentials-present-privately
+    status: pending-private-run
+    evidence_allowed_in_repo: presence-summary-only
+    fail_closed_if_missing: true
+  - id: private-redacted-event-ingestion
+    status: not-proven
+    evidence_allowed_in_repo: sanitized-summary-only
+    fail_closed_if_missing: true
+execution_gate:
+  allowed_now: false
+  readiness_result: blocked
+  stop_reasons:
+    - private topology values are placeholders only in repo
+    - credentials are required outside repo and not printed
+    - private redacted event ingestion is not proven
+    - explicit execution approval is not granted
+    - no private write/readback was executed by this issue
+  next_safe_actions:
+    - verify private topology outside repo without copying raw identifiers into git
+    - run private redacted no-op event ingestion before write-like traffic
+    - "keep #211 open until actual private execution and readback are separately approved executed and reviewed"
+sanitized_evidence_policy:
+  allowed:
+    - placeholder namespace refs
+    - pending-private-run status summaries
+    - blocked status summaries
+    - validator command names and pass/fail summaries
+    - explicit operator decision summary without identifiers
+  forbidden:
+    - real Discord guild/channel/user/message IDs
+    - credentials or .env values
+    - screenshots
+    - raw logs
+    - transcripts
+    - private payloads
+    - raw Engram exports
+    - SQL dumps
+non_goals:
+  - executing live Discord messages
+  - executing an Engram write
+  - executing a live readback from Engram
+  - proving private redacted event ingestion
+  - updating readiness to available-and-proven
+  - closing issue 211

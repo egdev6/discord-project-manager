@@ -346,6 +346,18 @@ Run the readiness validator with:
 bash scripts/validate-private-discord-engram-rehearsal-readiness.sh
 ```
 
+## Private topology readiness packet
+
+Use `examples/private-topology-readiness-packet.fake.yaml` and `scripts/validate-private-topology-readiness-packet.sh` to review the repo-safe placeholder topology packet for #262.
+
+This is **repo-safe placeholder readiness**. It records the placeholder shape of the private guild, channel, actor, message, runtime namespace, durable target namespace, and readback namespace without printing private values. It does not prove private topology is prepared for live execution, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Run the topology packet validator with:
+
+```bash
+bash scripts/validate-private-topology-readiness-packet.sh
+```
+
 ## Private write/readback preflight gate
 
 Use `examples/private-write-readback-preflight-gate.fake.yaml` and `scripts/validate-private-write-readback-preflight-gate.sh` for the first repo-safe #252 slice before any private write/readback execution is even proposed.
