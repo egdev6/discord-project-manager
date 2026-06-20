@@ -274,7 +274,7 @@ Run only the tests that fit the currently approved boundary. If a test would req
 | `DV-13` | Ledger contract | Review ledger candidate shape and allowed states | only `draft`, `queued`, `published`, `archived` appear | sanitized ledger checklist |
 | `DV-14` | LinkedIn planning contract | Review a LinkedIn weekly plan candidate | `planning_basis.missing_context` exists and planning stays review-only | sanitized candidate excerpt |
 | `DV-15` | X/brief contract | Review brief or X planning candidate structure | network-separated planning stays bounded and approval-gated | sanitized candidate excerpt |
-| `DV-16` | Evidence hygiene | Inspect captured notes/screenshots | no real IDs, secrets, transcripts, or raw logs are retained | sanitized evidence checklist |
+| `DV-16` | Evidence hygiene | Inspect captured sanitized notes only | no real IDs, secrets, screenshots, transcripts, or raw logs are retained | sanitized evidence checklist |
 | `DV-17` | Safe shutdown | Stop the local runtime | shutdown is clean and non-destructive | sanitized command output |
 
 ## Pass / fail matrix
@@ -292,12 +292,133 @@ Run only the tests that fit the currently approved boundary. If a test would req
 | Workflow contracts | strategy, ledger, LinkedIn, X, and briefs stay bounded and fake-first | live execution, publishing, or durable writes are implied |
 | Evidence | only sanitized notes are kept | real IDs, secrets, transcripts, or private payloads appear |
 
+## Private Discord-to-Engram vertical slice evidence pack
+
+Issue #211 is the release-defining private Discord-to-Engram gate, but the current repo-safe slice is **template/validator only**. It does not close #211, does not prove live Discord behavior, and does not prove durable Engram write/readback. Use this evidence pack before any private rehearsal so reviewers can inspect the intended boundaries without seeing private data.
+
+Repo-safe artifacts:
+
+- `examples/private-discord-engram-vertical-slice.fake.yaml` defines the sanitized evidence shape.
+- `scripts/validate-private-discord-engram-vertical-slice.sh` validates that the fixture stays fake-first, approval-gated, and aligned with the orchestrator/resolver/audit/backup contracts.
+
+The evidence pack must keep these defaults until a separate private rehearsal is explicitly approved and summarized safely:
+
+- `live_discord_connection: false`
+- `live_engram_calls: false`
+- `live_openclaw_prompt_execution: false`
+- `runtime_enforcement_proven: false`
+- `writes_attempted: false`
+- `repo_evidence_status: template-only`
+
+Run the repo-safe validator with:
+
+```bash
+bash scripts/validate-private-discord-engram-vertical-slice.sh
+bash scripts/validate-repo-safe-evidence.sh
+```
+
+## Private Discord-to-Engram rehearsal readiness gate
+
+Before any private Discord message is sent for #211, check the readiness fixture in `examples/private-discord-engram-rehearsal-readiness.fake.yaml` with `scripts/validate-private-discord-engram-rehearsal-readiness.sh`.
+
+This gate is intentionally blocked today: `execution_allowed: false`. It does not close #211 and does not claim live Discord-to-Engram validation. It records the exact prerequisites that must become true outside repo artifacts before a live/private rehearsal can be considered:
+
+- private topology and credentials prepared outside git;
+- explicit operator approval granted for execution;
+- local runtime baseline checked privately;
+- approval-gate lifecycle contract remains green;
+- runtime approval enforcement repair progresses beyond `design-only-not-implemented` and is proven in the runtime;
+- private backup/restore contract remains green;
+- the read-only no-op observation path progresses beyond `design-only-not-proven` and is proven before write-like Discord traffic.
+
+Run the readiness validator with:
+
+```bash
+bash scripts/validate-private-discord-engram-rehearsal-readiness.sh
+```
+
+## Private Discord-to-Engram no-op observation design
+
+Use `examples/private-discord-engram-noop-observation.fake.yaml` and `scripts/validate-private-discord-engram-noop-observation.sh` to review the shape of a future read-only no-op observation path.
+
+This remains **design-only-not-proven** for live/private Discord readiness. It does not update the readiness gate, does not close #211, and does not prove live Discord gateway delivery. The design describes a synthetic or separately approved redacted event preview that must stop at `approval-requested` without prompt execution, workspace writes, Engram writes, filesystem writes, publishing, scheduling, or network calls.
+
+The Docker runtime also includes `discord-project-manager-noop-observation`, a repo-safe synthetic CLI that calls `discord-project-manager-approval-guard` and proves the local no-op preview behavior for sanitized synthetic envelopes. The canonical status is `repo_safe_synthetic_observation_status: synthetic-noop-cli-proven`; the proof level is `repo-safe-synthetic-runtime-cli`. It does not prove live Discord gateway delivery or private redacted event ingestion.
+
+Run the no-op observation validators with:
+
+```bash
+bash scripts/validate-private-discord-engram-noop-observation.sh
+bash scripts/validate-discord-noop-observation-cli.sh
+```
+
+## Runtime approval enforcement repair contract
+
+Use `examples/runtime-approval-enforcement-repair.fake.yaml` and `scripts/validate-runtime-approval-enforcement-repair.sh` to review the required runtime repair before live Discord traffic.
+
+This is **design-only-not-implemented**. It does not update the readiness gate, does not close #211, and does not prove runtime enforcement. The contract requires a guard before workflow skills, model prompt execution, file tools, memory tools, and workspace persistence. Write-like Discord-originated turns must stop at `approval-requested` until the exact `approve write` phrase is received for the displayed target only.
+
+Run the repair contract validator with:
+
+```bash
+bash scripts/validate-runtime-approval-enforcement-repair.sh
+```
+
+## Deterministic approval guard CLI
+
+The Docker runtime includes `discord-project-manager-approval-guard`, a deterministic no-op guard for synthetic/private validation before any workflow runner, prompt, or persistence surface. It does not prove live Discord runtime integration by itself, and it does not authorize writes from caller-supplied arguments. Exact `approve write` moves the result only to `approval-verification-required`; a future server-side binding check must verify the displayed proposal, route, actor, and target before any write-capable runner may persist.
+
+Expected response states:
+
+- `summary-only` for read-only requests;
+- `needs-route` for unmapped write-like requests;
+- `approval-requested` for write-like requests without exact approval or with invalid approval text;
+- `approval-verification-required` after exact `approve write`, still with `persistent_writes_allowed: false` until server-side proposal binding is proven.
+
+Key fields to inspect: `response_state`, `persistent_writes_allowed`, `writes_attempted`, `prompt_execution`, `guard_event_type`, `runtime_namespace`, and `target_namespace`.
+
+Validate it with:
+
+```bash
+bash scripts/validate-discord-approval-guard-cli.sh
+```
+
+## Runtime boundary harness
+
+The Docker runtime also includes `discord-project-manager-runtime-boundary-harness`, a repo-safe synthetic container probe that composes `discord-project-manager-approval-guard` and `discord-project-manager-noop-observation` inside the packaged OpenClaw image.
+
+This is **container boundary evidence only**. It does not prove live Discord gateway delivery, private redacted event ingestion, or `available-and-proven` readiness for #211. It keeps #211 blocked while verifying these synthetic boundary expectations:
+
+- matched write-like input without approval stops at `approval-requested`;
+- matched exact `approve write` stops at `approval-verification-required` with `persistent_writes_allowed: false`;
+- unmapped write-like input stops at `needs-route` with `durable_reads_allowed: false`;
+- no-op helper output keeps network/filesystem/workspace/Engram writes blocked.
+
+Validate it with:
+
+```bash
+bash scripts/validate-discord-runtime-boundary-harness.sh
+docker compose run --rm --no-deps openclaw discord-project-manager-runtime-boundary-harness
+```
+
+## Private Discord no-op rehearsal plan
+
+Use `docs/operations/private-discord-noop-rehearsal-plan.md`, `examples/private-discord-noop-rehearsal-evidence.fake.yaml`, and `scripts/validate-private-discord-noop-rehearsal-plan.sh` to review the private/redacted no-op observation rehearsal summary.
+
+A no-op-only execution approval was granted and the result is recorded as `pass-summary`. This did not authorize a write-like live Discord message, Engram write/readback, prompt execution, workspace/filesystem writes, publishing, scheduling, GitHub mutations, readiness `available-and-proven`, or closure of #211. It records the gates, stop rules, and summary-minimum evidence shape for the approved no-op observation only.
+
+Validate it with:
+
+```bash
+bash scripts/validate-private-discord-noop-rehearsal-plan.sh
+```
+
 ## Sanitized evidence checklist
 
 - [ ] Use placeholders such as `<guild-id>` and `<channel-id>`.
 - [ ] Keep real guild/channel IDs outside the repo.
 - [ ] Do not commit credentials, tokens, or `.env` values.
-- [ ] Do not commit Discord exports, full screenshots with secrets, or transcripts.
+- [ ] Do not commit Discord exports, screenshots, raw logs, or transcripts.
 - [ ] Keep route outcomes, approval states, and namespace notes short and review-safe.
 - [ ] Record whether a test was `pass`, `blocked`, or `not run`.
 
@@ -341,4 +462,4 @@ Treat this guide as operator preparation for a **future gated rehearsal**, not a
 
 ## Next step
 
-Continue #132 with managed Project Manager global/project scaffolding only. Keep execution blocked until the private environment, explicit approval, status/repair preview path, and approval-gate behavior are all available.
+Continue #211 by implementing and proving the no-op observation path and runtime approval enforcement before any live Discord traffic. Keep live execution blocked until the private environment, explicit approval, status/repair preview path, and approval-gate behavior are all available and separately approved.

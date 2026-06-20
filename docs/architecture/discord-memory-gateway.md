@@ -10,7 +10,8 @@ This is a contract only. It does not prove live Engram calls, live Discord/runti
 2. Hydrate only the context allowed by the routing and scoped-skill contracts.
 3. Classify writeback as `auto-save`, `confirmation-required`, `draft`, or `reject`.
 4. Use `skills/discord-approval-gate/SKILL.md` for any confirmation-required durable write.
-5. Never store raw Discord chat logs as unbounded memory.
+5. Record sanitized audit/provenance metadata for durable change proposals and decisions.
+6. Never store raw Discord chat logs as unbounded memory.
 
 ## Contract inputs
 
@@ -54,7 +55,8 @@ Topic keys are record metadata, not new ADR 0002 namespace families.
 | `discord/writeback/network-update` | Candidate network-local writeback such as queue state. |
 | `discord/writeback/content-ledger-entry` | Candidate content-ledger writeback. |
 | `discord/writeback/global-governance` | Candidate global identity/style/principle change. |
-| `discord/audit/approval-decision` | Approval or rejection summary for the current turn. |
+| `discord/audit/approval-decision` | Approval, revision, rejection, or validation decision summary for the current turn. |
+| `discord/audit/durable-change` | Sanitized audit/provenance record for a durable Discord-managed change. |
 
 Use these topic keys inside records stored under existing ADR 0002 namespaces such as `discord-project-manager/runtime/discord/<guild-id>/<channel-id>` or `discord-project-manager/project/<project-slug>/...`.
 
@@ -69,6 +71,8 @@ Use these topic keys inside records stored under existing ADR 0002 namespaces su
 
 Global identity, style, or principle changes require explicit confirmation or approved global control-channel origin. Durable writeback proposals must show the runtime audit namespace `discord-project-manager/runtime/discord/<guild-id>/<channel-id>` and the target durable namespaces before persistence.
 
+Durable write proposals and approval decisions must also produce sanitized audit/provenance metadata using `docs/architecture/discord-durable-change-audit.md`. Audit records are metadata, not raw transcripts: they may include actor role refs, target refs, decision state, validation result, and rollback/restore hints, but not private payload dumps.
+
 ## Historical anchors
 
 This slice builds on existing memory/runtime anchors:
@@ -82,6 +86,7 @@ The Memory Gateway contract does not:
 
 - implement live Engram calls;
 - store raw Discord transcripts or chat logs as unbounded memory;
+- store raw private payloads as audit/provenance records;
 - bypass `discord-approval-gate` for confirmation-required writes;
 - introduce new ADR 0002 namespace families;
 - prove live Discord/runtime enforcement;
@@ -95,4 +100,5 @@ The Memory Gateway contract does not:
 - [ ] `discord-approval-gate` is present in effective skills for write-like flows.
 - [ ] Confirmation-required writes stop at approval-requested before persistence.
 - [ ] Runtime audit namespace is `discord-project-manager/runtime/discord/<guild-id>/<channel-id>`.
+- [ ] Durable write proposals include sanitized audit/provenance metadata and rollback or restore hints.
 - [ ] No raw Discord chat logs, real Discord IDs, credential env names, or production claims are introduced.

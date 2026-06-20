@@ -1,5 +1,5 @@
-ARG OPENCLAW_BASE_IMAGE=ghcr.io/openclaw/openclaw:latest
-ARG ENGRAM_IMAGE=ghcr.io/gentleman-programming/engram:latest
+ARG OPENCLAW_BASE_IMAGE=ghcr.io/openclaw/openclaw@sha256:9f55f0cb32b2925a983f40726440189b8f422ec61ae2a0fb0cf90403cf6d63d7
+ARG ENGRAM_IMAGE=ghcr.io/gentleman-programming/engram@sha256:f9b0d7c24f48076a4c836a1099b8351215bf902dcba7ae02222f2c431f2def38
 
 FROM ${ENGRAM_IMAGE} AS engram-bin
 FROM ${OPENCLAW_BASE_IMAGE}
@@ -35,7 +35,16 @@ COPY --chown=node:node skills/ /opt/discord-project-manager/skills/
 COPY --chown=node:node openclaw/config/ /opt/discord-project-manager/openclaw-config/
 COPY --chown=root:root docker/openclaw/sync-skills.sh /usr/local/bin/discord-project-manager-sync-skills
 COPY --chown=root:root docker/openclaw/managed-channel-registry.sh /usr/local/bin/discord-project-manager-managed-registry
-RUN chmod 0755 /usr/local/bin/discord-project-manager-sync-skills /usr/local/bin/discord-project-manager-managed-registry /usr/local/bin/engram \
+COPY --chown=root:root docker/openclaw/discord-approval-guard.sh /usr/local/bin/discord-project-manager-approval-guard
+COPY --chown=root:root docker/openclaw/discord-noop-observation.sh /usr/local/bin/discord-project-manager-noop-observation
+COPY --chown=root:root docker/openclaw/discord-runtime-boundary-harness.sh /usr/local/bin/discord-project-manager-runtime-boundary-harness
+RUN chmod 0755 \
+    /usr/local/bin/discord-project-manager-sync-skills \
+    /usr/local/bin/discord-project-manager-managed-registry \
+    /usr/local/bin/discord-project-manager-approval-guard \
+    /usr/local/bin/discord-project-manager-noop-observation \
+    /usr/local/bin/discord-project-manager-runtime-boundary-harness \
+    /usr/local/bin/engram \
   && engram version
 
 USER node

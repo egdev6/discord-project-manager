@@ -40,3 +40,9 @@ jobs:
             --file docker/openclaw/Dockerfile \
             --tag discord-project-manager-openclaw:ci \
             .
+
+      - name: Validate packaged runtime boundary harness
+        run: |
+          docker run --rm \
+            discord-project-manager-openclaw:ci \
+            discord-project-manager-runtime-boundary-harness

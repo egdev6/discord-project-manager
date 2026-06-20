@@ -85,8 +85,7 @@ sanitize_summary() {
 }
 
 changes_table=""
-mapfile -t commit_lines < <(git log --reverse --pretty=format:'%h%x09%s' "$range")
-for line in "${commit_lines[@]}"; do
+while IFS= read -r line; do
   [[ -n "$line" ]] || continue
   sha="${line%%$'\t'*}"
   subject="${line#*$'\t'}"
@@ -96,7 +95,7 @@ for line in "${commit_lines[@]}"; do
     pr_ref="#${BASH_REMATCH[1]}"
   fi
   changes_table+="| ${pr_ref} | ${subject} |"$'\n'
-done
+done < <(git log --reverse --pretty=format:'%h%x09%s' "$range")
 
 if [[ -z "$changes_table" ]]; then
   changes_table="| none | No commits found in ${BASE_REF}..${HEAD_REF}. |"$'\n'

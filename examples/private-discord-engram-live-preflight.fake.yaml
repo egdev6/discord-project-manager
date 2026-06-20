@@ -1,0 +1,81 @@
+schema_version: 1
+fixture_type: sanitized-private-preflight-summary
+safe_for_repo: true
+privacy_reviewed: true
+contract: private-discord-engram-live-preflight
+issue: 211
+preflight_timestamp_utc: 2026-06-19T18:00:00Z
+live_discord_message_sent: false
+live_engram_write_attempted: false
+live_openclaw_prompt_execution: false
+runtime_enforcement_proven: false
+uses_real_discord_ids: false
+raw_discord_chat_logs_included: false
+raw_private_payload_included: false
+screenshots_included: false
+secrets_included: false
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+operator_decision:
+  requested_path: live-private-preflight
+  evidence_policy: summary-minimum
+  private_environment_values_printed: false
+sanitized_preflight_results:
+  git_branch: develop
+  git_clean: true
+  env_presence:
+    discord_bot_token_present: true
+    discord_guild_id_present: true
+    openclaw_gateway_token_present: true
+    engram_cloud_token_present: true
+    raw_values_printed: false
+  validators:
+    runtime_version_baseline: pass
+    openclaw_gentle_runtime_static: pass
+    private_discord_engram_readiness_contract: blocked-expected
+    repo_safe_evidence: pass
+  docker_runtime:
+    compose_config: pass
+    openclaw_setup: pass
+    compose_up: pass
+    openclaw_health: pass
+    engram_health: pass
+    postgres_health: pass
+  discord_plugin:
+    plugin_present: true
+    plugin_enabled: true
+    plugin_connected: true
+    bot_identity_redacted: true
+    raw_status_committed: false
+readiness_gate:
+  execution_allowed: false
+  readiness_result: blocked
+  blockers:
+    - runtime approval enforcement repair is design-only-not-implemented
+    - no-op observation path is design-only-not-proven
+    - explicit execution approval for actual Discord message must be separated from this preflight
+  live_message_blocked_reason: readiness gate is not available-and-proven
+next_safe_actions:
+  - implement and prove runtime approval enforcement before write-like Discord traffic
+  - implement and prove read-only no-op observation path
+  - repeat sanitized preflight only after both runtime paths are proven and separate explicit execution approval is granted
+sanitized_evidence_policy:
+  allowed:
+    - pass status summary
+    - blocked status summary
+    - validator command names and pass/fail summaries
+    - placeholder namespace refs
+  forbidden:
+    - real Discord guild/channel/user/message IDs
+    - credentials or .env values
+    - screenshots
+    - raw logs
+    - transcripts
+    - private payloads
+    - raw Engram exports
+    - SQL dumps
+non_goals:
+  - closing issue 211
+  - claiming live Discord message routing
+  - claiming live Engram write/readback
+  - claiming runtime approval enforcement
+  - publishing raw runtime status

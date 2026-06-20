@@ -22,7 +22,8 @@ Also use it when a route-resolved skill proposes writes to project, network, str
 - If the operator replies `revise: <instruction>`, produce a revised proposal and ask again.
 - If the operator replies `reject`, stop without persistence and summarize what did not happen.
 - After approval, write only the displayed target namespaces and keep publishing, scheduling, Buffer, and unrelated memory out of scope unless separately approved.
-- Do not store secrets, raw private transcripts, real exports, or unredacted Discord IDs in durable project memory.
+- Do not store secrets, raw private transcripts, real exports, private payload dumps, or unredacted Discord IDs in durable project memory.
+- For durable write proposals and decisions, emit a sanitized `audit_record` with actor role/ref, target, decision state, validation result, and rollback/restore hint.
 
 ## Decision Gates
 
@@ -41,7 +42,8 @@ Also use it when a route-resolved skill proposes writes to project, network, str
 3. Classify the request as read-only or write-like.
 4. For write-like requests, return the approval prompt from `docs/operations/discord-approval-responses.md`.
 5. Keep the pre-approval audit trail in the response unless the runtime provides explicitly non-durable channel-local scratch state.
-6. After `approve write`, perform the approved write and record the final audit trail.
+6. After `approve write`, perform the approved write and record the final sanitized audit trail.
+7. For `revise: <instruction>` or `reject`, record only the sanitized decision metadata; do not persist the proposed private payload.
 
 ## Output Contract
 
@@ -55,6 +57,7 @@ Target namespace: <namespace-key>
 Runtime audit namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
 Change summary: <one-sentence summary>
 Risk boundary: <what this does not do>
+Audit record: <sanitized audit_record ref or inline sanitized audit summary>
 
 Reply with exactly one option:
 - approve write
@@ -66,4 +69,5 @@ Reply with exactly one option:
 
 - `docs/operations/discord-approval-responses.md`
 - `docs/operations/discord-routing.md`
+- `docs/architecture/discord-durable-change-audit.md`
 - `docs/architecture/channel-context-namespace-mapping.md`

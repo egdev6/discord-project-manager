@@ -10,8 +10,9 @@ This is a contract only. It does not prove live Discord/OpenClaw runtime behavio
 2. Resolve managed Project Manager channels through `docs/architecture/discord-managed-channel-routing.md` when persisted semantic metadata exists.
 3. Resolve a channel guide ref from `docs/architecture/discord-semantic-channel-guides.md` for the current semantic channel scope.
 4. Reference a Context Pack and Skill Pack for the current turn.
-5. Classify intent and choose an explainable runner/backend.
-6. Route any write-like result back through Memory Gateway policy and `discord-approval-gate`.
+5. Classify the requested artifact and persistence target using `docs/architecture/openclaw-artifact-classification.md`.
+6. Classify intent and choose an explainable runner/backend.
+7. Route any write-like result back through Memory Gateway policy and `discord-approval-gate`.
 
 ## Orchestrator pipeline
 
@@ -22,6 +23,7 @@ Discord event envelope
 -> channel guide ref
 -> context pack ref
 -> skill pack ref
+-> artifact classification
 -> intent classification
 -> runner selection
 -> permission/confirmation gate
@@ -39,6 +41,7 @@ The orchestrator depends on:
 - `docs/architecture/channel-context-namespace-mapping.md` for origin resolution, `runtime_namespace`, `routing_status`, and `resolved_route`;
 - `docs/architecture/discord-managed-channel-routing.md`, `examples/discord-managed-channel-routing.fake.yaml`, and `scripts/validate-discord-managed-channel-routing.sh` for persisted semantic metadata routing of managed Project Manager channels;
 - `docs/architecture/discord-semantic-channel-guides.md` for canonical channel topics and starter/pinned guidance copy;
+- `docs/architecture/openclaw-artifact-classification.md` for artifact type, persistence target, approval, backup, and deployment implications;
 - `docs/architecture/discord-memory-gateway.md` for hydration and writeback policy;
 - `docs/architecture/discord-context-skill-packs.md` for prompt-pack references;
 - `docs/architecture/discord-scoped-skills-registry.md` for `effective_skills`;
@@ -56,15 +59,39 @@ The orchestrator depends on:
 | `normalized_channel_name` | Reviewable fake channel-name evidence. |
 | `user_role` | Minimal fake operator role or capability hint. |
 
+## Artifact classification
+
+Before intent routing, the orchestrator must emit a compact artifact classification block. This keeps persistence and approval decisions explicit before a runner is selected.
+
+Classification fields:
+
+| Field | Required? | Purpose |
+| --- | --- |
+| `artifact_type` | Yes | Requested artifact family such as `workflow_skill`, `private_context`, `runtime_capability`, `publication_flow`, `sdd_dev_work`, or `ephemeral_draft`. |
+| `subtype` | When meaningful | Refinement such as `profile`, `scope_binding`, `skill_contract`, or `capability_config`. Use `none` or omit only when the artifact type has no useful subtype. |
+| `operation` | Yes | `read`, `draft`, `create`, `update`, `bind`, `reference`, `unbind`, `clone`, `execute`, or `handoff`. |
+| `persistence_target` | Yes | `repo`, `private-runtime`, `external-service`, or `ephemeral`. |
+| `approval_required` | Yes | Whether exact `approve write` is required before persistence. |
+| `backup_required` | Yes | Whether private backup/restore must cover the resulting state. |
+| `deployment_required` | Yes | Whether runtime sync, image rebuild, or release promotion is expected. |
+| `runner_backend` | Yes | Selected execution boundary such as `openclaw-skill-surface`, `gentle-sdd`, or `response-only`. |
+| `writeback_policy` | Yes | Memory Gateway classification: `auto-save`, `confirmation-required`, `draft`, or `reject`. |
+
+Private context profile operations such as create, update, bind, reference, unbind, or clone must classify as `artifact_type: private_context`, `subtype: profile` or `scope_binding`, `persistence_target: private-runtime`, `approval_required: true`, and `backup_required: true`.
+
+See `docs/architecture/openclaw-artifact-classification.md` for the full taxonomy and examples.
+
 ## Intent families
 
-First-slice intent families are intentionally small:
+First-slice intent families remain intentionally small:
 
 | Family | Meaning | Default gate |
 | --- | --- | --- |
 | `planning_content` | Planning or content-shaping work that stays proposal-only in this slice. | `summary-only` |
 | `sdd_dev_work` | Development/spec-heavy work that may be delegated to a Gentle SDD backend. | `summary-only` |
 | `clarification_needed` | Ambiguous or unmapped input that must ask for route or intent clarification. | `needs-route` |
+
+Artifact classification carries the detailed artifact/persistence decision. Intent families only decide the broad runner shape.
 
 Future families may include `context_update`, `skill_update`, `memory_query`, or `github_operation`, but they are not modeled beyond mention in this first slice.
 
@@ -111,6 +138,7 @@ Each orchestrated turn should leave reviewable metadata for the contract:
 - selected channel guide reference;
 - selected context pack reference;
 - selected skill pack reference;
+- artifact type, persistence target, approval, backup, and deployment classification;
 - intent family and confidence;
 - selected runner/backend;
 - permission gate state;
@@ -142,6 +170,8 @@ This contract does not:
 
 - [ ] Fixture uses fake/demo markers only.
 - [ ] All scenarios carry `runtime_namespace` and route status.
+- [ ] Every scenario includes artifact type, operation, persistence target, approval, backup, deployment, runner backend, and writeback policy.
+- [ ] Private context/profile writes require approval and backup coverage.
 - [ ] `sdd_dev_work` routes to `backend: gentle-sdd` only.
 - [ ] Clarification fallback stays `response-only` and `reject` for writeback.
 - [ ] Prompt execution remains `none` in every scenario.

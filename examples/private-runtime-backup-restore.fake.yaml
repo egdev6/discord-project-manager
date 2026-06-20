@@ -1,0 +1,171 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: private-runtime-backup-restore
+live_discord_connection: false
+live_engram_calls: false
+live_postgres_dump: false
+live_docker_restore: false
+runtime_enforcement_proven: false
+uses_real_discord_ids: false
+raw_private_backup_included: false
+raw_discord_chat_logs_included: false
+private_profile_content_included: false
+secrets_included: false
+workspace_file_writes_allowed: false
+publishing_enabled: false
+scheduling_enabled: false
+buffer_activity_enabled: false
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+source_contracts:
+  - docs/operations/private-runtime-backup-restore.md
+  - docs/security/data-handling.md
+  - docs/architecture/openclaw-artifact-classification.md
+  - docs/architecture/discord-effective-runtime-resolver.md
+  - docs/architecture/discord-durable-change-audit.md
+artifact_classification:
+  artifact_type: private_context
+  subtype: profile
+  operation: update
+  persistence_target: private-runtime
+  approval_required: true
+  backup_required: true
+  deployment_required: false
+  runner_backend: openclaw-skill-surface
+  writeback_policy: confirmation-required
+backup_manifest:
+  manifest_id: backup-demo-private-runtime
+  source_runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+  created_by_ref: operator-demo
+  storage_location: private-backup://demo/private-runtime-backup.tgz
+  public_repo_storage_allowed: false
+  includes:
+    profile_definitions: true
+    scope_bindings: true
+    overrides: true
+    disabled_bindings: true
+    capability_permissions: true
+    durable_audit_records: true
+  integrity:
+    sanitized_manifest_hash: sha256-demo-placeholder
+    raw_export_committed: false
+    manifest_only_in_repo: true
+pre_restore_effective_resolution:
+  ref: effective-resolution-before-restore
+  included_context:
+    - ref: profile:writing.demo-linkedin-b2b
+      scope: category:linkedin
+      kind: private_profile_ref
+      provenance: private-runtime/profile-binding
+      reason: matched-route-category-binding
+    - ref: profile:writing.demo-linkedin-b2b
+      scope: category:x
+      kind: private_profile_ref
+      provenance: private-runtime/profile-binding
+      reason: shared-profile-reference-for-reuse
+    - ref: profile:writing.demo-x-short
+      scope: channel:linkedin/experiments
+      kind: private_profile_ref
+      provenance: private-runtime/channel-override
+      reason: channel-specific-profile-override
+  excluded_context:
+    - ref: profile:writing.demo-linkedin-b2b
+      scope: category:linkedin
+      kind: private_profile_ref
+      provenance: private-runtime/category-binding
+      reason: overridden-by-channel-binding
+    - ref: profile:writing.demo-disabled
+      scope: category:x
+      kind: private_profile_ref
+      provenance: private-runtime/disabled-binding
+      reason: disabled-binding-preserved
+  capability_permissions:
+    - capability: engram
+      available: true
+      permitted: true
+      config_state: configured-private
+      provenance: runtime-capability-registry
+      reason: private-runtime-write-target-after-approval
+    - capability: filesystem
+      available: true
+      permitted: false
+      config_state: private-config-required
+      provenance: runtime-capability-registry
+      reason: capability-present-but-not-enabled-for-scope
+  audit_refs:
+    - audit-demo-profile-create-approved
+    - audit-demo-profile-restore-failed-validation
+restore_rehearsal:
+  restore_id: restore-demo-private-runtime
+  backup_manifest_ref: backup-demo-private-runtime
+  target_environment: private-rehearsal
+  restore_command_ref: docs/security/data-handling.md#current-recovery-path
+  owner_ref: operator-demo
+  writes_enabled_during_restore: false
+  verification_step: compare sanitized effective resolution before enabling writes
+post_restore_effective_resolution:
+  ref: effective-resolution-after-restore
+  included_context:
+    - ref: profile:writing.demo-linkedin-b2b
+      scope: category:linkedin
+      kind: private_profile_ref
+      provenance: private-runtime/profile-binding
+      reason: matched-route-category-binding
+    - ref: profile:writing.demo-linkedin-b2b
+      scope: category:x
+      kind: private_profile_ref
+      provenance: private-runtime/profile-binding
+      reason: shared-profile-reference-for-reuse
+    - ref: profile:writing.demo-x-short
+      scope: channel:linkedin/experiments
+      kind: private_profile_ref
+      provenance: private-runtime/channel-override
+      reason: channel-specific-profile-override
+  excluded_context:
+    - ref: profile:writing.demo-linkedin-b2b
+      scope: category:linkedin
+      kind: private_profile_ref
+      provenance: private-runtime/category-binding
+      reason: overridden-by-channel-binding
+    - ref: profile:writing.demo-disabled
+      scope: category:x
+      kind: private_profile_ref
+      provenance: private-runtime/disabled-binding
+      reason: disabled-binding-preserved
+  capability_permissions:
+    - capability: engram
+      available: true
+      permitted: true
+      config_state: configured-private
+      provenance: runtime-capability-registry
+      reason: private-runtime-write-target-after-approval
+    - capability: filesystem
+      available: true
+      permitted: false
+      config_state: private-config-required
+      provenance: runtime-capability-registry
+      reason: capability-present-but-not-enabled-for-scope
+  audit_refs:
+    - audit-demo-profile-create-approved
+    - audit-demo-profile-restore-failed-validation
+restore_assertions:
+  shared_profile_refs_preserved: true
+  profile_bindings_preserved: true
+  overrides_preserved: true
+  disabled_bindings_preserved: true
+  audit_metadata_preserved: true
+  capability_permissions_preserved: true
+  duplicate_profile_defs_created: false
+  writes_enabled_after_restore: false
+non_goals:
+  - live Discord validation
+  - live Engram calls
+  - live Postgres dump
+  - live Docker restore
+  - raw private backups
+  - raw private profile content
+  - production credentials
+  - publishing
+  - scheduling
+  - Buffer activity
