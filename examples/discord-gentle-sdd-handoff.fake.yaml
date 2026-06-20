@@ -93,27 +93,40 @@ scenarios:
       mandatory_skills:
         - discord-approval-gate
       requested_sdd_mode: design-only
+      development_intent: openclaw_skill_development
+      target_artifact_paths:
+        - skills/demo-openclaw-workflow/SKILL.md
       execution_mode: delegated-contract-only
       approval_policy: proposal-only
     return_envelope:
       execution_state: contract-only
       prompt_execution: none
-      turn_summary: proposed repo artifact update requires serialization claim
+      turn_summary: proposed OpenClaw skill artifact update requires serialization claim
       decisions:
-        - repo artifacts require single-writer claim and release metadata
+        - repo-backed OpenClaw skill contracts require single-writer claim and release metadata
+        - product capability skills must be proposed under skills/{name}/SKILL.md
       tasks:
-        - claim the target doc path before editing
+        - claim the target skill path before editing
+        - update skill inventory and scoped registry fixtures if the skill becomes active
       artifact_proposals:
-        - artifact_kind: repo-doc
-          target_path: docs/architecture/discord-runtime-orchestrator.md
+        - artifact_kind: repo-skill
+          target_path: skills/demo-openclaw-workflow/SKILL.md
           write_executed: false
       writeback_proposals: none
       shared_artifact_claims:
         - serialization_contract_ref: docs/process/shared-artifact-serialization.md
+          target_path: skills/demo-openclaw-workflow/SKILL.md
           claim_required: true
           release_required: true
           single_writer: true
           write_executed: false
+      validation_evidence:
+        - bash scripts/validate-openclaw-skill-inventory.sh
+        - bash scripts/validate-discord-scoped-skills-registry.sh
+      runtime_sync_requirements:
+        - docker image rebuild required before enabling a new active runtime skill
+        - OpenClaw skill sync required after merge
+        - runtime restart may be required after sync
 non_goals:
   - live Discord/OpenClaw handoff
   - live Engram calls
