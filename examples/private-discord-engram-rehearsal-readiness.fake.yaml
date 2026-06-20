@@ -22,7 +22,10 @@ source_contracts:
   - examples/private-discord-engram-vertical-slice.fake.yaml
   - examples/discord-approval-gate.fake.yaml
   - examples/private-discord-engram-noop-observation.fake.yaml
+  - examples/private-discord-engram-noop-observation-proof.fake.yaml
   - examples/runtime-approval-enforcement-repair.fake.yaml
+  - examples/runtime-approval-enforcement-proof.fake.yaml
+  - examples/private-write-readback-preflight-gate.fake.yaml
   - docs/operations/runtime-version-baseline.md
 operator_inputs:
   private_non_production_guild: required-outside-repo
@@ -47,17 +50,19 @@ readiness_checks:
     command_refs:
       - bash scripts/validate-discord-approval-gate.sh
   - id: runtime-approval-enforcement
-    status: design-only-not-implemented
+    status: repo-safe-synthetic-proof-only
     required_before_execution: true
     evidence_allowed_in_repo: sanitized-summary-only
-    blocker: repair contract exists, but runtime approval enforcement must be implemented and proven before any private Discord write-like traffic
+    blocker: repo-safe synthetic guard proof exists, but live/private approval enforcement and server-side proposal binding must be proven before any private Discord write-like traffic
     contract_ref: examples/runtime-approval-enforcement-repair.fake.yaml
+    proof_ref: examples/runtime-approval-enforcement-proof.fake.yaml
   - id: no-op-observation-path
-    status: design-only-not-proven
+    status: repo-safe-synthetic-proof-only
     required_before_execution: true
     evidence_allowed_in_repo: sanitized-summary-only
-    blocker: no-op observation design exists, but the runtime path must be implemented and proven before any private Discord write-like request
+    blocker: repo-safe synthetic no-op proof exists, but private redacted event ingestion must be proven before any private Discord write-like request
     contract_ref: examples/private-discord-engram-noop-observation.fake.yaml
+    proof_ref: examples/private-discord-engram-noop-observation-proof.fake.yaml
   - id: private-discord-topology
     status: required-outside-repo
     required_before_execution: true
@@ -85,13 +90,15 @@ execution_gate:
     explicit-human-approval: granted
     private-backup-restore-ready: repo-contract-ready
   stop_reasons:
-    - runtime approval enforcement repair is design-only-not-implemented
-    - no-op observation path is design-only-not-proven
+    - runtime approval enforcement is repo-safe-synthetic-proof-only, not live/private available-and-proven
+    - no-op observation path is repo-safe-synthetic-proof-only, not live/private available-and-proven
     - explicit execution approval is not granted
     - private topology and credentials are not represented in repo-safe evidence
+    - private redacted event ingestion and server-side proposal binding are not proven
   permitted_next_actions:
-    - implement and prove read-only no-op observation path
-    - implement and prove runtime approval enforcement before live traffic
+    - prepare private topology outside repo with sanitized placeholders only
+    - prove private redacted no-op event ingestion before write-like traffic
+    - prove server-side proposal binding before writes
 sanitized_evidence_policy:
   allowed:
     - pass status summary

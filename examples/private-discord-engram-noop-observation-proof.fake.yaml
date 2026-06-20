@@ -89,7 +89,7 @@ fail_closed_expectations:
     - explicit human execution approval
     - sanitized execution/readback evidence review
   readiness_check_id: no-op-observation-path
-  current_readiness_status: design-only-not-proven
+  current_readiness_status: repo-safe-synthetic-proof-only
   repo_safe_synthetic_status: synthetic-noop-cli-proven
   required_future_status: available-and-proven
   readiness_fixture_ref: examples/private-discord-engram-rehearsal-readiness.fake.yaml

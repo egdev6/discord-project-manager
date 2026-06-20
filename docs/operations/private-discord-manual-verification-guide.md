@@ -321,15 +321,24 @@ bash scripts/validate-repo-safe-evidence.sh
 
 Before any private Discord message is sent for #211, check the readiness fixture in `examples/private-discord-engram-rehearsal-readiness.fake.yaml` with `scripts/validate-private-discord-engram-rehearsal-readiness.sh`.
 
-This gate is intentionally blocked today: `execution_allowed: false`. It does not close #211 and does not claim live Discord-to-Engram validation. It records the exact prerequisites that must become true outside repo artifacts before a live/private rehearsal can be considered:
+This gate is intentionally blocked today: `execution_allowed: false`. It does not close #211 and does not claim live Discord-to-Engram validation. It records the exact prerequisites that must become true outside repo artifacts before a live/private rehearsal can be considered.
+
+The current repo-safe status after #252, #254, and #256 is:
+
+- private write/readback preflight gate exists and remains blocked;
+- runtime approval enforcement has repo-safe synthetic guard proof only;
+- no-op observation has repo-safe synthetic no-op proof only;
+- neither proof upgrades #211 readiness to live/private `available-and-proven`.
+
+Still required before any private write/readback execution:
 
 - private topology and credentials prepared outside git;
 - explicit operator approval granted for execution;
 - local runtime baseline checked privately;
 - approval-gate lifecycle contract remains green;
-- runtime approval enforcement repair progresses beyond `design-only-not-implemented` and is proven in the runtime;
+- runtime approval enforcement proven in the live/private runtime path, including server-side proposal binding;
 - private backup/restore contract remains green;
-- the read-only no-op observation path progresses beyond `design-only-not-proven` and is proven before write-like Discord traffic.
+- private redacted no-op event ingestion proven before write-like Discord traffic.
 
 Run the readiness validator with:
 
