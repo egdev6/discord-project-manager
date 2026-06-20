@@ -337,6 +337,27 @@ Run the readiness validator with:
 bash scripts/validate-private-discord-engram-rehearsal-readiness.sh
 ```
 
+## Private write/readback preflight gate
+
+Use `examples/private-write-readback-preflight-gate.fake.yaml` and `scripts/validate-private-write-readback-preflight-gate.sh` for the first repo-safe #252 slice before any private write/readback execution is even proposed.
+
+This gate is intentionally blocked by default: `execution_allowed: false`. It does not execute a private Discord message, does not execute an Engram write or readback, and does not close #211. #211 remains open until actual private execution and readback are separately approved, executed outside repo-safe artifacts, and reviewed with sanitized evidence.
+
+The gate fails closed unless all four review surfaces are explicitly present in sanitized placeholder form:
+
+- exact write approval state;
+- target scope preview;
+- runtime and durable namespace preview;
+- sanitized evidence schema for future execution/readback review.
+
+Only placeholder summaries are allowed in repo artifacts. Real Discord IDs, credentials, screenshots, raw logs, transcripts, private payloads, raw Engram exports, and SQL dumps remain forbidden.
+
+Run the preflight gate validator with:
+
+```bash
+bash scripts/validate-private-write-readback-preflight-gate.sh
+```
+
 ## Private Discord-to-Engram no-op observation design
 
 Use `examples/private-discord-engram-noop-observation.fake.yaml` and `scripts/validate-private-discord-engram-noop-observation.sh` to review the shape of a future read-only no-op observation path.
