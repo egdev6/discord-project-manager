@@ -427,6 +427,18 @@ bash scripts/validate-private-noop-execution-runbook-gate.sh
 
 The readiness gate cross-checks this runbook gate as `repo-safe-operator-sequence-only`; that status is still blocked and does not grant execution.
 
+## Private no-op execution result packet
+
+Use `examples/private-noop-execution-result-packet.fake.yaml` and `scripts/validate-private-noop-execution-result-packet.sh` to review the repo-safe result packet schema for #278.
+
+This is **repo-safe result schema only**. It defines the sanitized fields for a future separately approved private no-op run result. It does not prove private no-op execution occurred, does not grant private execution approval, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Validate the result packet with:
+
+```bash
+bash scripts/validate-private-noop-execution-result-packet.sh
+```
+
 ## Private write/readback preflight gate
 
 Use `examples/private-write-readback-preflight-gate.fake.yaml` and `scripts/validate-private-write-readback-preflight-gate.sh` for the first repo-safe #252 slice before any private write/readback execution is even proposed.
