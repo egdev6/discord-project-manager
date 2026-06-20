@@ -1,0 +1,208 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: discord-admin-ux
+parent_issue: 196
+live_discord_connection: false
+live_openclaw_execution: false
+live_engram_calls: false
+live_prompt_execution: false
+durable_writes_enabled: false
+github_mutations_enabled: false
+uses_real_discord_ids: false
+private_profile_content_included: false
+raw_discord_chat_logs_included: false
+raw_exports_included: false
+sql_dumps_included: false
+production_credentials: false
+publishing_enabled: false
+scheduling_enabled: false
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+contract_dependencies:
+  - docs/architecture/discord-managed-channel-routing.md
+  - docs/architecture/discord-scoped-skills-registry.md
+  - docs/architecture/discord-effective-runtime-resolver.md
+  - docs/architecture/discord-runtime-orchestrator.md
+  - docs/architecture/discord-memory-gateway.md
+  - skills/discord-approval-gate/SKILL.md
+  - docs/operations/private-runtime-backup-restore.md
+admin_scenarios:
+  - name: list-profiles-summary
+    request:
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      action_family: list_profiles
+      target_scope: project
+      target_ref: project-demo-egdev
+      write_like: false
+    response:
+      admin_state: summary-only
+      action_family: list_profiles
+      target_scope: project
+      target_ref: project-demo-egdev
+      resolver_source: docs/architecture/discord-managed-channel-routing.md
+      preview_summary: sanitized profile refs and binding counts only
+      profile_refs:
+        - writing.demo-linkedin-b2b
+        - writing.demo-x-short
+      private_content_included: false
+      approval_required: false
+      write_executed: false
+  - name: list-scope-bindings-summary
+    request:
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      action_family: list_scope_bindings
+      target_scope: channel
+      target_ref: channel-demo-egdev-linkedin-strategy
+      write_like: false
+    response:
+      admin_state: summary-only
+      action_family: list_scope_bindings
+      target_scope: channel
+      target_ref: channel-demo-egdev-linkedin-strategy
+      resolver_source: docs/architecture/discord-scoped-skills-registry.md
+      preview_summary: sanitized scope bindings with source scope and effective state
+      binding_refs:
+        - global:writing.demo-default
+        - project:egdev:writing.demo-linkedin-b2b
+      private_content_included: false
+      approval_required: false
+      write_executed: false
+  - name: bind-profile-preview
+    request:
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      action_family: bind_profile_preview
+      target_scope: channel
+      target_ref: channel-demo-egdev-linkedin-strategy
+      profile_ref: writing.demo-linkedin-b2b
+      write_like: true
+    response:
+      admin_state: approval-requested
+      action_family: bind_profile_preview
+      target_scope: channel
+      target_ref: channel-demo-egdev-linkedin-strategy
+      resolver_source: docs/architecture/discord-memory-gateway.md
+      preview_summary: bind existing profile ref to channel scope; no private profile body included
+      private_content_included: false
+      approval_required: true
+      approval_skill: discord-approval-gate
+      exact_approval_phrase: approve write
+      write_executed: false
+      rollback_note: remove channel binding or restore previous binding after approved change
+  - name: clone-profile-preview
+    request:
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      action_family: clone_profile_preview
+      target_scope: project
+      target_ref: project-demo-egdev
+      source_profile_ref: writing.demo-linkedin-b2b
+      proposed_profile_ref: writing.demo-linkedin-founder
+      write_like: true
+    response:
+      admin_state: approval-requested
+      action_family: clone_profile_preview
+      target_scope: project
+      target_ref: project-demo-egdev
+      resolver_source: docs/architecture/discord-memory-gateway.md
+      preview_summary: clone creates an independent profile ref while reference reuses the existing profile
+      clone_vs_reference_explained: true
+      private_content_included: false
+      approval_required: true
+      approval_skill: discord-approval-gate
+      exact_approval_phrase: approve write
+      write_executed: false
+  - name: inspect-effective-runtime
+    request:
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      action_family: inspect_effective_runtime
+      target_scope: channel
+      target_ref: channel-demo-egdev-linkedin-strategy
+      write_like: false
+    response:
+      admin_state: summary-only
+      action_family: inspect_effective_runtime
+      target_scope: channel
+      target_ref: channel-demo-egdev-linkedin-strategy
+      resolver_source: docs/architecture/discord-effective-runtime-resolver.md
+      preview_summary: effective context, skills, and capabilities summarized from resolver output
+      effective_context_ref: context-pack-demo-egdev-linkedin
+      effective_skills_ref: skill-pack-demo-egdev-linkedin
+      effective_capabilities_ref: capability-pack-demo-egdev-linkedin
+      private_content_included: false
+      approval_required: false
+      write_executed: false
+  - name: disable-skill-preview
+    request:
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      action_family: toggle_skill_or_capability_preview
+      target_scope: project
+      target_ref: project-demo-egdev
+      skill_ref: x-queue-planner
+      requested_state: disabled
+      write_like: true
+    response:
+      admin_state: approval-requested
+      action_family: toggle_skill_or_capability_preview
+      target_scope: project
+      target_ref: project-demo-egdev
+      resolver_source: docs/architecture/discord-scoped-skills-registry.md
+      preview_summary: proposed scoped skill disable with impact summary and resolver refresh requirement
+      impact_summary: future effective skill packs for project-demo-egdev exclude x-queue-planner unless overridden
+      private_content_included: false
+      approval_required: true
+      approval_skill: discord-approval-gate
+      exact_approval_phrase: approve write
+      write_executed: false
+      rollback_note: re-enable scoped skill in the same project scope after approval
+  - name: capability-toggle-preview
+    request:
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      action_family: toggle_skill_or_capability_preview
+      target_scope: global
+      target_ref: global-runtime-config
+      capability_ref: signed-in-browser-automation
+      requested_state: disabled
+      write_like: true
+    response:
+      admin_state: approval-requested
+      action_family: toggle_skill_or_capability_preview
+      target_scope: global
+      target_ref: global-runtime-config
+      resolver_source: docs/architecture/discord-runtime-orchestrator.md
+      preview_summary: proposed capability disable stays gated and may require runtime sync or restart
+      private_content_included: false
+      approval_required: true
+      approval_skill: discord-approval-gate
+      exact_approval_phrase: approve write
+      write_executed: false
+      rollback_note: restore previous capability config from approved backup if needed
+  - name: backup-export-request
+    request:
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      action_family: backup_export_request
+      target_scope: project
+      target_ref: project-demo-egdev
+      write_like: true
+    response:
+      admin_state: approval-requested
+      action_family: backup_export_request
+      target_scope: project
+      target_ref: project-demo-egdev
+      resolver_source: docs/operations/private-runtime-backup-restore.md
+      preview_summary: backup/export request must follow private runbook; no archive or export is attached
+      backup_runbook_ref: docs/operations/private-runtime-backup-restore.md
+      private_content_included: false
+      raw_exports_included: false
+      sql_dumps_included: false
+      approval_required: true
+      approval_skill: discord-approval-gate
+      exact_approval_phrase: approve write
+      write_executed: false
+non_goals:
+  - live Discord command handling
+  - durable profile binding writes
+  - profile content dumps
+  - live backup or export execution
+  - GitHub mutations
+  - publishing
+  - scheduling

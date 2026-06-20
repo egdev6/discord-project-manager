@@ -141,6 +141,25 @@ docker compose exec openclaw discord-project-manager-managed-registry simulate-e
 
 Each simulation must return sanitized output with `write_executed:false`.
 
+## Admin UX preview harness
+
+The local OpenClaw image packages a repo-safe synthetic admin UX preview harness:
+
+```bash
+docker compose run --rm --no-deps openclaw discord-project-manager-admin-ux-preview-harness
+```
+
+This command emits sanitized read-only summaries and approval-gated previews for the fake admin UX contract. It does not read live Discord, Engram/private runtime, private profile bodies, exports, SQL dumps, screenshots, raw logs, transcripts, or credentials.
+
+Validate the repo and container harness surfaces with:
+
+```bash
+bash scripts/validate-discord-admin-ux-preview-harness.sh
+ADMIN_UX_PREVIEW_HARNESS_DOCKER_SMOKE=1 \
+  bash scripts/validate-discord-admin-ux-preview-harness.sh
+docker compose run --rm --no-deps openclaw discord-project-manager-admin-ux-preview-harness
+```
+
 ## Runtime boundary harness
 
 The local OpenClaw image also packages a synthetic container-side runtime boundary harness:
@@ -187,7 +206,7 @@ The repository's tracked `skills/` directory is copied into the local OpenClaw r
 /home/node/.openclaw/workspace/skills
 ```
 
-The active runtime-core skills are `openclaw-runtime-orchestrator`, `scoped-skill-resolver`, and `discord-approval-gate`. The workflow skills `brand-context`, `content-ledger`, `strategy-planner`, `linkedin-weekly-planner`, `x-queue-planner`, and `on-demand-brief-planner` are synced as scoped workflow skills: available to the runtime, but intended to be used only after scoped skill resolution selects them. Gentle-AI SDD assets are separate protocol/backend assets under `.openclaw/skills`, not product workflow skills.
+The active runtime-core skills are `openclaw-runtime-orchestrator`, `scoped-skill-resolver`, `discord-approval-gate`, and `discord-general-advisor`. The workflow skills `brand-context`, `content-ledger`, `strategy-planner`, `linkedin-weekly-planner`, `x-queue-planner`, and `on-demand-brief-planner` are synced as scoped workflow skills: available to the runtime, but intended to be used only after scoped skill resolution selects them. Gentle-AI SDD assets are separate protocol/backend assets under `.openclaw/skills`, not product workflow skills.
 
 The M1 smoke test confirmed OpenClaw discovers workspace `SKILL.md` files from this shape. Runtime-generated workspace state remains in the `openclaw-home` volume, not in git.
 

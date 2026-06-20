@@ -52,7 +52,12 @@ for required in \
   "name: private-profile-clone" \
   "name: runtime-capability-filesystem" \
   "name: publication-flow-buffer" \
-  "name: workflow-skill-proposal" \
+  "name: openclaw-skill-development-flow" \
+  "development_intent: openclaw_skill_development" \
+  "target_skill_path: skills/demo-openclaw-workflow/SKILL.md" \
+  "preserved_protocol_backend: .openclaw/skills" \
+  "inventory_update_required: true" \
+  "scoped_registry_update_required: true" \
   "name: sdd-dev-work-flow" \
   "name: clarification-fallback" \
   "family: planning_content" \
@@ -253,9 +258,20 @@ for sc in scenarios:
     if name == "planning-content-flow":
         if intent.get("family") != "planning_content" or runner.get("backend") != "openclaw-skill-surface" or runner.get("runner_kind") != "content-planner" or gate.get("state") != "summary-only" or gate.get("approval_needed") != "false" or writeback.get("classification") != "draft":
             raise SystemExit("planning-content-flow contract markers are inconsistent")
+    if name == "openclaw-skill-development-flow":
+        if artifact.get("artifact_type") != "workflow_skill" or artifact.get("development_intent") != "openclaw_skill_development" or artifact.get("subtype") != "skill_contract":
+            raise SystemExit("openclaw-skill-development-flow must classify as openclaw_skill_development workflow skill contract")
+        if intent.get("family") != "sdd_dev_work" or runner.get("backend") != "gentle-sdd" or runner.get("runner_kind") != "development-orchestrator" or runner.get("backend_mode") != "delegated-contract-only" or gate.get("state") != "approval-requested" or writeback.get("classification") != "draft":
+            raise SystemExit("openclaw-skill-development-flow must be routed to gentle-sdd as delegated contract-only with approval before repo/deployment work")
+        if runner.get("selected_skills") != "none" or runner.get("preserved_protocol_backend") != ".openclaw/skills":
+            raise SystemExit("openclaw-skill-development-flow must use preserved Gentle protocol assets, not product workflow skills")
+        if exec_meta.get("target_skill_path") != "skills/demo-openclaw-workflow/SKILL.md" or exec_meta.get("inventory_update_required") != "true" or exec_meta.get("scoped_registry_update_required") != "true":
+            raise SystemExit("openclaw-skill-development-flow must name skill target path and inventory/registry impacts")
     if name == "sdd-dev-work-flow":
         if intent.get("family") != "sdd_dev_work" or runner.get("backend") != "gentle-sdd" or runner.get("runner_kind") != "development-orchestrator" or runner.get("backend_mode") != "delegated-contract-only" or gate.get("state") != "approval-requested" or writeback.get("classification") != "draft":
             raise SystemExit("sdd-dev-work-flow must be routed to gentle-sdd as delegated contract-only with approval before repo/deployment work")
+        if runner.get("selected_skills") != "none" or runner.get("preserved_protocol_backend") != ".openclaw/skills":
+            raise SystemExit("sdd-dev-work-flow must use preserved Gentle protocol assets, not product workflow skills")
     if name == "clarification-fallback":
         if intent.get("family") != "clarification_needed" or runner.get("backend") != "response-only" or runner.get("runner_kind") != "clarification" or gate.get("state") != "needs-route" or writeback.get("classification") != "reject":
             raise SystemExit("clarification-fallback must stay response-only with needs-route and reject writeback")
