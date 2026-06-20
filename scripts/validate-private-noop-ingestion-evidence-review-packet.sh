@@ -226,9 +226,11 @@ if data.get("non_goals", []) != expected_non_goals:
     raise SystemExit("non-goals drifted")
 PY
 
-bash scripts/validate-private-discord-engram-rehearsal-readiness.sh >/dev/null
-bash scripts/validate-private-redacted-noop-ingestion-packet.sh >/dev/null
-bash scripts/validate-private-execution-approval-packet.sh >/dev/null
+if [[ "${PRIVATE_NOOP_EVIDENCE_SKIP_READINESS_CROSSCHECK:-0}" != "1" ]]; then
+  bash scripts/validate-private-discord-engram-rehearsal-readiness.sh >/dev/null
+fi
+PRIVATE_READINESS_CROSSCHECK_SKIP=1 bash scripts/validate-private-redacted-noop-ingestion-packet.sh >/dev/null
+PRIVATE_READINESS_CROSSCHECK_SKIP=1 bash scripts/validate-private-execution-approval-packet.sh >/dev/null
 bash scripts/validate-repo-safe-evidence.sh >/dev/null
 
 review_paths=("$FIXTURE_PATH" "$GUIDE_PATH")

@@ -217,9 +217,11 @@ for required in [
         raise SystemExit(f"missing non-goal: {required}")
 PY
 
-bash scripts/validate-runtime-approval-enforcement-proof.sh >/dev/null
-bash scripts/validate-private-write-readback-preflight-gate.sh >/dev/null
-bash scripts/validate-private-discord-engram-rehearsal-readiness.sh >/dev/null
+PRIVATE_READINESS_CROSSCHECK_SKIP=1 bash scripts/validate-runtime-approval-enforcement-proof.sh >/dev/null
+PRIVATE_READINESS_CROSSCHECK_SKIP=1 bash scripts/validate-private-write-readback-preflight-gate.sh >/dev/null
+if [[ "${PRIVATE_READINESS_CROSSCHECK_SKIP:-0}" != "1" ]]; then
+  bash scripts/validate-private-discord-engram-rehearsal-readiness.sh >/dev/null
+fi
 bash scripts/validate-repo-safe-evidence.sh >/dev/null
 
 review_paths=("$FIXTURE_PATH" "$GUIDE_PATH")

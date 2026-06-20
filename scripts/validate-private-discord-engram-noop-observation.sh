@@ -188,7 +188,9 @@ for forbidden in ["real Discord guild/channel/user/message IDs", "credentials or
         raise SystemExit(f"missing forbidden evidence marker: {forbidden}")
 PY
 
-bash scripts/validate-private-discord-engram-rehearsal-readiness.sh >/dev/null
+if [[ "${PRIVATE_READINESS_CROSSCHECK_SKIP:-0}" != "1" ]]; then
+  bash scripts/validate-private-discord-engram-rehearsal-readiness.sh >/dev/null
+fi
 bash scripts/validate-discord-approval-gate.sh >/dev/null
 
 review_paths=("$FIXTURE_PATH" "$GUIDE_PATH" "$READINESS_FIXTURE" "$VERTICAL_FIXTURE" "$APPROVAL_FIXTURE")
