@@ -8,8 +8,14 @@ RUNBOOK_VALIDATOR="scripts/validate-private-noop-execution-runbook-gate.sh"
 HARNESS_VALIDATOR="scripts/validate-private-noop-ingestion-review-harness.sh"
 RUNTIME_NAMESPACE_CONTRACT="discord-project-manager/runtime/discord/<guild-id>/<channel-id>"
 
-fail() { echo "ERROR: $*" >&2; exit 1; }
-require_cmd() { command -v "$1" >/dev/null 2>&1 || fail "required command not found on PATH: $1"; }
+fail() {
+  echo "ERROR: $*" >&2
+  exit 1
+}
+
+require_cmd() {
+  command -v "$1" >/dev/null 2>&1 || fail "required command not found on PATH: $1"
+}
 require_cmd grep
 require_cmd python3
 
