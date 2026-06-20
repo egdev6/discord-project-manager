@@ -1,0 +1,115 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: private-noop-ingestion-evidence-review-packet
+issue: 268
+parent_issue: 211
+live_discord_connection: false
+live_engram_calls: false
+live_openclaw_prompt_execution: false
+live_discord_message_received: false
+live_discord_message_sent: false
+live_engram_write_attempted: false
+live_readback_attempted: false
+uses_real_discord_ids: false
+raw_discord_chat_logs_included: false
+raw_private_payload_included: false
+screenshots_included: false
+secrets_included: false
+evidence_review_proof_level: repo-safe-review-packet
+private_noop_ingestion_reviewed: false
+private_execution_approval_granted: false
+readiness_gate_updated: false
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+source_contracts:
+  - examples/private-discord-engram-rehearsal-readiness.fake.yaml
+  - examples/private-redacted-noop-ingestion-packet.fake.yaml
+  - examples/private-execution-approval-packet.fake.yaml
+  - docs/operations/private-discord-manual-verification-guide.md
+sanitized_review_packet:
+  review_state: not-run
+  expected_event_kind: private-redacted-discord-noop
+  approval_binding_ref: approval/<approval-record-id>
+  proposal_ref: proposal/<proposal-id>
+  route_ref: route/<project-key>/private-context
+  actor_ref: <operator-ref>
+  runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+  target_namespace: discord-project-manager/project/<project-key>/private-context
+  operation_fingerprint: fingerprint/<operation-fingerprint>
+  evidence_schema_ref: private-redacted-noop-ingestion-packet
+  operator_attestation_required: true
+  sanitized_summary_required: true
+  raw_private_values_allowed: false
+  write_readback_allowed: false
+  approval_reuse_allowed: false
+review_matrix:
+  - id: not-run
+    input_summary: none
+    expected_state: blocked
+    expected_acceptance_allowed: false
+    reason: private no-op ingestion has not been run or reviewed
+  - id: missing-approval-binding
+    input_summary: sanitized no-op summary present
+    expected_state: blocked
+    expected_acceptance_allowed: false
+    reason: approval binding reference is missing
+  - id: missing-operator-attestation
+    input_summary: sanitized no-op summary present
+    expected_state: blocked
+    expected_acceptance_allowed: false
+    reason: operator attestation is missing
+  - id: raw-private-evidence
+    input_summary: raw private payload included
+    expected_state: blocked
+    expected_acceptance_allowed: false
+    reason: raw private evidence is forbidden
+  - id: unsupported-success-claim
+    input_summary: available-and-proven claimed
+    expected_state: blocked
+    expected_acceptance_allowed: false
+    reason: no-op ingestion review cannot claim write/readback readiness
+  - id: write-readback-attempt
+    input_summary: Engram write or readback attempted
+    expected_state: blocked
+    expected_acceptance_allowed: false
+    reason: write/readback attempts are outside this packet
+review_gate:
+  accepted_now: false
+  readiness_result: blocked
+  stop_reasons:
+    - private no-op ingestion has not been executed in this repo-safe packet
+    - operator attestation is not present in repo artifacts
+    - repo artifacts cannot contain raw private evidence
+    - no private write/readback was executed by this issue
+    - sanitized evidence review cannot close issue 211
+  next_safe_actions:
+    - run private redacted no-op ingestion only after explicit approval outside repo
+    - review only sanitized summary fields against the approved evidence schema
+    - "keep #211 open until actual private execution and readback are separately approved executed and reviewed"
+sanitized_evidence_policy:
+  allowed:
+    - sanitized no-op outcome summary
+    - approval binding summary without identifiers
+    - placeholder namespace refs
+    - blocked or pass-summary status summaries
+    - validator command names and pass/fail summaries
+    - operator attestation summary without identifiers
+  forbidden:
+    - real Discord guild/channel/user/message IDs
+    - credentials or .env values
+    - screenshots
+    - raw logs
+    - transcripts
+    - private payloads
+    - raw event payloads
+    - raw Engram exports
+    - SQL dumps
+non_goals:
+  - proving private no-op ingestion occurred
+  - granting private execution approval
+  - executing live Discord messages
+  - executing an Engram write
+  - executing a live readback from Engram
+  - updating readiness to available-and-proven
+  - closing issue 211
