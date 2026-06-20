@@ -1,0 +1,123 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: private-noop-execution-runbook-gate
+issue: 274
+parent_issue: 211
+live_discord_connection: false
+live_engram_calls: false
+live_openclaw_prompt_execution: false
+live_discord_message_received: false
+live_discord_message_sent: false
+live_engram_write_attempted: false
+live_readback_attempted: false
+uses_real_discord_ids: false
+raw_discord_chat_logs_included: false
+raw_private_payload_included: false
+screenshots_included: false
+secrets_included: false
+runbook_gate_proof_level: repo-safe-operator-sequence-only
+private_noop_execution_approved: false
+private_noop_execution_run: false
+private_noop_evidence_reviewed: false
+readiness_gate_updated: false
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+source_contracts:
+  - examples/private-discord-engram-rehearsal-readiness.fake.yaml
+  - examples/private-redacted-noop-ingestion-packet.fake.yaml
+  - examples/private-execution-approval-packet.fake.yaml
+  - examples/private-noop-ingestion-evidence-review-packet.fake.yaml
+  - docker/openclaw/private-noop-ingestion-review-harness.sh
+  - docs/operations/private-discord-manual-verification-guide.md
+operator_sequence:
+  - id: confirm-private-topology
+    required_before_execution: true
+    status: required-outside-repo
+    repo_evidence_allowed: placeholder-summary-only
+    stop_if_missing: true
+  - id: confirm-proposal-binding
+    required_before_execution: true
+    status: repo-safe-synthetic-proof-only
+    repo_evidence_allowed: validator-output-only
+    stop_if_missing: true
+  - id: request-explicit-noop-approval
+    required_before_execution: true
+    status: not-granted
+    repo_evidence_allowed: decision-summary-only
+    stop_if_missing: true
+  - id: execute-redacted-noop-only
+    required_before_execution: true
+    status: not-run
+    repo_evidence_allowed: sanitized-summary-only
+    stop_if_missing: true
+  - id: review-sanitized-summary-with-harness
+    required_before_execution: true
+    status: repo-safe-harness-ready-only
+    repo_evidence_allowed: validator-output-only
+    stop_if_missing: true
+  - id: keep-write-readback-blocked
+    required_before_execution: true
+    status: blocked
+    repo_evidence_allowed: blocked-status-only
+    stop_if_missing: true
+fail_closed_matrix:
+  - id: missing-explicit-approval
+    expected_state: blocked
+    expected_execution_allowed: false
+    reason: explicit private no-op execution approval is not granted
+  - id: missing-review-harness
+    expected_state: blocked
+    expected_execution_allowed: false
+    reason: no-op ingestion review harness is not green
+  - id: raw-private-evidence
+    expected_state: blocked
+    expected_execution_allowed: false
+    reason: raw private evidence is forbidden
+  - id: write-readback-attempt
+    expected_state: blocked
+    expected_execution_allowed: false
+    reason: write/readback attempts are outside no-op execution
+  - id: readiness-overclaim
+    expected_state: blocked
+    expected_execution_allowed: false
+    reason: no-op runbook cannot claim available-and-proven readiness
+execution_gate:
+  allowed_now: false
+  readiness_result: blocked
+  stop_reasons:
+    - private no-op execution approval is not granted
+    - private no-op execution has not run
+    - sanitized no-op evidence has not been reviewed
+    - write/readback remains blocked
+    - issue 211 must remain open
+  next_safe_actions:
+    - request explicit private no-op-only approval outside repo
+    - execute only redacted no-op ingestion after approval
+    - review only sanitized summary with the repo-safe harness contract
+    - "keep #211 open until write/readback is separately approved executed and reviewed"
+sanitized_evidence_policy:
+  allowed:
+    - placeholder topology summary
+    - approval decision summary without identifiers
+    - sanitized no-op outcome summary
+    - harness pass/fail summary
+    - blocked write/readback status
+  forbidden:
+    - real Discord guild/channel/user/message IDs
+    - credentials or .env values
+    - screenshots
+    - raw logs
+    - transcripts
+    - private payloads
+    - raw event payloads
+    - raw Engram exports
+    - SQL dumps
+non_goals:
+  - granting private no-op execution approval
+  - proving private no-op execution occurred
+  - executing live Discord messages from repo validation
+  - executing an Engram write
+  - executing a live readback from Engram
+  - updating readiness to available-and-proven
+  - closing issue 211
