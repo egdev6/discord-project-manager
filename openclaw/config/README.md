@@ -16,6 +16,9 @@ Current routing references:
 - `skills/discord-approval-gate/SKILL.md` defines the runtime approval gate for Discord write-like intents.
 - `skills/discord-general-advisor/SKILL.md` defines the response-only advisor skill for Discord routing and operational architecture questions.
 - `docs/architecture/discord-general-advisor.md` defines the fake general advisor contract and sanitized advisory scenarios.
+- `docs/architecture/discord-admin-ux.md` defines the fake admin UX contract for profile, scope binding, effective resolver, capability, and backup/export admin flows.
+- `examples/discord-admin-ux.fake.yaml` provides fake admin UX scenarios.
+- `scripts/validate-discord-admin-ux.sh` validates the admin UX contract and fixture.
 - `examples/discord-general-advisor.fake.yaml` provides fake advisor routing scenarios.
 - `scripts/validate-discord-general-advisor.sh` validates the advisor contract and fixture.
 - `docs/architecture/discord-channel-routing.md` defines channel naming and namespace mapping.
