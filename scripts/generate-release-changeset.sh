@@ -118,7 +118,7 @@ The release owner explicitly defers private Discord execution for this tag unles
 
 ## Develop integration changeset
 
-Generated from ${BASE_REF}..${HEAD_REF} before the release-note commit. The release branch adds this `docs/releases/${VERSION}.md` promotion note on top of the develop integration range.
+Generated from ${BASE_REF}..${HEAD_REF} before the release-note commit. The release branch adds docs/releases/${VERSION}.md as a promotion note on top of the develop integration range.
 
 Develop commits in range: ${commit_count}
 
