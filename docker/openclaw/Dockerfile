@@ -5,7 +5,7 @@ FROM ${ENGRAM_IMAGE} AS engram-bin
 FROM ${OPENCLAW_BASE_IMAGE}
 
 ARG TARGETARCH
-ARG GENTLE_AI_VERSION=1.37.0
+ARG GENTLE_AI_VERSION=2.1.11
 
 USER root
 RUN set -eu; \
@@ -26,7 +26,9 @@ RUN set -eu; \
   tar -xzf "$archive" -C "$tmpdir"; \
   install -m 0755 "$tmpdir/gentle-ai" /usr/local/bin/gentle-ai; \
   rm -rf "$tmpdir"; \
-  gentle-ai --version; \
+  gentle_version_output="$(gentle-ai --version)"; \
+  echo "$gentle_version_output"; \
+  case "$gentle_version_output" in *"$GENTLE_AI_VERSION"*) ;; *) echo "installed gentle-ai version does not match $GENTLE_AI_VERSION" >&2; exit 1 ;; esac; \
   mkdir -p /opt/discord-project-manager/skills /opt/discord-project-manager/openclaw-config /usr/local/bin; \
   chown -R node:node /opt/discord-project-manager
 

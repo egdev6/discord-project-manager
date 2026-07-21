@@ -22,7 +22,7 @@ RELEASE_NOTES_PATH="docs/releases/v0.2.0.md"
 
 OPENCLAW_DIGEST="ghcr.io/openclaw/openclaw@sha256:9f55f0cb32b2925a983f40726440189b8f422ec61ae2a0fb0cf90403cf6d63d7"
 ENGRAM_DIGEST="ghcr.io/gentleman-programming/engram@sha256:f9b0d7c24f48076a4c836a1099b8351215bf902dcba7ae02222f2c431f2def38"
-GENTLE_VERSION="1.37.0"
+GENTLE_VERSION="2.1.11"
 POSTGRES_IMAGE="postgres@sha256:e013e867e712fec275706a6c51c966f0bb0c93cfa8f51000f85a15f9865a28cb"
 
 for path in "$COMPOSE_PATH" "$DOCKERFILE_PATH" "$ENV_EXAMPLE_PATH" "$DOC_PATH" "$RUNTIME_DOC_PATH" "$RELEASE_NOTES_PATH"; do
@@ -35,6 +35,8 @@ for path in "$COMPOSE_PATH" "$DOCKERFILE_PATH" "$ENV_EXAMPLE_PATH" "$DOC_PATH" "
 done
 
 grep -F "ARG GENTLE_AI_VERSION=$GENTLE_VERSION" "$DOCKERFILE_PATH" >/dev/null || fail "Dockerfile missing Gentle-AI pinned version"
+grep -F "gentle_version_output=\"\$(gentle-ai --version)\"" "$DOCKERFILE_PATH" >/dev/null || fail "Dockerfile missing installed Gentle-AI version capture"
+grep -F "case \"\$gentle_version_output\" in *\"\$GENTLE_AI_VERSION\"*)" "$DOCKERFILE_PATH" >/dev/null || fail "Dockerfile missing installed Gentle-AI version assertion"
 grep -F "Gentle-AI binary" "$DOC_PATH" >/dev/null || fail "baseline doc missing Gentle-AI entry"
 grep -F "$GENTLE_VERSION" "$DOC_PATH" >/dev/null || fail "baseline doc missing Gentle-AI version"
 grep -F "$POSTGRES_IMAGE" "$COMPOSE_PATH" >/dev/null || fail "Compose missing Postgres baseline"
