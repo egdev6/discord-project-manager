@@ -121,7 +121,7 @@ jobs:
 
       - name: Install Engram CLI
         run: |
-          go install github.com/Gentleman-Programming/engram/cmd/engram@v1.15.13
+          go install github.com/Gentleman-Programming/engram/cmd/engram@v1.20.0
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
       - name: Show Engram version
