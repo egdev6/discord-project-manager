@@ -93,9 +93,9 @@ jobs:
           set -euo pipefail
           commitlint=(npx --yes @commitlint/cli@19.8.1 --config .commitlintrc.json)
           if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
-            "${commitlint[@]}" --from "origin/${GITHUB_BASE_REF}" --to "${HEAD_SHA}"
+            "${commitlint[@]}" --from "origin/${GITHUB_BASE_REF}" --to "${HEAD_SHA}" --git-log-args="--no-merges"
           elif [[ -n "${BEFORE_SHA}" && "${BEFORE_SHA}" != "0000000000000000000000000000000000000000" ]]; then
-            "${commitlint[@]}" --from "${BEFORE_SHA}" --to HEAD
+            "${commitlint[@]}" --from "${BEFORE_SHA}" --to HEAD --git-log-args="--no-merges"
           else
             "${commitlint[@]}" --last
           fi
