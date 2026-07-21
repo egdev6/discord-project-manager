@@ -21,7 +21,7 @@ RUNTIME_DOC_PATH="docs/operations/docker-runtime.md"
 RELEASE_NOTES_PATH="docs/releases/v0.2.0.md"
 
 OPENCLAW_DIGEST="ghcr.io/openclaw/openclaw@sha256:9f55f0cb32b2925a983f40726440189b8f422ec61ae2a0fb0cf90403cf6d63d7"
-ENGRAM_DIGEST="ghcr.io/gentleman-programming/engram@sha256:f9b0d7c24f48076a4c836a1099b8351215bf902dcba7ae02222f2c431f2def38"
+ENGRAM_DIGEST="ghcr.io/gentleman-programming/engram@sha256:2ac75f5c362570aa438d0543fdf4ec3911ff9412664d79ec9d4f13f3a2678479"
 GENTLE_VERSION="2.1.11"
 POSTGRES_IMAGE="postgres@sha256:e013e867e712fec275706a6c51c966f0bb0c93cfa8f51000f85a15f9865a28cb"
 
