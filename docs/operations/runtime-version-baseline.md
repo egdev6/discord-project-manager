@@ -1,6 +1,6 @@
 # Runtime version baseline
 
-This document records the validated runtime component baseline for the v0.2.0 runtime governance work.
+This document records the current validated runtime component baseline, originally introduced during the v0.2.0 runtime governance work and maintained by later baseline-update PRs.
 
 The default Docker Compose values pin image digests for repeatable validation. Operators may still override them through `.env`, but an override is an intentional runtime change and should be recorded in release or validation notes.
 
@@ -9,8 +9,8 @@ The default Docker Compose values pin image digests for repeatable validation. O
 | Component | Default image/version | Notes |
 | --- | --- | --- |
 | OpenClaw base image | `ghcr.io/openclaw/openclaw@sha256:9f55f0cb32b2925a983f40726440189b8f422ec61ae2a0fb0cf90403cf6d63d7` | Multi-arch index digest inspected from the prior `latest` baseline. |
-| Engram image / CLI source | `ghcr.io/gentleman-programming/engram@sha256:f9b0d7c24f48076a4c836a1099b8351215bf902dcba7ae02222f2c431f2def38` | Used both as the Engram Cloud service image and as the `engram` CLI source copied into the OpenClaw image. |
-| Gentle-AI binary | `1.37.0` | Installed by `docker/openclaw/Dockerfile` with upstream checksum verification. |
+| Engram image / CLI source | `ghcr.io/gentleman-programming/engram@sha256:2ac75f5c362570aa438d0543fdf4ec3911ff9412664d79ec9d4f13f3a2678479` | Used both as the Engram Cloud service image and as the `engram` CLI source copied into the OpenClaw image. |
+| Gentle-AI binary | `2.1.11` | Installed by `docker/openclaw/Dockerfile` with upstream checksum verification. |
 | Postgres | `postgres@sha256:e013e867e712fec275706a6c51c966f0bb0c93cfa8f51000f85a15f9865a28cb` | Multi-arch index digest for the `16-alpine` baseline used by Engram Cloud. |
 
 ## Override policy

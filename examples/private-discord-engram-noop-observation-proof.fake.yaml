@@ -1,0 +1,118 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: private-discord-engram-noop-observation-proof
+issue: 256
+parent_issue: 211
+related_issue: 228
+live_discord_connection: false
+live_engram_calls: false
+live_openclaw_prompt_execution: false
+live_discord_message_sent: false
+live_engram_write_attempted: false
+live_readback_attempted: false
+uses_real_discord_ids: false
+raw_discord_chat_logs_included: false
+raw_private_payload_included: false
+screenshots_included: false
+secrets_included: false
+noop_observation_proof_level: repo-safe-synthetic-noop-cli
+noop_observation_proven_for_live_private_traffic: false
+readiness_gate_updated: false
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+source_contracts:
+  - docker/openclaw/discord-noop-observation.sh
+  - docker/openclaw/discord-approval-guard.sh
+  - scripts/validate-discord-noop-observation-cli.sh
+  - examples/private-discord-engram-noop-observation.fake.yaml
+  - examples/runtime-approval-enforcement-proof.fake.yaml
+  - examples/private-discord-engram-rehearsal-readiness.fake.yaml
+proof_boundary:
+  proves:
+    - synthetic matched-route write-like envelope stops at approval-requested
+    - synthetic unmapped-channel write-like envelope stops at needs-route
+    - prompt execution remains none
+    - workspace filesystem Engram network publishing scheduling and GitHub mutations remain blocked
+    - evidence policy remains sanitized-summary-only
+  does_not_prove:
+    - live Discord gateway delivery
+    - private redacted event ingestion
+    - live OpenClaw prompt execution safety
+    - server-side proposal binding
+    - Engram write/readback
+    - issue 211 completion
+synthetic_probe_matrix:
+  - id: matched-write-like-noop-observation
+    command_ref: docker/openclaw/discord-noop-observation.sh --route-status matched-route --content-summary <write-like-summary>
+    expected_event_source: synthetic-discord-envelope
+    expected_route_status: matched-route
+    expected_response_state: approval-requested
+    expected_guard_event_type: guard-denial
+    prompt_execution: none
+    persistent_writes_allowed: false
+    workspace_file_writes_allowed: false
+    memory_writes_allowed: false
+    engram_writes_allowed: false
+    durable_reads_allowed: true
+    writes_attempted: false
+    network_calls_attempted: false
+    filesystem_writes_attempted: false
+    publishing_attempted: false
+    scheduling_attempted: false
+    github_mutations_attempted: false
+    evidence_policy: sanitized-summary-only
+  - id: unmapped-write-like-noop-observation
+    command_ref: docker/openclaw/discord-noop-observation.sh --route-status unmapped-channel --content-summary <write-like-summary>
+    expected_event_source: synthetic-discord-envelope
+    expected_route_status: unmapped-channel
+    expected_response_state: needs-route
+    expected_guard_event_type: guard-needs-route
+    prompt_execution: none
+    persistent_writes_allowed: false
+    workspace_file_writes_allowed: false
+    memory_writes_allowed: false
+    engram_writes_allowed: false
+    durable_reads_allowed: false
+    writes_attempted: false
+    network_calls_attempted: false
+    filesystem_writes_attempted: false
+    publishing_attempted: false
+    scheduling_attempted: false
+    github_mutations_attempted: false
+    evidence_policy: sanitized-summary-only
+fail_closed_expectations:
+  required_before_private_execution:
+    - private topology prepared outside repo
+    - private redacted event ingestion proof
+    - server-side proposal binding proof
+    - explicit human execution approval
+    - sanitized execution/readback evidence review
+  readiness_check_id: no-op-observation-path
+  current_readiness_status: repo-safe-synthetic-proof-only
+  repo_safe_synthetic_status: synthetic-noop-cli-proven
+  required_future_status: available-and-proven
+  readiness_fixture_ref: examples/private-discord-engram-rehearsal-readiness.fake.yaml
+  updates_readiness_fixture_now: false
+sanitized_evidence_policy:
+  allowed:
+    - synthetic no-op output summaries
+    - validator command names and pass/fail summaries
+    - placeholder namespace refs
+    - blocked status summaries
+  forbidden:
+    - real Discord guild/channel/user/message IDs
+    - credentials or .env values
+    - screenshots
+    - raw logs
+    - transcripts
+    - private payloads
+    - raw Engram exports
+    - SQL dumps
+non_goals:
+  - executing live Discord messages
+  - executing an Engram write
+  - executing a live readback from Engram
+  - proving live private no-op observation
+  - updating readiness to available-and-proven
+  - closing issue 211

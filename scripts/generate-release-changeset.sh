@@ -116,11 +116,11 @@ Status statement preserved for this baseline:
 
 The release owner explicitly defers private Discord execution for this tag unless a separate approved issue completes it first. QA-07/private Discord execution remains gated until a separate approved issue executes and reviews docs/operations/private-discord-manual-verification-guide.md with sanitized evidence.
 
-## Changeset
+## Develop integration changeset
 
-Generated from ${BASE_REF}..${HEAD_REF}.
+Generated from ${BASE_REF}..${HEAD_REF} before the release-note commit. The release branch adds docs/releases/${VERSION}.md as a promotion note on top of the develop integration range.
 
-Commits in range: ${commit_count}
+Develop commits in range: ${commit_count}
 
 | Ref | Summary |
 | --- | --- |
@@ -130,12 +130,12 @@ ${changes_table}
 Run before opening or merging the release-promotion PR:
 
 ~~~bash
-git diff --check
-bash scripts/validate-release-promotion.sh --base origin/main --head HEAD
+git diff --check origin/main...HEAD
+bash scripts/validate-release-promotion.sh --base origin/main --head HEAD --force
 bash scripts/validate-repo-safe-evidence.sh
 bash scripts/validate-openclaw-gentle-ai-runtime.sh
 bash scripts/validate-openclaw-skill-inventory.sh
-SAFE_VALIDATION_SKIP_STAGE0=1 bash scripts/run-safe-validation-suite.sh
+TMPDIR="$(mktemp -d)" SAFE_VALIDATION_SKIP_STAGE0=1 bash scripts/run-safe-validation-suite.sh
 ~~~
 
 PR checks on the release-promotion PR must also pass before merge to main.

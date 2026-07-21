@@ -1,0 +1,177 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: proposal-binding-boundary
+issue: 260
+parent_issue: 211
+live_discord_connection: false
+live_engram_calls: false
+live_openclaw_prompt_execution: false
+live_discord_message_sent: false
+live_engram_write_attempted: false
+live_readback_attempted: false
+uses_real_discord_ids: false
+raw_discord_chat_logs_included: false
+raw_private_payload_included: false
+screenshots_included: false
+secrets_included: false
+proposal_binding_proof_level: repo-safe-synthetic-contract
+proposal_binding_proven_for_live_private_traffic: false
+readiness_gate_updated: false
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+source_contracts:
+  - docker/openclaw/discord-approval-guard.sh
+  - examples/runtime-approval-enforcement-proof.fake.yaml
+  - examples/private-write-readback-preflight-gate.fake.yaml
+  - examples/private-discord-engram-rehearsal-readiness.fake.yaml
+binding_contract:
+  required_binding_fields:
+    - proposal_ref
+    - route_ref
+    - actor_ref
+    - runtime_namespace
+    - target_namespace
+    - operation_fingerprint
+    - approval_phrase
+  exact_approval_phrase: approve write
+  approval_scope: displayed-proposal-only
+  replay_allowed: false
+  cross_target_approval_allowed: false
+  stale_proposal_allowed: false
+  missing_binding_allowed: false
+  server_side_binding_required_before_write: true
+synthetic_binding_matrix:
+  - id: valid-displayed-proposal
+    proposal_ref: proposal/demo-write-001
+    route_ref: route/demo-project-context
+    actor_ref: operator-demo
+    runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+    target_namespace: discord-project-manager/project/<project-key>/private-context
+    operation_fingerprint: fingerprint/demo-write-001
+    approval_phrase: approve write
+    expected_binding_state: binding-verification-required
+    expected_write_allowed: false
+    expected_reason: exact approval still requires server-side binding and execution gate checks
+  - id: missing-proposal-ref
+    proposal_ref: none
+    route_ref: route/demo-project-context
+    actor_ref: operator-demo
+    runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+    target_namespace: discord-project-manager/project/<project-key>/private-context
+    operation_fingerprint: fingerprint/demo-write-001
+    approval_phrase: approve write
+    expected_binding_state: blocked
+    expected_write_allowed: false
+    expected_reason: proposal reference is missing
+  - id: stale-proposal-ref
+    proposal_ref: proposal/demo-write-expired
+    route_ref: route/demo-project-context
+    actor_ref: operator-demo
+    runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+    target_namespace: discord-project-manager/project/<project-key>/private-context
+    operation_fingerprint: fingerprint/demo-write-001
+    approval_phrase: approve write
+    expected_binding_state: blocked
+    expected_write_allowed: false
+    expected_reason: proposal reference is stale
+  - id: cross-target-namespace
+    proposal_ref: proposal/demo-write-001
+    route_ref: route/demo-project-context
+    actor_ref: operator-demo
+    runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+    target_namespace: discord-project-manager/project/<other-project-key>/private-context
+    operation_fingerprint: fingerprint/demo-write-001
+    approval_phrase: approve write
+    expected_binding_state: blocked
+    expected_write_allowed: false
+    expected_reason: target namespace does not match displayed proposal
+  - id: actor-mismatch
+    proposal_ref: proposal/demo-write-001
+    route_ref: route/demo-project-context
+    actor_ref: operator-other
+    runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+    target_namespace: discord-project-manager/project/<project-key>/private-context
+    operation_fingerprint: fingerprint/demo-write-001
+    approval_phrase: approve write
+    expected_binding_state: blocked
+    expected_write_allowed: false
+    expected_reason: actor does not match displayed proposal
+  - id: route-mismatch
+    proposal_ref: proposal/demo-write-001
+    route_ref: route/other-project-context
+    actor_ref: operator-demo
+    runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+    target_namespace: discord-project-manager/project/<project-key>/private-context
+    operation_fingerprint: fingerprint/demo-write-001
+    approval_phrase: approve write
+    expected_binding_state: blocked
+    expected_write_allowed: false
+    expected_reason: route does not match displayed proposal
+  - id: runtime-namespace-mismatch
+    proposal_ref: proposal/demo-write-001
+    route_ref: route/demo-project-context
+    actor_ref: operator-demo
+    runtime_namespace: discord-project-manager/runtime/discord/<other-guild-id>/<other-channel-id>
+    target_namespace: discord-project-manager/project/<project-key>/private-context
+    operation_fingerprint: fingerprint/demo-write-001
+    approval_phrase: approve write
+    expected_binding_state: blocked
+    expected_write_allowed: false
+    expected_reason: runtime namespace does not match displayed proposal
+  - id: operation-fingerprint-mismatch
+    proposal_ref: proposal/demo-write-001
+    route_ref: route/demo-project-context
+    actor_ref: operator-demo
+    runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+    target_namespace: discord-project-manager/project/<project-key>/private-context
+    operation_fingerprint: fingerprint/other-write-001
+    approval_phrase: approve write
+    expected_binding_state: blocked
+    expected_write_allowed: false
+    expected_reason: operation fingerprint does not match displayed proposal
+  - id: invalid-approval-phrase
+    proposal_ref: proposal/demo-write-001
+    route_ref: route/demo-project-context
+    actor_ref: operator-demo
+    runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+    target_namespace: discord-project-manager/project/<project-key>/private-context
+    operation_fingerprint: fingerprint/demo-write-001
+    approval_phrase: approve
+    expected_binding_state: blocked
+    expected_write_allowed: false
+    expected_reason: exact approve write phrase is required
+fail_closed_expectations:
+  required_before_private_execution:
+    - proposal binding implemented in live/private runtime
+    - private topology prepared outside repo
+    - private redacted event ingestion proof
+    - explicit human execution approval
+    - sanitized execution/readback evidence review
+  readiness_check_id: server-side-proposal-binding
+  current_readiness_status: repo-safe-synthetic-proof-only
+  required_future_status: available-and-proven
+  readiness_fixture_ref: examples/private-discord-engram-rehearsal-readiness.fake.yaml
+  updates_readiness_fixture_now: false
+sanitized_evidence_policy:
+  allowed:
+    - synthetic binding matrix summaries
+    - validator command names and pass/fail summaries
+    - placeholder namespace refs
+    - blocked status summaries
+  forbidden:
+    - real Discord guild/channel/user/message IDs
+    - credentials or .env values
+    - screenshots
+    - raw logs
+    - transcripts
+    - private payloads
+    - raw Engram exports
+    - SQL dumps
+non_goals:
+  - executing live Discord messages
+  - executing an Engram write
+  - executing a live readback from Engram
+  - proving live private proposal binding
+  - updating readiness to available-and-proven
+  - closing issue 211

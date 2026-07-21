@@ -1,0 +1,118 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: private-write-readback-preflight-gate
+issue: 252
+parent_issue: 211
+parent_issue_status: remains-open-until-private-execution-reviewed
+live_discord_message_sent: false
+live_engram_write_attempted: false
+live_readback_attempted: false
+live_openclaw_prompt_execution: false
+runtime_enforcement_proven: false
+uses_real_discord_ids: false
+raw_discord_chat_logs_included: false
+raw_private_payload_included: false
+screenshots_included: false
+secrets_included: false
+execution_allowed: false
+gate_result: blocked
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+source_contracts:
+  - docs/operations/private-discord-manual-verification-guide.md
+  - docs/operations/discord-approval-responses.md
+  - docs/architecture/discord-durable-change-audit.md
+  - examples/private-discord-engram-rehearsal-readiness.fake.yaml
+  - examples/private-discord-engram-live-preflight.fake.yaml
+operator_inputs:
+  requested_operation: private-write-readback-preflight
+  explicit_write_approval: not-granted
+  scope_confirmation: not-confirmed
+  namespace_confirmation: not-confirmed
+  evidence_schema_review: not-reviewed
+  real_identifiers_committed: false
+  credentials_committed: false
+  raw_payloads_committed: false
+sanitized_scope_preview:
+  project_ref: project/<project-key>
+  channel_scope: <guild-id>/<channel-id>
+  operation_summary: fake private write/readback request preview
+  route_ref: private-context-preview
+  raw_scope_values_printed: false
+sanitized_namespace_preview:
+  runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+  durable_target_namespace: discord-project-manager/project/<project-key>/private-context
+  readback_target_namespace: discord-project-manager/project/<project-key>/private-context
+  placeholders_only: true
+  raw_values_printed: false
+sanitized_evidence_schema:
+  placeholder_only: true
+  raw_values_allowed: false
+  identifiers_allowed: false
+  required_sections:
+    - approval_state
+    - scope_preview
+    - namespace_preview
+    - execution_result
+    - readback_result
+    - blocked_reason
+  execution_result_default: not-run
+  readback_result_default: not-run
+gate_checks:
+  - id: explicit-write-approval
+    status: not-granted
+    required_before_execution: true
+    evidence_allowed_in_repo: decision-summary-only
+    blocker: exact operator approval for a specific private write/readback proposal is missing
+  - id: target-scope
+    status: not-confirmed
+    required_before_execution: true
+    evidence_allowed_in_repo: placeholder-summary-only
+    blocker: target scope must be reviewed through sanitized placeholders only before execution
+  - id: target-namespace
+    status: not-confirmed
+    required_before_execution: true
+    evidence_allowed_in_repo: placeholder-summary-only
+    blocker: runtime and durable namespaces must be reviewed with placeholders only before execution
+  - id: evidence-schema
+    status: not-reviewed
+    required_before_execution: true
+    evidence_allowed_in_repo: schema-summary-only
+    blocker: sanitized evidence schema must be agreed before execution or readback review
+execution_gate:
+  allowed_now: false
+  gate_result: blocked
+  stop_reasons:
+    - explicit write approval is not granted
+    - target scope is not confirmed with sanitized placeholders
+    - target namespace is not confirmed with sanitized placeholders
+    - evidence schema review is not completed
+    - no private write/readback was executed by this issue
+  next_safe_actions:
+    - review scope and namespace placeholders without private identifiers
+    - agree the sanitized evidence schema before any private execution request
+    - "keep #211 open until actual private execution and readback are separately approved, executed, and reviewed"
+sanitized_evidence_policy:
+  allowed:
+    - pass status summary
+    - blocked status summary
+    - not-run status summary
+    - placeholder namespace refs
+    - approval decision summary without identifiers
+    - validator command names and pass/fail summaries
+  forbidden:
+    - real Discord guild/channel/user/message IDs
+    - credentials or .env values
+    - screenshots
+    - raw logs
+    - transcripts
+    - private payloads
+    - raw Engram exports
+    - SQL dumps
+non_goals:
+  - executing a private Discord message
+  - executing an Engram write
+  - executing a live readback from Engram
+  - proving runtime approval enforcement
+  - closing issue 211

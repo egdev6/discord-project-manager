@@ -215,8 +215,10 @@ if effect.get("readiness_fixture_ref") != "examples/private-discord-engram-rehea
 PY
 
 bash scripts/validate-discord-approval-gate.sh >/dev/null
-bash scripts/validate-private-discord-engram-noop-observation.sh >/dev/null
-bash scripts/validate-private-discord-engram-rehearsal-readiness.sh >/dev/null
+PRIVATE_READINESS_CROSSCHECK_SKIP=1 bash scripts/validate-private-discord-engram-noop-observation.sh >/dev/null
+if [[ "${PRIVATE_READINESS_CROSSCHECK_SKIP:-0}" != "1" ]]; then
+  bash scripts/validate-private-discord-engram-rehearsal-readiness.sh >/dev/null
+fi
 
 review_paths=("$FIXTURE_PATH" "$GUIDE_PATH" "$SKILL_PATH" "$APPROVAL_DOC" "$APPROVAL_FIXTURE" "$READINESS_FIXTURE" "$NOOP_FIXTURE")
 

@@ -321,20 +321,143 @@ bash scripts/validate-repo-safe-evidence.sh
 
 Before any private Discord message is sent for #211, check the readiness fixture in `examples/private-discord-engram-rehearsal-readiness.fake.yaml` with `scripts/validate-private-discord-engram-rehearsal-readiness.sh`.
 
-This gate is intentionally blocked today: `execution_allowed: false`. It does not close #211 and does not claim live Discord-to-Engram validation. It records the exact prerequisites that must become true outside repo artifacts before a live/private rehearsal can be considered:
+This gate is intentionally blocked today: `execution_allowed: false`. It does not close #211 and does not claim live Discord-to-Engram validation. It records the exact prerequisites that must become true outside repo artifacts before a live/private rehearsal can be considered.
+
+The current repo-safe status after #252, #254, and #256 is:
+
+- private write/readback preflight gate exists and remains blocked;
+- runtime approval enforcement has repo-safe synthetic guard proof only;
+- no-op observation has repo-safe synthetic no-op proof only;
+- no-op ingestion evidence review has a repo-safe synthetic harness only;
+- none of these proofs upgrade #211 readiness to live/private `available-and-proven`.
+
+Still required before any private write/readback execution:
 
 - private topology and credentials prepared outside git;
 - explicit operator approval granted for execution;
 - local runtime baseline checked privately;
 - approval-gate lifecycle contract remains green;
-- runtime approval enforcement repair progresses beyond `design-only-not-implemented` and is proven in the runtime;
+- runtime approval enforcement proven in the live/private runtime path, including server-side proposal binding;
 - private backup/restore contract remains green;
-- the read-only no-op observation path progresses beyond `design-only-not-proven` and is proven before write-like Discord traffic.
+- private redacted no-op event ingestion proven, no-op runbook gate followed, and sanitized review completed before write-like Discord traffic.
 
 Run the readiness validator with:
 
 ```bash
 bash scripts/validate-private-discord-engram-rehearsal-readiness.sh
+```
+
+## Private topology readiness packet
+
+Use `examples/private-topology-readiness-packet.fake.yaml` and `scripts/validate-private-topology-readiness-packet.sh` to review the repo-safe placeholder topology packet for #262.
+
+This is **repo-safe placeholder readiness**. It records the placeholder shape of the private guild, channel, actor, message, runtime namespace, durable target namespace, and readback namespace without printing private values. It does not prove private topology is prepared for live execution, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Run the topology packet validator with:
+
+```bash
+bash scripts/validate-private-topology-readiness-packet.sh
+```
+
+## Private redacted no-op ingestion packet
+
+Use `examples/private-redacted-noop-ingestion-packet.fake.yaml` and `scripts/validate-private-redacted-noop-ingestion-packet.sh` to review the repo-safe schema packet for #264.
+
+This is a **repo-safe schema packet**. It defines the placeholder event envelope, no-op boundary expectations, private-run evidence schema, and fail-closed checklist for a future private redacted no-op ingestion run. It does not prove private redacted event ingestion, does not include raw Discord payloads, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Run the ingestion packet validator with:
+
+```bash
+bash scripts/validate-private-redacted-noop-ingestion-packet.sh
+```
+
+## Private execution approval packet
+
+Use `examples/private-execution-approval-packet.fake.yaml` and `scripts/validate-private-execution-approval-packet.sh` to review the repo-safe decision packet for #266.
+
+This is a **repo-safe decision packet**. It defines the exact approval phrase, one-proposal scope, binding fields, blocked approval matrix, and fail-closed next actions required before any private execution approval may be granted outside repo artifacts. It does not grant private execution approval, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Run the approval packet validator with:
+
+```bash
+bash scripts/validate-private-execution-approval-packet.sh
+```
+
+## Private no-op ingestion evidence review packet
+
+Use `examples/private-noop-ingestion-evidence-review-packet.fake.yaml` and `scripts/validate-private-noop-ingestion-evidence-review-packet.sh` to review the repo-safe review packet for #268.
+
+This is a **repo-safe review packet**. It defines the sanitized fields, review matrix, operator-attestation requirement, and fail-closed stop rules for a future private redacted no-op ingestion evidence review. It does not prove private no-op ingestion occurred, does not grant private execution approval, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Run the evidence review packet validator with:
+
+```bash
+bash scripts/validate-private-noop-ingestion-evidence-review-packet.sh
+```
+
+## Private no-op ingestion review harness
+
+Use `discord-project-manager-private-noop-ingestion-review-harness` from the packaged runtime, or `docker/openclaw/private-noop-ingestion-review-harness.sh` locally, to produce deterministic repo-safe summaries for #270.
+
+This is a **repo-safe sanitized review harness**. It exercises only synthetic review scenarios such as `not-run`, `pass-summary`, `missing-approval-binding`, `missing-operator-attestation`, `raw-private-evidence`, `unsupported-success-claim`, and `write-readback-attempt`. Even `pass-summary` remains non-accepting: it is reviewable summary shape only, not accepted proof. It does not prove private no-op ingestion occurred, does not grant private execution approval, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Validate the harness with:
+
+```bash
+bash scripts/validate-private-noop-ingestion-review-harness.sh
+```
+
+Example local harness call:
+
+```bash
+sh docker/openclaw/private-noop-ingestion-review-harness.sh --scenario not-run
+```
+
+## Private no-op execution runbook gate
+
+Use `examples/private-noop-execution-runbook-gate.fake.yaml` and `scripts/validate-private-noop-execution-runbook-gate.sh` to review the repo-safe runbook gate for #274.
+
+This is **repo-safe operator sequence only**. It defines the future private no-op-only sequence, prerequisite gates, fail-closed matrix, and sanitized evidence policy. It does not prove private no-op execution occurred, does not grant private no-op execution approval, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Validate the runbook gate with:
+
+```bash
+bash scripts/validate-private-noop-execution-runbook-gate.sh
+```
+
+The readiness gate cross-checks this runbook gate as `repo-safe-operator-sequence-only`; that status is still blocked and does not grant execution.
+
+## Private no-op execution result packet
+
+Use `examples/private-noop-execution-result-packet.fake.yaml` and `scripts/validate-private-noop-execution-result-packet.sh` to review the repo-safe result packet schema for #278.
+
+This is **repo-safe result schema only**. It defines the sanitized fields for a future separately approved private no-op run result. It does not prove private no-op execution occurred, does not grant private execution approval, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Validate the result packet with:
+
+```bash
+bash scripts/validate-private-noop-execution-result-packet.sh
+```
+
+## Private write/readback preflight gate
+
+Use `examples/private-write-readback-preflight-gate.fake.yaml` and `scripts/validate-private-write-readback-preflight-gate.sh` for the first repo-safe #252 slice before any private write/readback execution is even proposed.
+
+This gate is intentionally blocked by default: `execution_allowed: false`. It does not execute a private Discord message, does not execute an Engram write or readback, and does not close #211. #211 remains open until actual private execution and readback are separately approved, executed outside repo-safe artifacts, and reviewed with sanitized evidence.
+
+The gate fails closed unless all four review surfaces are explicitly present in sanitized placeholder form:
+
+- exact write approval state;
+- target scope preview;
+- runtime and durable namespace preview;
+- sanitized evidence schema for future execution/readback review.
+
+Only placeholder summaries are allowed in repo artifacts. Real Discord IDs, credentials, screenshots, raw logs, transcripts, private payloads, raw Engram exports, and SQL dumps remain forbidden.
+
+Run the preflight gate validator with:
+
+```bash
+bash scripts/validate-private-write-readback-preflight-gate.sh
 ```
 
 ## Private Discord-to-Engram no-op observation design
@@ -352,6 +475,18 @@ bash scripts/validate-private-discord-engram-noop-observation.sh
 bash scripts/validate-discord-noop-observation-cli.sh
 ```
 
+## Private Discord-to-Engram no-op observation proof gate
+
+Use `examples/private-discord-engram-noop-observation-proof.fake.yaml` and `scripts/validate-private-discord-engram-noop-observation-proof.sh` to verify the repo-safe synthetic no-op proof for #256.
+
+This is a **repo-safe synthetic no-op proof**. It validates `discord-project-manager-noop-observation` for matched-route and unmapped-channel synthetic envelopes. It does not prove live private no-op observation, does not prove live Discord gateway delivery, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Run the proof gate validator with:
+
+```bash
+bash scripts/validate-private-discord-engram-noop-observation-proof.sh
+```
+
 ## Runtime approval enforcement repair contract
 
 Use `examples/runtime-approval-enforcement-repair.fake.yaml` and `scripts/validate-runtime-approval-enforcement-repair.sh` to review the required runtime repair before live Discord traffic.
@@ -362,6 +497,30 @@ Run the repair contract validator with:
 
 ```bash
 bash scripts/validate-runtime-approval-enforcement-repair.sh
+```
+
+## Runtime approval enforcement proof gate
+
+Use `examples/runtime-approval-enforcement-proof.fake.yaml` and `scripts/validate-runtime-approval-enforcement-proof.sh` to verify the repo-safe synthetic guard proof for #254.
+
+This is a **repo-safe synthetic guard proof**. It validates the deterministic `discord-project-manager-approval-guard` states for write-like input, invalid approval text, exact `approve write`, and unmapped routes. It does not prove live private Discord approval enforcement, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Run the proof gate validator with:
+
+```bash
+bash scripts/validate-runtime-approval-enforcement-proof.sh
+```
+
+## Proposal binding proof gate
+
+Use `examples/proposal-binding-boundary.fake.yaml` and `scripts/validate-proposal-binding-boundary.sh` to verify the repo-safe synthetic proposal binding proof for #260.
+
+This is a **repo-safe synthetic proposal binding proof**. It validates that exact `approve write` remains scoped to the displayed proposal, route, actor, runtime namespace, target namespace, and operation fingerprint. Missing, stale, mismatched, cross-target, or invalid approvals stay blocked. It does not prove live private proposal binding, does not execute private Discord traffic, does not execute Engram write/readback, does not update #211 readiness to available-and-proven, and does not close #211.
+
+Run the proof gate validator with:
+
+```bash
+bash scripts/validate-proposal-binding-boundary.sh
 ```
 
 ## Deterministic approval guard CLI

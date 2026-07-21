@@ -1,11 +1,11 @@
 ARG OPENCLAW_BASE_IMAGE=ghcr.io/openclaw/openclaw@sha256:9f55f0cb32b2925a983f40726440189b8f422ec61ae2a0fb0cf90403cf6d63d7
-ARG ENGRAM_IMAGE=ghcr.io/gentleman-programming/engram@sha256:f9b0d7c24f48076a4c836a1099b8351215bf902dcba7ae02222f2c431f2def38
+ARG ENGRAM_IMAGE=ghcr.io/gentleman-programming/engram@sha256:2ac75f5c362570aa438d0543fdf4ec3911ff9412664d79ec9d4f13f3a2678479
 
 FROM ${ENGRAM_IMAGE} AS engram-bin
 FROM ${OPENCLAW_BASE_IMAGE}
 
 ARG TARGETARCH
-ARG GENTLE_AI_VERSION=1.37.0
+ARG GENTLE_AI_VERSION=2.1.11
 
 USER root
 RUN set -eu; \
@@ -26,7 +26,9 @@ RUN set -eu; \
   tar -xzf "$archive" -C "$tmpdir"; \
   install -m 0755 "$tmpdir/gentle-ai" /usr/local/bin/gentle-ai; \
   rm -rf "$tmpdir"; \
-  gentle-ai --version; \
+  gentle_version_output="$(gentle-ai --version)"; \
+  echo "$gentle_version_output"; \
+  case "$gentle_version_output" in *"$GENTLE_AI_VERSION"*) ;; *) echo "installed gentle-ai version does not match $GENTLE_AI_VERSION" >&2; exit 1 ;; esac; \
   mkdir -p /opt/discord-project-manager/skills /opt/discord-project-manager/openclaw-config /usr/local/bin; \
   chown -R node:node /opt/discord-project-manager
 
@@ -39,6 +41,7 @@ COPY --chown=root:root docker/openclaw/discord-approval-guard.sh /usr/local/bin/
 COPY --chown=root:root docker/openclaw/discord-noop-observation.sh /usr/local/bin/discord-project-manager-noop-observation
 COPY --chown=root:root docker/openclaw/discord-runtime-boundary-harness.sh /usr/local/bin/discord-project-manager-runtime-boundary-harness
 COPY --chown=root:root docker/openclaw/discord-admin-ux-preview-harness.sh /usr/local/bin/discord-project-manager-admin-ux-preview-harness
+COPY --chown=root:root docker/openclaw/private-noop-ingestion-review-harness.sh /usr/local/bin/discord-project-manager-private-noop-ingestion-review-harness
 RUN chmod 0755 \
     /usr/local/bin/discord-project-manager-sync-skills \
     /usr/local/bin/discord-project-manager-managed-registry \
@@ -46,6 +49,7 @@ RUN chmod 0755 \
     /usr/local/bin/discord-project-manager-noop-observation \
     /usr/local/bin/discord-project-manager-runtime-boundary-harness \
     /usr/local/bin/discord-project-manager-admin-ux-preview-harness \
+    /usr/local/bin/discord-project-manager-private-noop-ingestion-review-harness \
     /usr/local/bin/engram \
   && engram version
 

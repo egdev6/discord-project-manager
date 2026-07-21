@@ -151,7 +151,9 @@ fi
 bash scripts/validate-discord-approval-guard-cli.sh >/dev/null
 bash scripts/validate-discord-noop-observation-cli.sh >/dev/null
 bash scripts/validate-discord-runtime-boundary-harness.sh >/dev/null
-bash scripts/validate-private-discord-engram-rehearsal-readiness.sh >/dev/null
+if [[ "${PRIVATE_READINESS_CROSSCHECK_SKIP:-0}" != "1" ]]; then
+  bash scripts/validate-private-discord-engram-rehearsal-readiness.sh >/dev/null
+fi
 bash scripts/validate-repo-safe-evidence.sh >/dev/null
 
 echo "Validated private Discord no-op rehearsal preparation plan."
