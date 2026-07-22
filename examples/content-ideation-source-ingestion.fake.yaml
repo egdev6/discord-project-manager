@@ -1,0 +1,198 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: content-ideation-source-ingestion
+project: egdev
+live_source_fetching: false
+live_discord_connection: false
+live_openclaw_execution: false
+live_engram_calls: false
+notion_dependency: false
+plugin_install_enabled: false
+plugin_enable_enabled: false
+publishing_enabled: false
+scheduling_enabled: false
+queue_execution_enabled: false
+durable_memory_writes_allowed: false
+workspace_file_writes_allowed: false
+uses_real_discord_ids: false
+credential_material_included: false
+raw_source_dumps_included: false
+private_source_urls_in_repo: false
+runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+limits:
+  max_items_per_source: 2
+  max_summary_chars: 280
+  max_signals_per_item: 3
+source_registry:
+  storage_policy: repo-safe-demo-only
+  private_source_policy: keep private-runtime source URLs outside git
+  sources:
+  - source_key: demo-rss-feed-01
+    source_kind: rss-feed
+    sensitivity: public-demo
+    url: https://example.invalid/feeds/openclaw-ideation.xml
+    url_policy: fake-demo-url-only
+    adapter_preference: pending-rss-plugin-spike
+    rss_plugin_candidates:
+    - holo-rss-reader
+    - '@ipocket/clawrss'
+    - '@feednest/openclaw'
+    retrieval_adapter: fake-rss-fixture-adapter
+  - source_key: demo-webpage-01
+    source_kind: webpage
+    sensitivity: public-demo
+    url: https://example.invalid/articles/reviewable-ai-workflows
+    url_policy: fake-demo-url-only
+    adapter_preference: web-readability
+    retrieval_adapter: web-readability
+  - source_key: demo-rss-partial-01
+    source_kind: rss-feed
+    sensitivity: public-demo
+    url: https://example.invalid/feeds/partial-ideation.xml
+    url_policy: fake-demo-url-only
+    adapter_preference: pending-rss-plugin-spike
+    rss_plugin_candidates:
+    - holo-rss-reader
+    - '@ipocket/clawrss'
+    - '@feednest/openclaw'
+    retrieval_adapter: fake-rss-fixture-adapter
+  - source_key: demo-webpage-failing-01
+    source_kind: webpage
+    sensitivity: public-demo
+    url: https://example.invalid/articles/inactive-source
+    url_policy: fake-demo-url-only
+    adapter_preference: web-readability
+    retrieval_adapter: web-readability
+retrieval_plan:
+  retrieval_mode: fake-fixture-no-network
+  allowed_capabilities:
+  - web-readability
+  - fake-rss-fixture-adapter
+  excluded_capabilities:
+  - live-fetch
+  - plugin-install
+  - plugin-enable
+  - notion-api
+source_statuses:
+- source_ref: demo-rss-feed-01
+  source_kind: rss-feed
+  retrieved_by: fake-rss-fixture-adapter
+  retrieval_mode: fake-fixture-no-network
+  status: succeeded
+  items_emitted: 1
+  durable_write_executed: false
+- source_ref: demo-webpage-01
+  source_kind: webpage
+  retrieved_by: web-readability
+  retrieval_mode: fake-fixture-no-network
+  status: succeeded
+  items_emitted: 1
+  durable_write_executed: false
+- source_ref: demo-rss-partial-01
+  source_kind: rss-feed
+  retrieved_by: fake-rss-fixture-adapter
+  retrieval_mode: fake-fixture-no-network
+  status: partial
+  items_emitted: 1
+  isolated: true
+  failure_reason: fake feed parse warning retained one bounded item
+  durable_write_executed: false
+- source_ref: demo-webpage-failing-01
+  source_kind: webpage
+  retrieved_by: web-readability
+  retrieval_mode: fake-fixture-no-network
+  status: failed
+  items_emitted: 0
+  isolated: true
+  failure_reason: fake inactive source used to validate per-source failure isolation
+  durable_write_executed: false
+normalized_items:
+- item_id: demo-rss-item-01
+  source_ref: demo-rss-feed-01
+  provenance:
+    source_kind: rss-feed
+    retrieved_by: fake-rss-fixture-adapter
+    retrieval_mode: fake-fixture-no-network
+    canonical_url: https://example.invalid/feeds/openclaw-ideation/item-01
+    source_title: Demo RSS item about approval-first ideation
+  summary: Approval gates should treat source-derived content ideas as proposals until a human approves any strategy or ledger write.
+  ideation_signals:
+  - approval gates are part of ideation safety
+  - source summaries should stay smaller than raw source content
+  - provenance helps reviewers audit where ideas came from
+  content_boundaries:
+    raw_dump_included: false
+    private_payload_included: false
+    durable_write_executed: false
+- item_id: demo-rss-partial-item-01
+  source_ref: demo-rss-partial-01
+  provenance:
+    source_kind: rss-feed
+    retrieved_by: fake-rss-fixture-adapter
+    retrieval_mode: fake-fixture-no-network
+    canonical_url: https://example.invalid/feeds/partial-ideation/item-01
+    source_title: Demo partial RSS item with isolated parse warning
+  summary: A partial feed result can keep one bounded idea while recording the source warning and avoiding batch-level failure.
+  ideation_signals:
+  - partial source failures should stay isolated
+  - emitted item counts must match status envelopes
+  content_boundaries:
+    raw_dump_included: false
+    private_payload_included: false
+    durable_write_executed: false
+- item_id: demo-webpage-item-01
+  source_ref: demo-webpage-01
+  provenance:
+    source_kind: webpage
+    retrieved_by: web-readability
+    retrieval_mode: fake-fixture-no-network
+    canonical_url: https://example.invalid/articles/reviewable-ai-workflows
+    source_title: Demo webpage about reviewable AI workflows
+  summary: Reviewable content workflows need bounded inputs, explicit source references, and small proposal slices before planning or publishing decisions.
+  ideation_signals:
+  - bounded summaries protect reviewer attention
+  - webpage extraction should prefer readability output over raw HTML
+  - planning candidates should remain network-neutral until routed
+  content_boundaries:
+    raw_dump_included: false
+    private_payload_included: false
+    durable_write_executed: false
+proposal_route:
+  effective_skills:
+  - strategy-planner
+  - on-demand-brief-planner
+  mandatory_skills:
+  - discord-approval-gate
+  proposed_targets:
+    strategy_namespace_key: discord-project-manager/project/egdev/strategy
+    content_ledger_namespace_key: discord-project-manager/project/egdev/content-ledger
+    network_namespace_keys:
+      youtube: discord-project-manager/project/egdev/network/youtube
+      twitch: discord-project-manager/project/egdev/network/twitch
+      stack-and-flow: discord-project-manager/project/egdev/network/stack-and-flow
+  write_mode: planned-only-until-approved
+approval_request:
+  state: approval-requested
+  approval_phrase: approve write
+  write_executed: false
+  runtime_context: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+  runtime_audit_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+  reply_options:
+  - approve write
+  - 'revise: <instruction>'
+  - reject
+  risk_boundary:
+  - no durable memory writes before approval
+  - no workspace file writes before approval
+  - no publishing, scheduling, queue execution, plugin install, or plugin enable
+  - no live fetching before an explicit read-only adapter spike
+non_goals:
+- live source fetching
+- Notion API calls
+- plugin installation or enablement
+- durable storage
+- publishing
+- scheduling
+- production credentials
