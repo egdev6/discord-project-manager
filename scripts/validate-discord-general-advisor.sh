@@ -52,6 +52,10 @@ for required in \
   "name: social-bootstrap-request" \
   "name: publishing-request" \
   "name: ambiguous-route-question" \
+  "name: command-family-help" \
+  "name: prompt-feedback-request" \
+  "name: workflow-handoff-request" \
+  "name: process-release-question" \
   "name: spanish-strategy-question" \
   "name: mixed-language-profile-approval" \
   "user_message_language: es" \
@@ -81,6 +85,10 @@ for required in \
   "discord-approval-gate" \
   "recommended_route" \
   "handoff_message" \
+  "command_families" \
+  "prompt_pattern" \
+  "safer_prompt" \
+  "response-only usage coach" \
   "user_message_language" \
   "prose_reply_language" \
   "technical_tokens_language: en" \
@@ -92,6 +100,10 @@ for required in \
   "Advisor input schema" \
   "Advisor response schema" \
   "Topic routing guide" \
+  "Command family guide" \
+  "Prompt review guide" \
+  "Information placement guide" \
+  "Workflow handoff template" \
   "project:egdev:strategy" \
   "category" \
   "channel" \
@@ -118,39 +130,47 @@ python3 - "$FIXTURE_PATH" "$RUNTIME_NAMESPACE_CONTRACT" <<'PY'
 import sys
 from pathlib import Path
 
+import yaml
+
 fixture_path = Path(sys.argv[1])
 runtime_contract = sys.argv[2]
-lines = fixture_path.read_text().splitlines()
-scenarios = []
-current = None
-section = None
-subsection = None
 
-for raw in lines:
-    if raw.startswith("  - name:"):
-        if current:
-            scenarios.append(current)
-        current = {"name": raw.split(":", 1)[1].strip(), "input": {}, "response": {}, "contracts": []}
-        section = subsection = None
-        continue
-    if not current:
-        continue
-    if raw.startswith("    input:"):
-        section = "input"; subsection = None; continue
-    if raw.startswith("    response:"):
-        section = "response"; subsection = None; continue
-    if section and raw.startswith("      ") and not raw.startswith("        ") and raw.rstrip().endswith(":"):
-        subsection = raw.strip()[:-1]
-        continue
-    if section and raw.startswith("      ") and not raw.startswith("        ") and ":" in raw:
-        key, value = raw.strip().split(":", 1)
-        current[section][key] = value.strip().strip('"')
-        subsection = None
-        continue
-    if section == "response" and subsection == "required_contracts" and raw.startswith("        - "):
-        current["contracts"].append(raw.strip()[2:])
-if current:
-    scenarios.append(current)
+try:
+    fixture = yaml.safe_load(fixture_path.read_text())
+except yaml.YAMLError as exc:
+    raise SystemExit(f"fixture is not valid YAML: {exc}") from exc
+
+if not isinstance(fixture, dict):
+    raise SystemExit("fixture root must be a mapping")
+
+raw_scenarios = fixture.get("advisor_scenarios")
+if not isinstance(raw_scenarios, list):
+    raise SystemExit("fixture must contain advisor_scenarios list")
+
+def scalar_to_contract_string(value):
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return str(value)
+
+scenarios = []
+for raw in raw_scenarios:
+    if not isinstance(raw, dict):
+        raise SystemExit("each advisor scenario must be a mapping")
+    name = raw.get("name")
+    inp = raw.get("input")
+    res = raw.get("response")
+    if not isinstance(name, str):
+        raise SystemExit("each advisor scenario must have a string name")
+    if not isinstance(inp, dict):
+        raise SystemExit(f"{name} input must be a mapping")
+    if not isinstance(res, dict):
+        raise SystemExit(f"{name} response must be a mapping")
+    scenarios.append({
+        "name": name,
+        "input": {key: scalar_to_contract_string(value) for key, value in inp.items()},
+        "response": {key: scalar_to_contract_string(value) for key, value in res.items() if key != "required_contracts"},
+        "contracts": res.get("required_contracts") or [],
+    })
 
 expected = {
     "linkedin-project-request",
@@ -164,6 +184,10 @@ expected = {
     "social-bootstrap-request",
     "publishing-request",
     "ambiguous-route-question",
+    "command-family-help",
+    "prompt-feedback-request",
+    "workflow-handoff-request",
+    "process-release-question",
     "spanish-strategy-question",
     "mixed-language-profile-approval",
     "unknown-language-clarification",
@@ -173,7 +197,7 @@ missing = expected - seen
 if missing:
     raise SystemExit(f"missing advisor scenarios: {sorted(missing)}")
 
-required_topics = {"project", "category", "channel", "context", "skill", "profile", "capability", "strategy", "task", "analytics", "publishing"}
+required_topics = {"project", "category", "channel", "context", "skill", "profile", "capability", "strategy", "task", "analytics", "publishing", "process_release"}
 seen_topics = {s["input"].get("requested_topic") for s in scenarios}
 missing_topics = required_topics - seen_topics
 if missing_topics:
@@ -229,6 +253,24 @@ for sc in scenarios:
             raise SystemExit(f"{name} write-like advice must be blocked and approval-required")
         if res.get("approval_skill") != "discord-approval-gate" or res.get("exact_approval_phrase") != "approve write":
             raise SystemExit(f"{name} write-like advice must name exact approval gate")
+    if name == "command-family-help":
+        for key in ["command_families", "prompt_pattern", "handoff_message"]:
+            if key not in res:
+                raise SystemExit(f"{name} missing {key}")
+        for token in ["context", "profile", "skill", "capability", "strategy", "task", "analytics", "publishing", "process/release"]:
+            if token not in res.get("command_families", "") and token not in res.get("reason", ""):
+                raise SystemExit(f"{name} must explain command family {token}")
+    if name == "prompt-feedback-request":
+        if inp.get("question_type") != "prompt_feedback" or "safer_prompt" not in res:
+            raise SystemExit("prompt-feedback-request must review and improve a prompt before execution")
+        if res.get("write_executed") != "false":
+            raise SystemExit("prompt-feedback-request must remain response-only")
+    if name == "workflow-handoff-request":
+        if inp.get("question_type") != "handoff_copy" or "handoff_message" not in res:
+            raise SystemExit("workflow-handoff-request must produce copyable handoff")
+    if name == "process-release-question":
+        if inp.get("requested_topic") != "process_release" or "process/release" not in res.get("reason", ""):
+            raise SystemExit("process-release-question must cover process/release placement")
     if res.get("advisor_state") == "clarification-needed":
         if "clarifying_question" not in res:
             raise SystemExit(f"{name} clarification-needed response must ask a clarifying question")

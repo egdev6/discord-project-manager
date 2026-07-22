@@ -299,6 +299,106 @@ advisor_scenarios:
       technical_tokens_language: en
       language_policy: prose-matches-current-message; technical-tokens-stay-english
       clarifying_question: "Which project and channel type should this task belong to: context, strategy, tasks, skills, decisions, or qa?"
+  - name: command-family-help
+    input:
+      origin_kind: discord-general-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      question_type: command_help
+      requested_topic: context
+      known_scope: unknown
+      known_project_ref: unknown
+      write_like: false
+      user_message_language: en
+    response:
+      advisor_state: route-recommended
+      recommended_route: response-only-usage-coach
+      target_channel_ref: none
+      reason: Explain context, profile, skill, capability, strategy, task, analytics, publishing, and process/release command families with sanitized examples only.
+      required_contracts:
+        - skills/discord-general-advisor/SKILL.md
+        - docs/architecture/discord-runtime-orchestrator.md
+      approval_required: false
+      write_executed: false
+      prose_reply_language: en
+      technical_tokens_language: en
+      language_policy: prose-matches-current-message; technical-tokens-stay-english
+      command_families: "context | profile | skill | capability | strategy | task | analytics | publishing | process/release"
+      prompt_pattern: "Goal + sanitized input + target topic + approval state + requested output. Example: route this fake roadmap note for project-demo-egdev; do not write or publish."
+      handoff_message: "Use the family names above to ask for routing advice first; include sanitized examples only and keep live actions out of scope."
+  - name: prompt-feedback-request
+    input:
+      origin_kind: discord-general-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      question_type: prompt_feedback
+      requested_topic: task
+      known_scope: project
+      known_project_ref: project-demo-egdev
+      write_like: false
+      user_message_language: en
+    response:
+      advisor_state: route-recommended
+      recommended_route: project:egdev:tasks
+      target_channel_ref: channel-demo-egdev-tasks
+      reason: "Review the proposed prompt before execution, remove private data, make approval state explicit, and keep write_executed: false."
+      required_contracts:
+        - skills/discord-general-advisor/SKILL.md
+        - docs/architecture/discord-runtime-orchestrator.md
+      approval_required: false
+      write_executed: false
+      prose_reply_language: en
+      technical_tokens_language: en
+      language_policy: prose-matches-current-message; technical-tokens-stay-english
+      prompt_pattern: "Goal + scope + sanitized context + non-goals + approval state + output format."
+      safer_prompt: "For project-demo-egdev, review this sanitized task idea and return risks plus next-step options only. Do not execute, persist, publish, schedule, or mutate GitHub."
+      handoff_message: "In project:egdev:tasks: review the sanitized task prompt and suggest safer next steps before execution."
+  - name: workflow-handoff-request
+    input:
+      origin_kind: discord-general-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      question_type: handoff_copy
+      requested_topic: strategy
+      known_scope: project
+      known_project_ref: project-demo-egdev
+      write_like: false
+      user_message_language: en
+    response:
+      advisor_state: route-recommended
+      recommended_route: project:egdev:strategy
+      target_channel_ref: channel-demo-egdev-strategy
+      reason: A workflow handoff should move sanitized planning context to the strategy channel while staying response-only until approval.
+      required_contracts:
+        - docs/architecture/discord-semantic-channel-guides.md
+        - docs/architecture/discord-managed-channel-routing.md
+      approval_required: false
+      write_executed: false
+      prose_reply_language: en
+      technical_tokens_language: en
+      language_policy: prose-matches-current-message; technical-tokens-stay-english
+      handoff_message: "In project:egdev:strategy: review this sanitized workflow question for project-demo-egdev. Return options and risks only; no durable writes or live actions without approval."
+  - name: process-release-question
+    input:
+      origin_kind: discord-general-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      question_type: where_should_this_go
+      requested_topic: process_release
+      known_scope: project
+      known_project_ref: project-demo-egdev
+      write_like: false
+      user_message_language: en
+    response:
+      advisor_state: route-recommended
+      recommended_route: project:egdev:decisions
+      target_channel_ref: channel-demo-egdev-decisions
+      reason: process/release questions belong with review, governance, incident, or release decision records before task execution.
+      required_contracts:
+        - docs/architecture/discord-semantic-channel-guides.md
+        - docs/architecture/discord-managed-channel-routing.md
+      approval_required: false
+      write_executed: false
+      prose_reply_language: en
+      technical_tokens_language: en
+      language_policy: prose-matches-current-message; technical-tokens-stay-english
+      handoff_message: "In project:egdev:decisions: review the sanitized release/process question for project-demo-egdev and decide the next workflow; no release action is approved."
   - name: spanish-strategy-question
     input:
       origin_kind: discord-general-channel
