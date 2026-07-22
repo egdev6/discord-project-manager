@@ -20,6 +20,7 @@ Do not use it to execute the requested work. Advise first, then route.
 - Distinguish advice from execution; never imply state changed, persistence happened, or live Discord routing was proven.
 - Ask clarifying questions when scope, project, network, requested artifact, or risk is ambiguous.
 - For write-like requests, name `discord-approval-gate` and keep `write_executed: false`.
+- Match user-facing prose to the user's current Discord message language, using `user_message_language` and `prose_reply_language`; keep commands, snippets, schema keys, routes, paths, skill names, and exact approval phrases in English.
 - Never include real Discord IDs, private transcripts, screenshots, secrets, or personal context in public evidence.
 
 ## Decision Gates
@@ -42,7 +43,7 @@ Do not use it to execute the requested work. Advise first, then route.
 
 ## Output Contract
 
-Return `recommended_route`, `reason`, `approval_required`, `write_executed: false`, `handoff_message` when useful, and `clarifying_question` when needed.
+Return `recommended_route`, `reason`, `approval_required`, `write_executed: false`, `handoff_message` when useful, `clarifying_question` when needed, plus `prose_reply_language`, `technical_tokens_language: en`, and `language_policy: prose-matches-current-message; technical-tokens-stay-english`. Read `user_message_language` from the input metadata; do not invent or silently change it.
 
 ## References
 

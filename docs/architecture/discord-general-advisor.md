@@ -36,6 +36,7 @@ The advisor depends on:
 | `known_scope` | `global`, `project`, `network`, or `unknown`. |
 | `known_project_ref` | Sanitized project ref or `unknown`. |
 | `write_like` | Whether the request appears to create, update, store, publish, schedule, commit, or deploy. |
+| `user_message_language` | Review language tag for the current Discord message. Fake fixtures currently use `en`, `es`, or `und` for unknown/ambiguous language. |
 
 ## Advisor response schema
 
@@ -49,6 +50,9 @@ The advisor depends on:
 | `write_executed` | Always `false` in this slice. |
 | `handoff_message` | Optional copyable message for the recommended channel. |
 | `clarifying_question` | Required when route or risk is ambiguous. |
+| `prose_reply_language` | Language tag used for natural-language, user-facing prose; must match `user_message_language`. |
+| `technical_tokens_language` | Always `en` for routes, paths, schema keys, commands, and exact approval phrases. |
+| `language_policy` | Canonical marker `prose-matches-current-message; technical-tokens-stay-english`. |
 
 ## Topic routing guide
 
@@ -66,6 +70,12 @@ The advisor depends on:
 | Runtime capability or connector configuration | Global/project `config` or skills governance, approval-gated before enablement. |
 | Analytics or trend ingestion | Strategy/advisory route until v0.5 capability is approved. |
 | Publishing or scheduling | `publishing-connector-readiness`; no publish/schedule before explicit approval. |
+
+## Response-language rule
+
+The advisor's user-facing prose replies must match the user's current Discord message language when the language is known. This is a per-message fake-first contract; the fixture metadata proves only the intended policy, not live language detection. Routes such as `project:egdev:strategy`, paths, schema keys, commands, skill names, and exact approval phrases such as `approve write` remain English inside otherwise localized prose.
+
+When the language is unknown or genuinely ambiguous, use `user_message_language: und`, `prose_reply_language: und`, and ask a short language-neutral clarification instead of defaulting silently to English.
 
 ## Safety rules
 
@@ -91,6 +101,7 @@ This contract does not:
 
 - [ ] Fixture covers project, category, channel, private preference, capability, social bootstrap, publishing, and ambiguity scenarios.
 - [ ] Every response includes a route or clarifying question, reason, approval state, and `write_executed: false`.
+- [ ] Every scenario includes `user_message_language`, matching `prose_reply_language`, `language_policy: prose-matches-current-message; technical-tokens-stay-english`, and `technical_tokens_language: en`.
 - [ ] Write-like advice stays approval-gated.
 - [ ] Copyable handoff text is safe and does not include private IDs or transcripts.
 - [ ] No live/prod/mutation claims or real Discord identifiers are introduced.

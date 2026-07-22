@@ -33,6 +33,7 @@ scenarios:
         network_slug: linkedin
       normalized_channel_name: drafts
       user_role: operator-demo
+      user_message_language: en
     pack_refs:
       context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.context_pack
       skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.skill_pack
@@ -63,6 +64,9 @@ scenarios:
     execution_metadata:
       mode: fake-contract
       prompt_execution: none
+      prose_reply_language: en
+      technical_tokens_language: en
+      language_policy: prose-matches-current-message; technical-tokens-stay-english
       selected_context_pack: egdev-linkedin-drafts
       selected_skill_pack: egdev-linkedin-drafts
     writeback_policy:
@@ -79,6 +83,7 @@ scenarios:
         network_slug: linkedin
       normalized_channel_name: openclaw-global-profiles
       user_role: operator-demo
+      user_message_language: en
     pack_refs:
       context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.context_pack
       skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.skill_pack
@@ -110,6 +115,9 @@ scenarios:
     execution_metadata:
       mode: fake-contract
       prompt_execution: none
+      prose_reply_language: en
+      technical_tokens_language: en
+      language_policy: prose-matches-current-message; technical-tokens-stay-english
       selected_context_pack: egdev-linkedin-drafts
       selected_skill_pack: egdev-linkedin-drafts
       private_content_fixture: sanitized-placeholder-only
@@ -127,6 +135,7 @@ scenarios:
         network_slug: linkedin
       normalized_channel_name: openclaw-global-profiles
       user_role: operator-demo
+      user_message_language: en
     pack_refs:
       context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.context_pack
       skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.skill_pack
@@ -161,6 +170,9 @@ scenarios:
     execution_metadata:
       mode: fake-contract
       prompt_execution: none
+      prose_reply_language: en
+      technical_tokens_language: en
+      language_policy: prose-matches-current-message; technical-tokens-stay-english
       selected_context_pack: egdev-linkedin-drafts
       selected_skill_pack: egdev-linkedin-drafts
       reference_behavior: shared-profile-reference-not-clone
@@ -178,6 +190,7 @@ scenarios:
         network_slug: linkedin
       normalized_channel_name: experiments
       user_role: operator-demo
+      user_message_language: en
     pack_refs:
       context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.context_pack
       skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.skill_pack
@@ -211,6 +224,9 @@ scenarios:
     execution_metadata:
       mode: fake-contract
       prompt_execution: none
+      prose_reply_language: en
+      technical_tokens_language: en
+      language_policy: prose-matches-current-message; technical-tokens-stay-english
       selected_context_pack: egdev-linkedin-drafts
       selected_skill_pack: egdev-linkedin-drafts
       override_reason: fake-channel-experiment
@@ -228,6 +244,7 @@ scenarios:
         network_slug: x
       normalized_channel_name: experiments
       user_role: operator-demo
+      user_message_language: en
     pack_refs:
       context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.context_pack
       skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.skill_pack
@@ -260,6 +277,9 @@ scenarios:
     execution_metadata:
       mode: fake-contract
       prompt_execution: none
+      prose_reply_language: en
+      technical_tokens_language: en
+      language_policy: prose-matches-current-message; technical-tokens-stay-english
       selected_context_pack: egdev-linkedin-drafts
       selected_skill_pack: egdev-linkedin-drafts
       clone_reason: fake-network-specific-style-divergence
@@ -277,6 +297,7 @@ scenarios:
         network_slug: linkedin
       normalized_channel_name: operations
       user_role: operator-demo
+      user_message_language: en
     pack_refs:
       context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.context_pack
       skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.skill_pack
@@ -307,6 +328,9 @@ scenarios:
     execution_metadata:
       mode: fake-contract
       prompt_execution: none
+      prose_reply_language: en
+      technical_tokens_language: en
+      language_policy: prose-matches-current-message; technical-tokens-stay-english
       selected_context_pack: egdev-linkedin-drafts
       selected_skill_pack: egdev-linkedin-drafts
       private_config_fixture: sanitized-path-placeholder-only
@@ -326,6 +350,7 @@ scenarios:
         network_slug: linkedin
       normalized_channel_name: queue
       user_role: operator-demo
+      user_message_language: en
     pack_refs:
       context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.context_pack
       skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.skill_pack
@@ -356,6 +381,9 @@ scenarios:
     execution_metadata:
       mode: fake-contract
       prompt_execution: none
+      prose_reply_language: en
+      technical_tokens_language: en
+      language_policy: prose-matches-current-message; technical-tokens-stay-english
       selected_context_pack: egdev-linkedin-drafts
       selected_skill_pack: egdev-linkedin-drafts
       connector_credentials: private-placeholder-only
@@ -375,6 +403,7 @@ scenarios:
         network_slug: stack-and-flow
       normalized_channel_name: github
       user_role: operator-demo
+      user_message_language: en
     pack_refs:
       context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#stack-and-flow-github.context_pack
       skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#stack-and-flow-github.skill_pack
@@ -407,6 +436,9 @@ scenarios:
     execution_metadata:
       mode: fake-contract
       prompt_execution: none
+      prose_reply_language: en
+      technical_tokens_language: en
+      language_policy: prose-matches-current-message; technical-tokens-stay-english
       selected_context_pack: stack-and-flow-github
       selected_skill_pack: stack-and-flow-github
       target_skill_path: skills/demo-openclaw-workflow/SKILL.md
@@ -429,6 +461,7 @@ scenarios:
         network_slug: stack-and-flow
       normalized_channel_name: github
       user_role: operator-demo
+      user_message_language: en
     pack_refs:
       context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#stack-and-flow-github.context_pack
       skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#stack-and-flow-github.skill_pack
@@ -460,6 +493,9 @@ scenarios:
     execution_metadata:
       mode: fake-contract
       prompt_execution: none
+      prose_reply_language: en
+      technical_tokens_language: en
+      language_policy: prose-matches-current-message; technical-tokens-stay-english
       selected_context_pack: stack-and-flow-github
       selected_skill_pack: stack-and-flow-github
       deployment_step: repo-review-and-runtime-sync-before-enable
@@ -479,6 +515,7 @@ scenarios:
         network_slug: none
       normalized_channel_name: general
       user_role: operator-demo
+      user_message_language: en
     pack_refs:
       context_pack_fixture: none
       skill_pack_fixture: none
@@ -508,11 +545,167 @@ scenarios:
     execution_metadata:
       mode: fake-contract
       prompt_execution: none
+      prose_reply_language: en
+      technical_tokens_language: en
+      language_policy: prose-matches-current-message; technical-tokens-stay-english
       selected_context_pack: none
       selected_skill_pack: none
     writeback_policy:
       classification: reject
       reason: no durable reads or writes until an approved route exists
+      writeback_out_of_scope: true
+  - name: spanish-planning-content-flow
+    event_envelope:
+      origin_kind: discord-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      routing_status: matched-route
+      resolved_route:
+        project_slug: egdev
+        network_slug: linkedin
+      normalized_channel_name: drafts
+      user_role: operator-demo
+      user_message_language: es
+    pack_refs:
+      context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.context_pack
+      skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.skill_pack
+    artifact_classification:
+      artifact_type: ephemeral_draft
+      subtype: none
+      operation: draft
+      persistence_target: ephemeral
+      approval_required: false
+      backup_required: false
+      deployment_required: false
+      runner_backend: openclaw-skill-surface
+      writeback_policy: draft
+    intent_classification:
+      family: planning_content
+      write_like: false
+      confidence: reviewable-demo
+    runner_selection:
+      runner_kind: content-planner
+      backend: openclaw-skill-surface
+      selected_skills:
+        - linkedin-weekly-planner
+        - brand-context
+    permission_gate:
+      state: summary-only
+      required_skill: discord-approval-gate
+      approval_needed: false
+    execution_metadata:
+      mode: fake-contract
+      prompt_execution: none
+      prose_reply_language: es
+      technical_tokens_language: en
+      language_policy: prose-matches-current-message; technical-tokens-stay-english
+      selected_context_pack: egdev-linkedin-drafts
+      selected_skill_pack: egdev-linkedin-drafts
+      response_excerpt: "La respuesta va en español; `selected_skill_pack` y `openclaw-skill-surface` quedan en inglés."
+    writeback_policy:
+      classification: draft
+      via: docs/architecture/discord-memory-gateway.md
+      writeback_out_of_scope: true
+  - name: mixed-language-approval-flow
+    event_envelope:
+      origin_kind: discord-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      routing_status: matched-route
+      resolved_route:
+        project_slug: egdev
+        network_slug: linkedin
+      normalized_channel_name: openclaw-global-profiles
+      user_role: operator-demo
+      user_message_language: es
+    pack_refs:
+      context_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.context_pack
+      skill_pack_fixture: examples/discord-context-skill-packs.fake.yaml#egdev-linkedin-drafts.skill_pack
+    artifact_classification:
+      artifact_type: private_context
+      subtype: profile
+      operation: update
+      profile_ref: writing.demo-linkedin-b2b
+      persistence_target: private-runtime
+      approval_required: true
+      backup_required: true
+      deployment_required: false
+      runner_backend: openclaw-skill-surface
+      writeback_policy: confirmation-required
+    intent_classification:
+      family: planning_content
+      write_like: true
+      confidence: reviewable-demo
+    runner_selection:
+      runner_kind: content-planner
+      backend: openclaw-skill-surface
+      selected_skills:
+        - brand-context
+    permission_gate:
+      state: approval-requested
+      required_skill: discord-approval-gate
+      approval_needed: true
+      exact_approval_phrase: approve write
+    execution_metadata:
+      mode: fake-contract
+      prompt_execution: none
+      prose_reply_language: es
+      technical_tokens_language: en
+      language_policy: prose-matches-current-message; technical-tokens-stay-english
+      selected_context_pack: egdev-linkedin-drafts
+      selected_skill_pack: egdev-linkedin-drafts
+      response_excerpt: "Necesita aprobación; usá exactamente `approve write` y mantené `profile_ref` en inglés."
+    writeback_policy:
+      classification: confirmation-required
+      via: docs/architecture/discord-memory-gateway.md
+      writeback_out_of_scope: true
+  - name: unknown-language-clarification-flow
+    event_envelope:
+      origin_kind: discord-channel
+      runtime_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+      routing_status: clarification-needed
+      resolved_route:
+        project_slug: unknown
+        network_slug: unknown
+      normalized_channel_name: general
+      user_role: operator-demo
+      user_message_language: und
+    pack_refs:
+      context_pack_fixture: none
+      skill_pack_fixture: none
+    artifact_classification:
+      artifact_type: ephemeral_draft
+      subtype: clarification
+      operation: clarify
+      persistence_target: ephemeral
+      approval_required: false
+      backup_required: false
+      deployment_required: false
+      runner_backend: response-only
+      writeback_policy: reject
+    intent_classification:
+      family: clarification_needed
+      write_like: false
+      confidence: reviewable-demo
+    runner_selection:
+      runner_kind: clarification
+      backend: response-only
+      selected_skills:
+        - discord-approval-gate
+    permission_gate:
+      state: needs-route
+      required_skill: discord-approval-gate
+      approval_needed: false
+    execution_metadata:
+      mode: fake-contract
+      prompt_execution: none
+      prose_reply_language: und
+      technical_tokens_language: en
+      language_policy: prose-matches-current-message; technical-tokens-stay-english
+      selected_context_pack: none
+      selected_skill_pack: none
+      response_excerpt: "🌐 language/lang/idioma? · project/proyecto? · context/strategy/tasks/skills/decisions/qa?"
+    writeback_policy:
+      classification: reject
+      via: docs/architecture/discord-memory-gateway.md
       writeback_out_of_scope: true
 non_goals:
   - live Discord validation
