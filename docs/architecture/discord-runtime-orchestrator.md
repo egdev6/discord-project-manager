@@ -59,6 +59,7 @@ The orchestrator depends on:
 | `resolved_route` | Approved `project_slug` and `network_slug`, or `none`. |
 | `normalized_channel_name` | Reviewable fake channel-name evidence. |
 | `user_role` | Minimal fake operator role or capability hint. |
+| `user_message_language` | Review language tag for the current Discord message. Fake fixtures currently use `en`, `es`, or `und` for unknown/ambiguous language. |
 
 ## Artifact classification
 
@@ -118,6 +119,19 @@ The active OpenClaw skill surface is curated, not “everything in `skills/` mea
 | Scoped workflow | `brand-context`, `content-ledger`, `strategy-planner`, `linkedin-weekly-planner`, `x-queue-planner`, `on-demand-brief-planner` | Invoked only when selected by global/category/channel scoped resolution. |
 | Preserved protocol | Gentle-AI SDD assets under `.openclaw/skills` | Used only through the `gentle-sdd` backend boundary for `sdd_dev_work`; product workflow skills are not selected as the executor for OpenClaw skill-development handoffs. |
 
+## Response-language policy
+
+For Discord-originated turns, user-facing prose replies must match the user's current Discord message language. The language decision is per-message and fake-first in this contract; no live detection is proven. Commands, code snippets, schema keys, routes, paths, skill names, backend names, and exact approval phrases remain English even when the surrounding prose is not English.
+
+Reviewable language metadata:
+
+| Field | Required? | Purpose |
+| --- | --- | --- |
+| `user_message_language` | Yes | Language tag inferred for the current Discord message in the fake event envelope. |
+| `prose_reply_language` | Yes | Language tag used for natural-language, user-facing prose. Must match `user_message_language`; use `und` only for an explicit language-neutral clarification fallback. |
+| `language_policy` | Yes | Canonical marker `prose-matches-current-message; technical-tokens-stay-english`. |
+| `technical_tokens_language` | Yes | Always `en` for commands, snippets, schema keys, routes, paths, approval phrases, and contract identifiers. |
+
 ## Permission and confirmation gates
 
 The orchestrator must separate runner selection from persistence permission.
@@ -144,7 +158,8 @@ Each orchestrated turn should leave reviewable metadata for the contract:
 - selected runner/backend;
 - permission gate state;
 - prompt execution state (`none` in this slice);
-- writeback policy classification.
+- writeback policy classification;
+- user message language, prose reply language, technical token language, and the language-policy marker.
 
 ## Historical anchors
 
@@ -176,4 +191,5 @@ This contract does not:
 - [ ] `sdd_dev_work` routes to `backend: gentle-sdd` only.
 - [ ] Clarification fallback stays `response-only` and `reject` for writeback.
 - [ ] Prompt execution remains `none` in every scenario.
+- [ ] Every scenario includes `user_message_language`, matching `prose_reply_language`, `language_policy: prose-matches-current-message; technical-tokens-stay-english`, and `technical_tokens_language: en`.
 - [ ] No raw Discord IDs, credential env names, live/prod claims, or GitHub mutation claims are introduced.

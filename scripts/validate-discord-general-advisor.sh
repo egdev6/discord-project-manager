@@ -51,7 +51,13 @@ for required in \
   "name: new-capability-request" \
   "name: social-bootstrap-request" \
   "name: publishing-request" \
-  "name: ambiguous-route-question"; do
+  "name: ambiguous-route-question" \
+  "name: spanish-strategy-question" \
+  "name: mixed-language-profile-approval" \
+  "user_message_language: es" \
+  "prose_reply_language: es" \
+  "technical_tokens_language: en" \
+  "language_policy: prose-matches-current-message; technical-tokens-stay-english"; do
   grep -F "$required" "$FIXTURE_PATH" >/dev/null || fail "fixture missing required marker: $required"
 done
 
@@ -74,7 +80,11 @@ for required in \
   "write_executed: false" \
   "discord-approval-gate" \
   "recommended_route" \
-  "handoff_message"; do
+  "handoff_message" \
+  "user_message_language" \
+  "prose_reply_language" \
+  "technical_tokens_language: en" \
+  "language_policy: prose-matches-current-message; technical-tokens-stay-english"; do
   grep -F "$required" "$SKILL_PATH" >/dev/null || fail "skill missing advisor marker: $required"
 done
 
@@ -89,7 +99,12 @@ for required in \
   "private-runtime:profile-binding" \
   "publishing-connector-readiness" \
   "write_executed: false" \
-  "clarifying question"; do
+  "clarifying question" \
+  "Response-language rule" \
+  "user_message_language" \
+  "prose_reply_language" \
+  "technical_tokens_language" \
+  "prose-matches-current-message; technical-tokens-stay-english"; do
   grep -F "$required" "$DOC_PATH" >/dev/null || fail "doc missing advisor marker: $required"
 done
 
@@ -149,6 +164,9 @@ expected = {
     "social-bootstrap-request",
     "publishing-request",
     "ambiguous-route-question",
+    "spanish-strategy-question",
+    "mixed-language-profile-approval",
+    "unknown-language-clarification",
 }
 seen = {s["name"] for s in scenarios}
 missing = expected - seen
@@ -167,14 +185,41 @@ for sc in scenarios:
     res = sc["response"]
     if inp.get("runtime_namespace") != runtime_contract:
         raise SystemExit(f"{name} has wrong runtime namespace")
-    for key in ["question_type", "requested_topic", "known_scope", "known_project_ref", "write_like"]:
+    for key in ["question_type", "requested_topic", "known_scope", "known_project_ref", "write_like", "user_message_language"]:
         if key not in inp:
             raise SystemExit(f"{name} missing input field {key}")
-    for key in ["advisor_state", "recommended_route", "reason", "approval_required", "write_executed"]:
+    for key in ["advisor_state", "recommended_route", "reason", "approval_required", "write_executed", "prose_reply_language", "technical_tokens_language", "language_policy"]:
         if key not in res:
             raise SystemExit(f"{name} missing response field {key}")
     if res.get("write_executed") != "false":
         raise SystemExit(f"{name} must keep write_executed: false")
+    if res.get("prose_reply_language") != inp.get("user_message_language"):
+        raise SystemExit(f"{name} prose reply language must match current user message language")
+    if res.get("technical_tokens_language") != "en":
+        raise SystemExit(f"{name} technical tokens language must stay English")
+    if res.get("language_policy") != "prose-matches-current-message; technical-tokens-stay-english":
+        raise SystemExit(f"{name} has wrong language policy marker")
+    if name == "spanish-strategy-question":
+        if inp.get("user_message_language") != "es" or res.get("prose_reply_language") != "es":
+            raise SystemExit("spanish-strategy-question must keep Spanish prose metadata")
+        for token in ["project:egdev:strategy", "project-demo-egdev"]:
+            if token not in res.get("reason", "") and token not in res.get("handoff_message", "") and token not in res.get("recommended_route", ""):
+                raise SystemExit(f"spanish-strategy-question must preserve English technical token: {token}")
+    if name == "mixed-language-profile-approval":
+        if inp.get("user_message_language") != "es" or res.get("prose_reply_language") != "es":
+            raise SystemExit("mixed-language-profile-approval must keep Spanish prose metadata")
+        for token in ["private-runtime:profile-binding", "discord-approval-gate", "approve write", "project:egdev:context"]:
+            if token not in res.get("reason", "") and token not in res.get("handoff_message", "") and token not in res.get("recommended_route", "") and token not in res.get("target_channel_ref", ""):
+                raise SystemExit(f"mixed-language-profile-approval must preserve English technical token: {token}")
+    if name == "unknown-language-clarification":
+        if inp.get("user_message_language") != "und" or res.get("prose_reply_language") != "und":
+            raise SystemExit("unknown-language-clarification must use und language-neutral metadata")
+        if res.get("advisor_state") != "clarification-needed":
+            raise SystemExit("unknown-language-clarification must ask before choosing a language or route")
+        if res.get("recommended_route") != "none" or res.get("target_channel_ref") != "none" or "handoff_message" in res:
+            raise SystemExit("unknown-language-clarification must not emit a concrete route, target channel, or handoff")
+        if "🌐" not in res.get("clarifying_question", "") or "idioma" not in res.get("clarifying_question", ""):
+            raise SystemExit("unknown-language-clarification must avoid silently defaulting to English prose")
     if not sc["contracts"]:
         raise SystemExit(f"{name} missing required contracts")
     write_like = inp.get("write_like") == "true"
