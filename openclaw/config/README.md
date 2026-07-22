@@ -33,6 +33,7 @@ Current routing references:
 - `docs/architecture/discord-memory-gateway.md` defines the fake Memory Gateway / Context Broker contract for Discord flows.
 - `docs/architecture/discord-semantic-channel-guides.md` defines the canonical fake guide catalog for managed channel topics and starter/pinned prompts.
 - `docs/architecture/openclaw-global-channel-guides.md` defines the canonical fake guide catalog for reserved `OpenClaw Global` control-channel topics and starter guidance.
+- `docs/research/openclaw-runtime-capability-inventory.md` maps requested product capabilities to the sanitized current runtime plugin inventory, ClawHub candidates, private config needs, governance risk, rollout order, and non-goals.
 - `examples/openclaw-global-channel-guides.fake.yaml` provides fake reserved control-channel guide data.
 - `scripts/validate-openclaw-global-channel-guides.sh` validates the reserved control-channel guide contract and fixture.
 - `docs/architecture/discord-project-manager-global-init.md` defines the fake `/project-manager init` contract for creating the global Project Manager category and channels.
