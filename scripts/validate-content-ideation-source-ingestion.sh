@@ -6,10 +6,15 @@ DOC_PATH="docs/operations/content-ideation-source-ingestion-flow.md"
 INVENTORY_PATH="docs/research/openclaw-runtime-capability-inventory.md"
 RUNTIME_NAMESPACE="discord-project-manager/runtime/discord/<guild-id>/<channel-id>"
 
-fail() { echo "ERROR: $*" >&2; exit 1; }
+fail() {
+  echo "ERROR: $*" >&2
+  exit 1
+}
 command -v grep >/dev/null 2>&1 || fail "required command not found: grep"
 command -v python3 >/dev/null 2>&1 || fail "required command not found: python3"
-for path in "$FIXTURE_PATH" "$DOC_PATH" "$INVENTORY_PATH"; do [[ -f "$path" ]] || fail "required file not found: $path"; done
+for path in "$FIXTURE_PATH" "$DOC_PATH" "$INVENTORY_PATH"; do
+  [[ -f "$path" ]] || fail "required file not found: $path"
+done
 
 python3 - "$FIXTURE_PATH" "$DOC_PATH" "$INVENTORY_PATH" "$RUNTIME_NAMESPACE" <<'PY'
 import sys
