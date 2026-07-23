@@ -35,6 +35,8 @@ for required in \
   "uses_real_discord_ids: false" \
   "runtime_namespace_contract: $RUNTIME_NAMESPACE_CONTRACT" \
   "approval_phrase: approve write" \
+  "language_policy: prose-matches-current-message; technical-tokens-stay-english" \
+  "technical_tokens_language: en" \
   "state: approval-requested" \
   "persistent_writes_allowed: false" \
   "durable_project_writes_allowed: false" \
@@ -71,6 +73,7 @@ done
 
 for required in \
   "Before explicit approval, do not call file, memory, ledger, queue, publishing, scheduling, or workspace persistence tools." \
+  "User-facing proposal prose must match the current Discord message language." \
   "Accept only the exact phrase \`approve write\` as approval." \
   "Keep the pre-approval audit trail in the response" \
   "$RUNTIME_NAMESPACE_CONTRACT"; do
@@ -81,6 +84,9 @@ for required in \
   "## Runtime enforcement skill" \
   "skills/discord-approval-gate/SKILL.md" \
   "Before approval, the safe default is response-only" \
+  "Response-language policy" \
+  "prose_reply_language: es" \
+  "Respondé con exactamente una opción" \
   "Reply with exactly one option:" \
   "Lifecycle validation fixture"; do
   grep -F "$required" "$DOC_PATH" >/dev/null || fail "approval doc missing enforcement marker: $required"
@@ -116,6 +122,10 @@ if data.get("runtime_namespace_contract") != runtime:
     raise SystemExit("runtime namespace contract mismatch")
 if data.get("approval_phrase") != "approve write":
     raise SystemExit("approval phrase must be exact")
+if data.get("language_policy") != "prose-matches-current-message; technical-tokens-stay-english":
+    raise SystemExit("language policy mismatch")
+if data.get("technical_tokens_language") != "en":
+    raise SystemExit("technical tokens language must stay English")
 
 required_terms = {"save", "write", "update", "remember", "store", "queue", "ledger", "publish", "schedule"}
 if set(data.get("write_like_terms", [])) != required_terms:
@@ -161,6 +171,16 @@ for key in ["writes_before_approval", "workspace_file_writes_before_approval", "
         raise SystemExit(f"save request must keep {key}: false")
 if save.get("mandatory_skill") != "discord-approval-gate" or save.get("exact_approval_phrase_required") != "approve write":
     raise SystemExit("save request must require approval gate and exact phrase")
+if save.get("user_message_language") != "es" or save.get("prose_reply_language") != "es":
+    raise SystemExit("Spanish write-like proposal must keep prose in Spanish")
+if save.get("technical_tokens_language") != "en" or save.get("language_policy") != data.get("language_policy"):
+    raise SystemExit("Spanish write-like proposal must keep technical tokens in English")
+proposal_excerpt = str(save.get("proposal_excerpt", ""))
+for expected in ["Propuesta de actualización durable", "Resumen del cambio", "Respondé con exactamente una opción", "approve write", "revise: <instruction>", "reject"]:
+    if expected not in proposal_excerpt:
+        raise SystemExit(f"Spanish proposal excerpt missing: {expected}")
+if "Proposed durable update" in proposal_excerpt or "Reply with exactly one option" in proposal_excerpt:
+    raise SystemExit("Spanish proposal excerpt must not use English proposal prose")
 if save.get("runtime_audit_namespace") != runtime:
     raise SystemExit("save request runtime audit namespace mismatch")
 

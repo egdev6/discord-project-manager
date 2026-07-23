@@ -14,6 +14,8 @@ screenshots_included: false
 secrets_included: false
 runtime_namespace_contract: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
 approval_phrase: approve write
+language_policy: prose-matches-current-message; technical-tokens-stay-english
+technical_tokens_language: en
 write_like_terms:
   - save
   - write
@@ -50,6 +52,11 @@ scenarios:
     target_namespace: discord-project-manager/project/egdev/network/x
     runtime_audit_namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
     mandatory_skill: discord-approval-gate
+    user_message_language: es
+    prose_reply_language: es
+    technical_tokens_language: en
+    language_policy: prose-matches-current-message; technical-tokens-stay-english
+    proposal_excerpt: "Propuesta de actualización durable; Resumen del cambio: registrar una regla fake; Respondé con exactamente una opción: approve write, revise: <instruction>, reject"
     exact_approval_phrase_required: approve write
     writes_before_approval: false
     workspace_file_writes_before_approval: false

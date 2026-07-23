@@ -18,6 +18,7 @@ Also use it when a route-resolved skill proposes writes to project, network, str
 - Treat `save`, `write`, `update`, `remember`, `store`, `queue`, `ledger`, `publish`, and `schedule` as write-like until proven safe.
 - Before explicit approval, do not call file, memory, ledger, queue, publishing, scheduling, or workspace persistence tools.
 - The first response must be `proposal` or `approval-requested`; show the exact target namespace, runtime audit namespace, and change summary.
+- User-facing proposal prose must match the current Discord message language. Keep technical tokens, namespaces, schema keys, and the exact approval phrase `approve write` in English.
 - Accept only the exact phrase `approve write` as approval. Treat silence, emoji, and unrelated replies as no approval.
 - If the operator replies `revise: <instruction>`, produce a revised proposal and ask again.
 - If the operator replies `reject`, stop without persistence and summarize what did not happen.
@@ -47,23 +48,30 @@ Also use it when a route-resolved skill proposes writes to project, network, str
 
 ## Output Contract
 
-For write-like requests, return:
+For write-like requests, return localized user-facing prose plus stable technical tokens:
 
 ```text
-Proposed durable update
+user_message_language: <language-code>
+prose_reply_language: <same-language-code>
+technical_tokens_language: en
+language_policy: prose-matches-current-message; technical-tokens-stay-english
+
+<Localized heading, e.g. Proposed durable update / Propuesta de actualización durable>
 Route: <project>/<network>
 Runtime context: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
 Target namespace: <namespace-key>
 Runtime audit namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
-Change summary: <one-sentence summary>
-Risk boundary: <what this does not do>
-Audit record: <sanitized audit_record ref or inline sanitized audit summary>
+<Localized Change summary label>: <one-sentence summary>
+<Localized Risk boundary label>: <what this does not do>
+<Localized Audit record label>: <sanitized audit_record ref or inline sanitized audit summary>
 
-Reply with exactly one option:
+<Localized approval instruction>:
 - approve write
 - revise: <instruction>
 - reject
 ```
+
+For Spanish Discord messages, the proposal prose must be Spanish while the option literals remain exactly `approve write`, `revise: <instruction>`, and `reject`.
 
 ## References
 
