@@ -22,6 +22,7 @@ Use this runbook before onboarding any real Discord server, brand, Buffer accoun
 | `ENGRAM_JWT_SECRET` | No | `.env` or secret manager | Must be strong and private. |
 | `POSTGRES_PASSWORD` | No | `.env` or secret manager | Treat DB credentials as production secrets once real memory exists. |
 | `BUFFER_ACCESS_TOKEN` / `BUFFER_API_KEY` | No | `.env` or secret manager | Grants Buffer API access; current public API should not be assumed to expose LinkedIn/X analytics metrics. |
+| Social publishing connector credentials and browser/session state | No | `.env`, secret manager, private connector config, or provider-specific private session store | Includes Buffer OAuth refresh tokens/API keys, LinkedIn/X OAuth or user tokens, provider app secrets, profile/account IDs, plugin credentials, and browser session state. Revoke, rotate, rebind private runtime config, invalidate old sessions, and rerun fake-first validation after suspected exposure. |
 | `BUFFER_ACCOUNT_ID` | Usually no | `.env` or private config | Keep private unless intentionally documented for a public demo. |
 | `.env.example` placeholders | Yes | git | Names and fake `change-me-*` values only. |
 
@@ -56,6 +57,7 @@ Private profiles are reusable context, not repo-backed skills. Public docs may d
 
 - Treat all raw Engram exports, sync archives, SQL dumps, private profile backups, and volume snapshots as private.
 - Never commit raw Engram exports, Postgres dumps, Discord transcripts, or Buffer response payloads.
+- Do not commit social provider payloads, screenshots, account IDs, profile IDs, OAuth refresh tokens, or browser session state.
 - Promote only sanitized, durable knowledge into repo artifacts:
   - architecture decisions;
   - approved namespace conventions;
