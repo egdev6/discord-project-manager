@@ -25,6 +25,8 @@ Optional inputs:
 
 - `campaign_name`
 - `recent_ledger_summary`
+- `normalized_snapshots` from `social-strategy-analytics-trends-ingestion`
+- `trend_signals` from `social-strategy-analytics-trends-ingestion`
 - `known_assets`
 - `review_preferences`
 
@@ -33,10 +35,11 @@ Optional inputs:
 1. Start from approved brand context when available.
 2. Separate confirmed facts from assumptions.
 3. Produce concise planning structures instead of long prose.
-4. Put cross-network planning rules in project strategy memory and network-local planning state in the network subtree.
-5. Keep execution steps for publishing, analytics, and Discord operations out of scope.
-6. Use only fake/demo values in repository-facing examples.
-7. Follow ADR 0002 for all namespace references.
+4. When analytics or trends are provided, consume only sanitized normalized snapshots and trend signals from the shared `docs/operations/social-strategy-analytics-trends-ingestion.md` contract; join analytics through `content_ledger_entry_id`, keep unknown metrics as `unknown`, and preserve trend provenance, timestamp, confidence, and source type in the planning basis.
+5. Put cross-network planning rules in project strategy memory and network-local planning state in the network subtree.
+6. Keep execution steps for publishing, analytics, and Discord operations out of scope.
+7. Use only fake/demo values in repository-facing examples.
+8. Follow ADR 0002 for all namespace references.
 
 ## Output shape
 
@@ -51,6 +54,21 @@ strategy_slice:
     - <goal>
   assumptions:
     - <assumption>
+  sanitized_performance_inputs:
+    - content_ledger_entry_id: <ledger id or none>
+      network: <network>
+      insight: <normalized analytics cue>
+  trend_inputs:
+    - source_type: <rss|web|search|trend-provider|manual-sanitized-entry>
+      observed_at: <timestamp>
+      confidence: <0.0-1.0>
+      provenance:
+        source_kind: <rss-feed|webpage|search-result|trend-report|manual-note>
+        retrieved_by: <fake adapter or human-sanitized-entry>
+        retrieval_mode: fake-fixture-no-network
+        canonical_url: https://example.invalid/<path>
+        source_title: <bounded title>
+      strategy_signal: <normalized trend cue>
   planned_items:
     - title: <item>
       purpose: <why>
@@ -101,6 +119,8 @@ Promote reusable planning rules, review checkpoints, and skill behavior into rep
 ## Safety rules
 
 - Do not pretend memory writes, Discord routing, or Buffer analytics are already operational.
+- Do not consume raw scraped pages, screenshots, native exports, provider payloads, account data, credentials, or private metrics; require sanitized normalized snapshots instead.
+- Do not claim live browser/API scraping, analytics ingestion, or trend-provider access until a separate approved implementation exists.
 - Do not publish or schedule content from this contract alone.
 - Do not put durable cross-network strategy inside runtime Discord namespaces.
 - Keep repository examples generic and fake.

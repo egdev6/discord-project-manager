@@ -1,0 +1,148 @@
+schema_version: 1
+contract: social-strategy-analytics-trends-ingestion
+project: egdev
+fake: true
+safe_for_repo: true
+live_scraping_enabled: false
+live_api_ingestion_enabled: false
+browser_automation_enabled: false
+raw_provider_payloads_included: false
+screenshots_included: false
+account_data_included: false
+private_metrics_included: false
+credential_material_included: false
+source_options:
+  - option: manual-sanitized-entry
+    reliability: medium
+    privacy: low
+    tos_risk: low
+    implementation_effort: low
+    approval_status: approved-for-fake-fixtures
+  - option: native-platform-export
+    reliability: medium-high
+    privacy: medium
+    tos_risk: medium
+    implementation_effort: medium
+    approval_status: requires-separate-approval
+  - option: approved-provider-api
+    reliability: high
+    privacy: medium
+    tos_risk: medium
+    implementation_effort: high
+    approval_status: pending-provider-approval
+  - option: rss-web-search-trend-provider
+    reliability: medium
+    privacy: medium
+    tos_risk: medium
+    implementation_effort: medium
+    approval_status: approved-for-fake-fixtures
+  - option: browser-scraping-automation
+    reliability: medium
+    privacy: high
+    tos_risk: high
+    implementation_effort: high
+    approval_status: not-approved
+normalized_snapshots:
+  - snapshot_id: linkedin-normalized-2026-w23-demo
+    project: egdev
+    network: linkedin
+    strategy_namespace_key: discord-project-manager/project/egdev/strategy
+    content_ledger_namespace_key: discord-project-manager/project/egdev/content-ledger
+    network_namespace_key: discord-project-manager/project/egdev/network/linkedin
+    source_type: manual-sanitized-entry
+    source_approval_status: approved-for-fake-fixtures
+    captured_at: "2026-06-08T09:00:00Z"
+    snapshot_window:
+      start: 2026-06-01
+      end: 2026-06-07
+    metrics:
+      - content_ledger_entry_id: linkedin-post-001-demo
+        planning_reference_id: linkedin-weekly-post-01-demo
+        published_at: "2026-06-03T14:00:00Z"
+        values:
+          impressions: 420
+          reactions: 18
+          comments: 4
+          shares: 2
+          clicks: 11
+          engagement_rate: 0.083
+      - content_ledger_entry_id: linkedin-post-002-demo
+        planning_reference_id: linkedin-weekly-post-02-demo
+        published_at: "2026-06-05T16:30:00Z"
+        values:
+          impressions: 355
+          reactions: 12
+          comments: 3
+          shares: 1
+          clicks: unknown
+          engagement_rate: unknown
+  - snapshot_id: x-normalized-2026-w24-demo
+    project: egdev
+    network: x
+    strategy_namespace_key: discord-project-manager/project/egdev/strategy
+    content_ledger_namespace_key: discord-project-manager/project/egdev/content-ledger
+    network_namespace_key: discord-project-manager/project/egdev/network/x
+    source_type: manual-sanitized-entry
+    source_approval_status: approved-for-fake-fixtures
+    captured_at: "2026-06-16T09:15:00Z"
+    snapshot_window:
+      start: 2026-06-09
+      end: 2026-06-15
+    metrics:
+      - content_ledger_entry_id: x-post-001-demo
+        planning_reference_id: historical-ledger-entry
+        published_at: "2026-06-10T09:00:00Z"
+        values:
+          impressions: 610
+          likes: 24
+          replies: 5
+          reposts: 3
+          quote_posts: 1
+          clicks: 14
+          engagement_rate: 0.077
+      - content_ledger_entry_id: x-post-002-demo
+        planning_reference_id: x-queue-item-02-demo
+        published_at: "2026-06-12T15:45:00Z"
+        values:
+          impressions: 455
+          likes: 19
+          replies: 2
+          reposts: 2
+          quote_posts: unknown
+          clicks: unknown
+          engagement_rate: unknown
+trend_signals:
+  - trend_id: trend-linkedin-ops-proof-demo
+    project: egdev
+    strategy_namespace_key: discord-project-manager/project/egdev/strategy
+    network_scope:
+      - linkedin
+    source_type: web
+    provenance:
+      source_kind: webpage
+      retrieved_by: web-readability-fake-fixture
+      retrieval_mode: fake-fixture-no-network
+      canonical_url: https://example.invalid/trends/ops-proof
+      source_title: Demo trend brief about operational proof points
+    observed_at: "2026-06-08T10:00:00Z"
+    confidence: 0.72
+    signal_summary: Demo-only signal that implementation proof points may outperform generic launch announcements.
+  - trend_id: trend-x-reviewability-demo
+    project: egdev
+    strategy_namespace_key: discord-project-manager/project/egdev/strategy
+    network_scope:
+      - x
+    source_type: rss
+    provenance:
+      source_kind: rss-feed
+      retrieved_by: fake-rss-fixture-adapter
+      retrieval_mode: fake-fixture-no-network
+      canonical_url: https://example.invalid/trends/reviewability-feed
+      source_title: Demo feed item about reviewable engineering work
+    observed_at: "2026-06-16T11:30:00Z"
+    confidence: 0.64
+    signal_summary: Demo-only signal that short reviewability lessons can seed longer technical threads.
+metadata:
+  fixture_type: fake-demo
+  safe_for_repo: true
+  note: This fixture contains sanitized fake analytics and trend signals only.
