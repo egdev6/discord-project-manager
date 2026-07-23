@@ -70,7 +70,7 @@ sanitize_summary() {
   local private_id_pattern='[0-9]{17,20}'
   # Keep generated commit subjects safe against common pasted token prefixes and key=value secrets.
   local token_prefix_pattern='(ghp_|gho_|github_pat_|xox[baprs]-|mfa\.)[A-Za-z0-9_-]+'
-  local secret_assignment_pattern='(DISCORD_BOT_TOKEN|OPENAI_API_KEY|ANTHROPIC_API_KEY|SLACK_BOT_TOKEN|GITHUB_TOKEN|GITLAB_TOKEN|STRIPE_API_KEY|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY)[[:space:]]*=[[:space:]]*[^[:space:]]+'
+  local secret_assignment_pattern='(DISCORD_BOT_TOKEN|OPENCLAW_GATEWAY_TOKEN|ENGRAM_CLOUD_TOKEN|ENGRAM_CLOUD_ADMIN|ENGRAM_JWT_SECRET|POSTGRES_PASSWORD|BUFFER_ACCESS_TOKEN|BUFFER_API_KEY|OPENAI_API_KEY|ANTHROPIC_API_KEY|SLACK_BOT_TOKEN|GITHUB_TOKEN|GITLAB_TOKEN|STRIPE_API_KEY|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY)[[:space:]]*=[[:space:]]*[^[:space:]]+'
 
   value="${value//|/\\|}"
   value="$(printf '%s' "$value" | sed -E \

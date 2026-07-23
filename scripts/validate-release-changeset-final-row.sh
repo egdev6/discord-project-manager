@@ -51,6 +51,28 @@ printf 'spaced-secret\n' >>"$REPO_DIR/fixture.txt"
 git -C "$REPO_DIR" add fixture.txt
 git -C "$REPO_DIR" commit -q -m "fix: redact spaced secret DISCORD_BOT_TOKEN = <fake-spaced-token-value> (#213)"
 
+new_secret_names=(
+  OPENCLAW_GATEWAY_TOKEN
+  ENGRAM_CLOUD_TOKEN
+  ENGRAM_CLOUD_ADMIN
+  ENGRAM_JWT_SECRET
+  POSTGRES_PASSWORD
+  BUFFER_ACCESS_TOKEN
+  BUFFER_API_KEY
+)
+new_secret_issue=214
+for secret_name in "${new_secret_names[@]}"; do
+  printf 'secret-%s\n' "$secret_name" >>"$REPO_DIR/fixture.txt"
+  git -C "$REPO_DIR" add fixture.txt
+  git -C "$REPO_DIR" commit -q -m "fix: redact ${secret_name}=<fake-${secret_name}-value> (#${new_secret_issue})"
+  new_secret_issue=$((new_secret_issue + 1))
+
+  printf 'spaced-secret-%s\n' "$secret_name" >>"$REPO_DIR/fixture.txt"
+  git -C "$REPO_DIR" add fixture.txt
+  git -C "$REPO_DIR" commit -q -m "fix: redact ${secret_name} = <fake-spaced-${secret_name}-value> (#${new_secret_issue})"
+  new_secret_issue=$((new_secret_issue + 1))
+done
+
 printf 'final\n' >>"$REPO_DIR/fixture.txt"
 git -C "$REPO_DIR" add fixture.txt
 git -C "$REPO_DIR" commit -q -m "fix: final row survives unterminated git log (#210)"
@@ -66,8 +88,8 @@ if not raw:
     raise SystemExit("git log fixture unexpectedly empty")
 if raw.endswith(b"\n"):
     raise SystemExit("git log fixture unexpectedly ended with a trailing newline")
-if raw.count(b"\n") != 4:
-    raise SystemExit("git log fixture should contain exactly five rows")
+if raw.count(b"\n") != 18:
+    raise SystemExit("git log fixture should contain exactly nineteen rows")
 PY
 
 (
@@ -83,8 +105,18 @@ grep -F "| #213 | fix: redact spaced secret <redacted-secret> (#213) |" "$OUTPUT
 ! grep -F "ghp_fake" "$OUTPUT_PATH" >/dev/null || fail "generated changeset leaked fake token fixture"
 ! grep -F "DISCORD_BOT_TOKEN=<fake-discord-token-value>" "$OUTPUT_PATH" >/dev/null || fail "generated changeset leaked fake secret fixture"
 ! grep -F "DISCORD_BOT_TOKEN = <fake-spaced-token-value>" "$OUTPUT_PATH" >/dev/null || fail "generated changeset leaked fake spaced-secret fixture"
-grep -F "Develop commits in range: 5" "$OUTPUT_PATH" >/dev/null || fail "generated changeset has unexpected commit count"
+new_secret_issue=214
+for secret_name in "${new_secret_names[@]}"; do
+  grep -F "| #${new_secret_issue} | fix: redact <redacted-secret> (#${new_secret_issue}) |" "$OUTPUT_PATH" >/dev/null || fail "generated changeset did not redact ${secret_name} assignment"
+  ! grep -F "${secret_name}=<fake-${secret_name}-value>" "$OUTPUT_PATH" >/dev/null || fail "generated changeset leaked fake ${secret_name} fixture"
+  new_secret_issue=$((new_secret_issue + 1))
+
+  grep -F "| #${new_secret_issue} | fix: redact <redacted-secret> (#${new_secret_issue}) |" "$OUTPUT_PATH" >/dev/null || fail "generated changeset did not redact spaced ${secret_name} assignment"
+  ! grep -F "${secret_name} = <fake-spaced-${secret_name}-value>" "$OUTPUT_PATH" >/dev/null || fail "generated changeset leaked fake spaced ${secret_name} fixture"
+  new_secret_issue=$((new_secret_issue + 1))
+done
+grep -F "Develop commits in range: 19" "$OUTPUT_PATH" >/dev/null || fail "generated changeset has unexpected commit count"
 
 printf 'Validated release changeset final-row handling with unterminated git log output.\n'
-printf 'Validated release changeset token and secret redaction.\n'
-printf 'Fixture commits in range: 5\n'
+printf 'Validated release changeset token and secret redaction for documented non-public names.\n'
+printf 'Fixture commits in range: 19\n'
