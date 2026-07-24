@@ -3,6 +3,7 @@ set -euo pipefail
 
 FIXTURE_PATH="${DISCORD_RUNTIME_ORCHESTRATOR_FIXTURE:-examples/discord-runtime-orchestrator.fake.yaml}"
 DOC_PATH="docs/architecture/discord-runtime-orchestrator.md"
+SKILL_PATH="skills/openclaw-runtime-orchestrator/SKILL.md"
 ARTIFACT_DOC_PATH="docs/architecture/openclaw-artifact-classification.md"
 PARENT_DOC_PATH="docs/architecture/discord-dynamic-context-namespaces.md"
 ROUTING_DOC_PATH="docs/operations/discord-routing.md"
@@ -23,6 +24,7 @@ require_cmd python3
 
 [[ -f "$FIXTURE_PATH" ]] || fail "fixture not found: $FIXTURE_PATH"
 [[ -f "$DOC_PATH" ]] || fail "doc not found: $DOC_PATH"
+[[ -f "$SKILL_PATH" ]] || fail "skill not found: $SKILL_PATH"
 [[ -f "$ARTIFACT_DOC_PATH" ]] || fail "artifact classification doc not found: $ARTIFACT_DOC_PATH"
 [[ -f "$PARENT_DOC_PATH" ]] || fail "parent doc not found: $PARENT_DOC_PATH"
 [[ -f "$ROUTING_DOC_PATH" ]] || fail "routing doc not found: $ROUTING_DOC_PATH"
@@ -60,10 +62,17 @@ for required in \
   "scoped_registry_update_required: true" \
   "name: sdd-dev-work-flow" \
   "name: clarification-fallback" \
+  "name: spanish-planning-content-flow" \
+  "name: mixed-language-approval-flow" \
+  "name: unknown-language-clarification-flow" \
   "family: planning_content" \
   "family: sdd_dev_work" \
   "family: clarification_needed" \
-  "prompt_execution: none"; do
+  "prompt_execution: none" \
+  "user_message_language: es" \
+  "prose_reply_language: es" \
+  "technical_tokens_language: en" \
+  "language_policy: prose-matches-current-message; technical-tokens-stay-english"; do
   grep -F "$required" "$FIXTURE_PATH" >/dev/null || fail "fixture missing required marker: $required"
 done
 
@@ -106,6 +115,11 @@ for required in \
   "Runner selection" \
   "Permission and confirmation gates" \
   "Execution metadata" \
+  "Response-language policy" \
+  "user_message_language" \
+  "prose_reply_language" \
+  "technical_tokens_language" \
+  "prose-matches-current-message; technical-tokens-stay-english" \
   "docs/architecture/channel-context-namespace-mapping.md" \
   "docs/architecture/openclaw-artifact-classification.md" \
   "docs/architecture/discord-memory-gateway.md" \
@@ -116,6 +130,15 @@ for required in \
   "Gentle SDD is one runner/backend for \`sdd_dev_work\`" \
   "GitHub mutations"; do
   grep -F "$required" "$DOC_PATH" >/dev/null || fail "doc missing required orchestrator marker: $required"
+done
+
+for required in \
+  "response-language policy" \
+  "user_message_language" \
+  "prose_reply_language" \
+  "technical_tokens_language: en" \
+  "language_policy: prose-matches-current-message; technical-tokens-stay-english"; do
+  grep -F "$required" "$SKILL_PATH" >/dev/null || fail "skill missing response-language marker: $required"
 done
 
 for required in \
@@ -184,6 +207,7 @@ required_sections = {
     "execution_metadata",
     "writeback_policy",
 }
+required_language_policy = "prose-matches-current-message; technical-tokens-stay-english"
 required_artifact_fields = {
     "artifact_type",
     "subtype",
@@ -221,6 +245,37 @@ for sc in scenarios:
         raise SystemExit(f"scenario {name} missing route status or network slug")
     if exec_meta.get("prompt_execution") != "none":
         raise SystemExit(f"scenario {name} must keep prompt_execution: none")
+    if "user_message_language" not in event:
+        raise SystemExit(f"scenario {name} missing user_message_language")
+    if exec_meta.get("prose_reply_language") != event.get("user_message_language"):
+        raise SystemExit(f"scenario {name} prose reply language must match current user message language")
+    if exec_meta.get("technical_tokens_language") != "en":
+        raise SystemExit(f"scenario {name} technical tokens language must stay English")
+    if exec_meta.get("language_policy") != required_language_policy:
+        raise SystemExit(f"scenario {name} has wrong language policy marker")
+    if name == "spanish-planning-content-flow":
+        if event.get("user_message_language") != "es" or exec_meta.get("prose_reply_language") != "es":
+            raise SystemExit("spanish-planning-content-flow must keep Spanish prose metadata")
+        response_excerpt = exec_meta.get("response_excerpt", "")
+        for token in ["selected_skill_pack", "openclaw-skill-surface"]:
+            if token not in response_excerpt:
+                raise SystemExit(f"spanish-planning-content-flow must preserve English technical token: {token}")
+    if name == "mixed-language-approval-flow":
+        if event.get("user_message_language") != "es" or exec_meta.get("prose_reply_language") != "es":
+            raise SystemExit("mixed-language-approval-flow must keep Spanish prose metadata")
+        response_excerpt = exec_meta.get("response_excerpt", "")
+        for token in ["approve write", "profile_ref"]:
+            if token not in response_excerpt:
+                raise SystemExit(f"mixed-language-approval-flow must preserve English technical token: {token}")
+    if name == "unknown-language-clarification-flow":
+        if event.get("user_message_language") != "und" or exec_meta.get("prose_reply_language") != "und":
+            raise SystemExit("unknown-language-clarification-flow must use und language-neutral metadata")
+        if event.get("routing_status") != "clarification-needed" or event.get("project_slug") != "unknown" or event.get("network_slug") != "unknown":
+            raise SystemExit("unknown-language-clarification-flow must remain unresolved and non-routed")
+        if artifact.get("persistence_target") != "ephemeral" or artifact.get("writeback_policy") != "reject":
+            raise SystemExit("unknown-language-clarification-flow must stay ephemeral with rejected writeback")
+        if "🌐" not in exec_meta.get("response_excerpt", "") or "idioma" not in exec_meta.get("response_excerpt", ""):
+            raise SystemExit("unknown-language-clarification-flow must avoid silently defaulting to English prose")
 
     missing_artifact = required_artifact_fields - artifact.keys()
     if missing_artifact:
@@ -254,6 +309,9 @@ for sc in scenarios:
 
     if artifact.get("runner_backend") != runner.get("backend"):
         raise SystemExit(f"scenario {name} artifact runner_backend must match runner backend")
+    if intent.get("family") == "clarification_needed":
+        if runner.get("backend") != "response-only" or runner.get("runner_kind") != "clarification" or gate.get("state") != "needs-route" or writeback.get("classification") != "reject":
+            raise SystemExit(f"scenario {name} clarification fallback must stay response-only with needs-route and reject writeback")
 
     if name == "planning-content-flow":
         if intent.get("family") != "planning_content" or runner.get("backend") != "openclaw-skill-surface" or runner.get("runner_kind") != "content-planner" or gate.get("state") != "summary-only" or gate.get("approval_needed") != "false" or writeback.get("classification") != "draft":
@@ -292,7 +350,7 @@ if missing_profile_ops:
     raise SystemExit(f"fixture missing private profile operations: {sorted(missing_profile_ops)}")
 PY
 
-review_paths=("$FIXTURE_PATH" "$DOC_PATH" "$ARTIFACT_DOC_PATH" "$PARENT_DOC_PATH" "$ROUTING_DOC_PATH" "$CONFIG_README_PATH")
+review_paths=("$FIXTURE_PATH" "$DOC_PATH" "$SKILL_PATH" "$ARTIFACT_DOC_PATH" "$PARENT_DOC_PATH" "$ROUTING_DOC_PATH" "$CONFIG_README_PATH")
 
 if grep -E '\b[0-9]{17,20}\b' "${review_paths[@]}" >/dev/null; then
   fail "artifacts must not expose raw Discord snowflake-like IDs"
@@ -309,6 +367,7 @@ fi
 echo "Validated fake Discord runtime orchestrator contract."
 echo "Fixture: $FIXTURE_PATH"
 echo "Doc: $DOC_PATH"
+echo "Skill: $SKILL_PATH"
 echo "Artifact classification doc: $ARTIFACT_DOC_PATH"
 echo "Parent doc: $PARENT_DOC_PATH"
 echo "Routing doc: $ROUTING_DOC_PATH"

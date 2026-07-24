@@ -52,6 +52,16 @@ The fixture must cover:
 
 Memory-changing actions must ask for an explicit approval phrase. Do not treat silence, emoji reactions, or unrelated replies as approval.
 
+### Response-language policy
+
+Approval proposal prose must match the language of the current Discord message. Keep stable technical tokens in English: route names, namespaces, schema keys, and the exact approval phrase `approve write`. The option literals stay exactly:
+
+- `approve write`
+- `revise: <instruction>`
+- `reject`
+
+For Spanish operator messages, headings and explanatory labels should be Spanish, for example `Propuesta de actualización durable`, `Resumen del cambio`, `Límite de riesgo`, and `Respondé con exactamente una opción`.
+
 Recommended prompt shape:
 
 ```text
@@ -64,6 +74,29 @@ Change summary: <one-sentence summary>
 Risk boundary: <what this does not do>
 
 Reply with exactly one option:
+- approve write
+- revise: <instruction>
+- reject
+```
+
+Spanish prompt shape:
+
+```text
+user_message_language: es
+prose_reply_language: es
+technical_tokens_language: en
+language_policy: prose-matches-current-message; technical-tokens-stay-english
+
+Propuesta de actualización durable
+Route: <project>/<network>
+Runtime context: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+Target namespace: <namespace-key>
+Runtime audit namespace: discord-project-manager/runtime/discord/<guild-id>/<channel-id>
+Resumen del cambio: <resumen en español de una oración>
+Límite de riesgo: <qué no hace esta acción>
+Registro de auditoría: <resumen sanitizado o referencia audit_record>
+
+Respondé con exactamente una opción:
 - approve write
 - revise: <instruction>
 - reject

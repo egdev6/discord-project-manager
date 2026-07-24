@@ -28,6 +28,7 @@ Discord event envelope
 -> intent classification
 -> runner selection
 -> permission/confirmation gate
+-> response-language policy
 -> execution metadata
 -> writeback policy
 ```
@@ -45,6 +46,7 @@ Discord event envelope
 - Resolve scope and effective skills before using any workflow skill.
 - Always emit artifact classification before runner selection.
 - Always include `discord-approval-gate` for write-like flows.
+- Match user-facing prose to the user's current Discord message language, using `user_message_language` and `prose_reply_language`; keep commands, snippets, schema keys, routes, paths, skill/backend names, and exact approval phrases in English.
 - Private context profile operations such as `create`, `update`, `reference`, `bind`, `clone`, and channel override proposals are write-like when they target durable private runtime state.
 - Do not expose raw Discord IDs, secrets, transcripts, screenshots, or private payloads in repo artifacts.
 - Do not claim live Discord, production, publishing, scheduling, Buffer, or durable write success from no-op/model-mediated checks.
@@ -72,6 +74,10 @@ effective_skills: [<skill-name>]
 mandatory_skills: [discord-approval-gate] # for write-like flows
 approval_required: <true|false>
 writes_attempted: false
+user_message_language: <en|es|...>
+prose_reply_language: <same-as-user_message_language>
+technical_tokens_language: en
+language_policy: prose-matches-current-message; technical-tokens-stay-english
 boundary_notes: <one sentence>
 ```
 

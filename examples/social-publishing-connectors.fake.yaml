@@ -1,0 +1,292 @@
+schema_version: 1
+contract: social-publishing-connectors
+project: egdev
+fixture_type: fake-demo
+fake: true
+safe_for_repo: true
+privacy_reviewed: true
+real_tokens_included: false
+real_payloads_included: false
+screenshots_included: false
+social_account_data_included: false
+live_publish_attempted: false
+live_schedule_attempted: false
+browser_automation_attempted: false
+raw_provider_payloads_included: false
+credential_material_included: false
+approval_phrase: approve publish
+connector_options:
+  - option: buffer-graphql-publishing
+    label: Buffer GraphQL publishing
+    reliability: high
+    privacy_exposure: medium
+    tos_risk: medium
+    implementation_effort: medium
+    credential_model: buffer-oauth-private-runtime-placeholder
+    credential_storage: private-runtime-only
+    rotation_action: revoke-rotate-rebind-buffer-oauth
+    approval_status: candidate-provider-not-live-approved
+    scheduling_support: supported-by-provider-unvalidated-here
+    ledger_update_behavior: success-only-published-or-queued
+  - option: direct-linkedin-api
+    label: Direct LinkedIn API
+    reliability: medium
+    privacy_exposure: medium-high
+    tos_risk: medium-high
+    implementation_effort: high
+    credential_model: linkedin-oauth-private-runtime-placeholder
+    credential_storage: private-runtime-only
+    rotation_action: revoke-rotate-rebind-linkedin-oauth
+    approval_status: pending-provider-approval
+    scheduling_support: not-confirmed
+    ledger_update_behavior: success-only-published
+  - option: direct-x-api
+    label: Direct X API
+    reliability: medium
+    privacy_exposure: medium-high
+    tos_risk: medium-high
+    implementation_effort: high
+    credential_model: x-oauth-private-runtime-placeholder
+    credential_storage: private-runtime-only
+    rotation_action: revoke-rotate-rebind-x-oauth
+    approval_status: pending-provider-approval
+    scheduling_support: not-confirmed
+    ledger_update_behavior: success-only-published
+  - option: browser-assisted-manual-publishing
+    label: Browser-assisted manual publishing
+    reliability: medium
+    privacy_exposure: high
+    tos_risk: high
+    implementation_effort: high
+    credential_model: human-browser-session-private-runtime-placeholder
+    credential_storage: private-runtime-only
+    rotation_action: sign-out-revoke-session-clear-private-browser-profile
+    approval_status: manual-only-automation-not-approved
+    scheduling_support: platform-native-manual-only
+    ledger_update_behavior: manual-success-receipt-only
+  - option: community-plugin-openclaw-social
+    label: Community plugin openclaw-plugin-social or zooclaw-social
+    reliability: low-medium
+    privacy_exposure: high
+    tos_risk: high
+    implementation_effort: medium
+    credential_model: plugin-session-or-provider-token-private-runtime-placeholder
+    credential_storage: private-runtime-only
+    rotation_action: revoke-plugin-provider-credentials-and-rebind
+    approval_status: not-approved-for-automation
+    scheduling_support: unknown-unverified
+    ledger_update_behavior: no-update-until-approved-result-contract
+  - option: custom-openclaw-plugin
+    label: Custom OpenClaw plugin
+    reliability: medium-high
+    privacy_exposure: medium-high
+    tos_risk: medium
+    implementation_effort: high
+    credential_model: provider-oauth-or-api-key-private-runtime-placeholder
+    credential_storage: private-runtime-only
+    rotation_action: revoke-rotate-provider-credentials-rebind-and-audit
+    approval_status: design-candidate-separate-implementation-approval-required
+    scheduling_support: provider-specific
+    ledger_update_behavior: normalized-success-result-only
+approval_contract:
+  draft_approval_phrase: approve draft
+  schedule_approval_phrase: approve schedule
+  publish_approval_phrase: approve publish
+  draft_approval_allows_publish: false
+  schedule_approval_allows_publish: false
+  publish_requires_explicit_separate_approval: true
+  publish_before_approval_blocked: true
+  schedule_before_approval_blocked: true
+  ledger_updates_before_provider_success: false
+ledger_contract:
+  allowed_initial_states:
+    - draft
+    - queued
+  publish_success_state: published
+  schedule_success_state: queued
+  failed_result_preserves_previous_state: true
+  blocked_result_preserves_previous_state: true
+  provider_receipts_are_fake_only: true
+  publish_receipt_prefix: fake-provider://publish/
+  schedule_receipt_prefix: fake-provider://schedule/
+credential_requirements:
+  storage_classification: private-runtime-only
+  placeholders_only: true
+  public_repo_allowed_values:
+    - example.invalid
+    - placeholder
+    - fake-provider://publish/
+    - fake-provider://schedule/
+  required_rotation_actions:
+    - revoke-provider-token
+    - rotate-secret
+    - rebind-private-runtime-account
+    - invalidate-old-session-state
+    - rerun-fake-first-validator
+scenarios:
+  - name: blocked-publish-before-approval
+    intent: publish
+    draft_approved: false
+    schedule_approved: false
+    publish_approved: false
+    action_allowed: false
+    expected_result: blocked-before-approval
+    provider_call_attempted: false
+    live_activity_attempted: false
+    ledger_before:
+      entry_id: social-post-001-demo
+      status: draft
+      published_at: unknown
+      scheduled_for: unknown
+      provider_receipt_ref: none
+    provider_result:
+      status: not-attempted
+      receipt_ref: none
+      completed_at: null
+      scheduled_for: null
+      error_ref: null
+    ledger_after:
+      entry_id: social-post-001-demo
+      status: draft
+      published_at: unknown
+      scheduled_for: unknown
+      provider_receipt_ref: none
+  - name: draft-approved-but-publish-blocked
+    intent: publish
+    draft_approved: true
+    schedule_approved: false
+    publish_approved: false
+    action_allowed: false
+    expected_result: blocked-before-publish-approval
+    provider_call_attempted: false
+    live_activity_attempted: false
+    ledger_before:
+      entry_id: social-post-002-demo
+      status: draft
+      published_at: unknown
+      scheduled_for: unknown
+      provider_receipt_ref: none
+    provider_result:
+      status: not-attempted
+      receipt_ref: none
+      completed_at: null
+      scheduled_for: null
+      error_ref: null
+    ledger_after:
+      entry_id: social-post-002-demo
+      status: draft
+      published_at: unknown
+      scheduled_for: unknown
+      provider_receipt_ref: none
+  - name: schedule-approved-but-publish-blocked
+    intent: publish
+    draft_approved: true
+    schedule_approved: true
+    publish_approved: false
+    action_allowed: false
+    expected_result: blocked-before-publish-approval
+    provider_call_attempted: false
+    live_activity_attempted: false
+    ledger_before:
+      entry_id: social-post-003-demo
+      status: queued
+      published_at: unknown
+      scheduled_for: "2026-08-01T15:00:00Z"
+      provider_receipt_ref: fake-provider://schedule/social-post-003-demo
+    provider_result:
+      status: not-attempted
+      receipt_ref: none
+      completed_at: null
+      scheduled_for: null
+      error_ref: null
+    ledger_after:
+      entry_id: social-post-003-demo
+      status: queued
+      published_at: unknown
+      scheduled_for: "2026-08-01T15:00:00Z"
+      provider_receipt_ref: fake-provider://schedule/social-post-003-demo
+  - name: publish-approved-updates-ledger-after-success
+    intent: publish
+    draft_approved: true
+    schedule_approved: false
+    publish_approved: true
+    action_allowed: true
+    expected_result: fake-publish-success
+    provider_call_attempted: false
+    live_activity_attempted: false
+    ledger_before:
+      entry_id: social-post-004-demo
+      status: draft
+      published_at: unknown
+      scheduled_for: unknown
+      provider_receipt_ref: none
+    provider_result:
+      status: fake-success
+      receipt_ref: fake-provider://publish/social-post-004-demo
+      completed_at: "2026-08-01T15:05:00Z"
+      scheduled_for: null
+      error_ref: null
+    ledger_after:
+      entry_id: social-post-004-demo
+      status: published
+      published_at: "2026-08-01T15:05:00Z"
+      scheduled_for: unknown
+      provider_receipt_ref: fake-provider://publish/social-post-004-demo
+  - name: schedule-approved-updates-ledger-after-success
+    intent: schedule
+    draft_approved: true
+    schedule_approved: true
+    publish_approved: false
+    action_allowed: true
+    expected_result: fake-schedule-success
+    provider_call_attempted: false
+    live_activity_attempted: false
+    ledger_before:
+      entry_id: social-post-005-demo
+      status: draft
+      published_at: unknown
+      scheduled_for: unknown
+      provider_receipt_ref: none
+    provider_result:
+      status: fake-success
+      receipt_ref: fake-provider://schedule/social-post-005-demo
+      completed_at: null
+      scheduled_for: "2026-08-02T16:00:00Z"
+      error_ref: null
+    ledger_after:
+      entry_id: social-post-005-demo
+      status: queued
+      published_at: unknown
+      scheduled_for: "2026-08-02T16:00:00Z"
+      provider_receipt_ref: fake-provider://schedule/social-post-005-demo
+  - name: failed-provider-result-does-not-mark-published
+    intent: publish
+    draft_approved: true
+    schedule_approved: false
+    publish_approved: true
+    action_allowed: true
+    expected_result: fake-provider-failure
+    provider_call_attempted: false
+    live_activity_attempted: false
+    ledger_before:
+      entry_id: social-post-006-demo
+      status: draft
+      published_at: unknown
+      scheduled_for: unknown
+      provider_receipt_ref: none
+    provider_result:
+      status: fake-failure
+      receipt_ref: none
+      completed_at: null
+      scheduled_for: null
+      error_ref: fake-error://provider-rejected-demo
+    ledger_after:
+      entry_id: social-post-006-demo
+      status: draft
+      published_at: unknown
+      scheduled_for: unknown
+      provider_receipt_ref: none
+metadata:
+  fixture_note: Fake-only connector research validation. No provider tokens, payloads, screenshots, account data, live publishing, or live scheduling are included.
+  source_urls_are_sanitized: true
+  example_url: https://example.invalid/social-publishing-connectors/demo

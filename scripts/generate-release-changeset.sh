@@ -66,11 +66,17 @@ commit_count="$(git rev-list --count "$range")"
 
 sanitize_summary() {
   local value="$1"
+  # Discord snowflakes are 17-20 digit IDs; release notes should keep only placeholders.
+  local private_id_pattern='[0-9]{17,20}'
+  # Keep generated commit subjects safe against common pasted token prefixes and key=value secrets.
+  local token_prefix_pattern='(ghp_|gho_|github_pat_|xox[baprs]-|mfa\.)[A-Za-z0-9_-]+'
+  local secret_assignment_pattern='(DISCORD_BOT_TOKEN|OPENCLAW_GATEWAY_TOKEN|ENGRAM_CLOUD_TOKEN|ENGRAM_CLOUD_ADMIN|ENGRAM_JWT_SECRET|POSTGRES_PASSWORD|BUFFER_ACCESS_TOKEN|BUFFER_API_KEY|OPENAI_API_KEY|ANTHROPIC_API_KEY|SLACK_BOT_TOKEN|GITHUB_TOKEN|GITLAB_TOKEN|STRIPE_API_KEY|AWS_ACCESS_KEY_ID|AWS_SECRET_ACCESS_KEY)[[:space:]]*=[[:space:]]*[^[:space:]]+'
+
   value="${value//|/\\|}"
   value="$(printf '%s' "$value" | sed -E \
-    -e 's/[0-9]{17,20}/<redacted-id>/g' \
-    -e 's/(ghp_|gho_|github_pat_)[A-Za-z0-9_]+/<redacted-token>/g' \
-    -e 's/(DISCORD_BOT_TOKEN|OPENAI_API_KEY|ANTHROPIC_API_KEY)=[^[:space:]]+/<redacted-secret>/g' \
+    -e "s/${private_id_pattern}/<redacted-id>/g" \
+    -e "s/${token_prefix_pattern}/<redacted-token>/g" \
+    -e "s/${secret_assignment_pattern}/<redacted-secret>/g" \
     -e 's/production-ready/[release-claim-redacted]/Ig' \
     -e 's/public Discord validation passed/[release-claim-redacted]/Ig' \
     -e 's/live Discord validation passed/[release-claim-redacted]/Ig' \
@@ -85,7 +91,7 @@ sanitize_summary() {
 }
 
 changes_table=""
-while IFS= read -r line; do
+while IFS= read -r line || [[ -n "$line" ]]; do
   [[ -n "$line" ]] || continue
   sha="${line%%$'\t'*}"
   subject="${line#*$'\t'}"
@@ -132,10 +138,11 @@ Run before opening or merging the release-promotion PR:
 ~~~bash
 git diff --check origin/main...HEAD
 bash scripts/validate-release-promotion.sh --base origin/main --head HEAD --force
+bash scripts/validate-release-changeset-final-row.sh
 bash scripts/validate-repo-safe-evidence.sh
 bash scripts/validate-openclaw-gentle-ai-runtime.sh
 bash scripts/validate-openclaw-skill-inventory.sh
-TMPDIR="$(mktemp -d)" SAFE_VALIDATION_SKIP_STAGE0=1 bash scripts/run-safe-validation-suite.sh
+TMPDIR="\$(mktemp -d)" SAFE_VALIDATION_SKIP_STAGE0=1 bash scripts/run-safe-validation-suite.sh
 ~~~
 
 PR checks on the release-promotion PR must also pass before merge to main.
@@ -152,6 +159,8 @@ PR checks on the release-promotion PR must also pass before merge to main.
 ## Rollback notes
 
 This promotion is repository-only. If a release problem is found after merge, open a hotfix issue/PR against main, then back-merge or cherry-pick the fix into develop.
+
+If the Release tag and notes workflow creates an incorrect tag or GitHub Release, do not assume a rerun will overwrite it. Open a release repair issue, mark the affected GitHub Release as invalid or superseded in sanitized wording, and prefer a patch or corrected follow-up tag. Delete and recreate a tag/release only after explicit maintainer approval and after confirming no downstream consumer depends on the original artifact.
 
 ## Post-merge actions
 

@@ -27,6 +27,8 @@ Optional inputs:
 
 - `brand_context_summary`
 - `recent_ledger_summary`
+- `normalized_snapshots` for `network: x`
+- `trend_signals` scoped to X or cross-network strategy
 - `queue_goal`
 - `review_preferences`
 - `source_context`
@@ -38,11 +40,12 @@ Optional inputs:
 2. Treat source ingestion as a normalization step that produces proposal-only queue candidates, never a durable write.
 3. Keep X queue planning separate from cross-network strategy rules.
 4. Separate confirmed facts, assumptions, variation rules, and proposed angles or candidate updates.
-5. Keep each queued item small enough for human review before any drafting or publishing.
-6. Treat memory writes as planned targets until a human approves the queue.
-7. For write-like Discord requests, load `skills/discord-approval-gate/SKILL.md` and ask for explicit approval before any persistence.
-8. Use only fake/demo values in repository-facing examples.
-9. Follow ADR 0002 for all namespace references.
+5. If analytics or trends are supplied, use only sanitized normalized snapshots and trend signals from the shared `docs/operations/social-strategy-analytics-trends-ingestion.md` contract; join X metrics through `content_ledger_entry_id`, keep unknown metrics as `unknown`, and include trend provenance, observed timestamp, confidence, and source type in the planning basis.
+6. Keep each queued item small enough for human review before any drafting or publishing.
+7. Treat memory writes as planned targets until a human approves the queue.
+8. For write-like Discord requests, load `skills/discord-approval-gate/SKILL.md` and ask for explicit approval before any persistence.
+9. Use only fake/demo values in repository-facing examples.
+10. Follow ADR 0002 for all namespace references.
 
 ## Output shape
 
@@ -81,6 +84,20 @@ planning_basis:
     - <planning assumption to review>
   variation_rules:
     - <queue diversity rule>
+  sanitized_performance_inputs:
+    - content_ledger_entry_id: <x ledger id or none>
+      insight: <normalized analytics cue>
+  trend_inputs:
+    - source_type: <rss|web|search|trend-provider|manual-sanitized-entry>
+      observed_at: <timestamp>
+      confidence: <0.0-1.0>
+      provenance:
+        source_kind: <rss-feed|webpage|search-result|trend-report|manual-note>
+        retrieved_by: <fake adapter or human-sanitized-entry>
+        retrieval_mode: fake-fixture-no-network
+        canonical_url: https://example.invalid/<path>
+        source_title: <bounded title>
+      strategy_signal: <normalized trend cue>
   proposed_angles:
     - <queued angle under consideration>
 queue_plan:
@@ -152,6 +169,8 @@ Promote reusable X queue planning rules, approval checkpoints, and contract chan
 ## Safety rules
 
 - Do not claim memory was written unless the runtime actually saved it after approval.
+- Do not consume raw scraped pages, screenshots, native exports, provider payloads, account data, credentials, or private metrics; require sanitized normalized snapshots instead.
+- Do not claim live browser/API scraping, analytics ingestion, or trend-provider access until a separate approved implementation exists.
 - Do not publish or schedule content from this contract alone.
 - Do not put durable X queue planning under runtime Discord namespaces.
 - Do not include private brand plans, secrets, or real customer data in repo examples.
