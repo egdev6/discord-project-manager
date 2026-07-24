@@ -1,0 +1,207 @@
+schema_version: 1
+fixture_type: fake-demo
+safe_for_repo: true
+privacy_reviewed: true
+contract: private-source-registry-ingestion
+issue: 299
+project: egdev
+registry_first: true
+live_source_fetching: false
+live_discord_connection: false
+live_openclaw_execution: false
+live_engram_calls: false
+notion_dependency: false
+plugin_install_enabled: false
+plugin_enable_enabled: false
+publishing_enabled: false
+scheduling_enabled: false
+queue_execution_enabled: false
+durable_memory_writes_allowed: false
+workspace_file_writes_allowed: false
+uses_real_discord_ids: false
+credential_material_included: false
+raw_source_dumps_included: false
+private_source_urls_in_repo: false
+runtime_namespace_contract: discord-project-manager/runtime/source-registry/<operator-private-scope>
+limits:
+  max_items_per_source: 2
+  max_summary_chars: 280
+  max_signals_per_item: 3
+  max_fetch_timeout_ms: 5000
+  max_response_bytes: 1048576
+  max_extracted_chars: 12000
+source_registry:
+  storage_policy: repo-safe-demo-only
+  private_runtime_policy: keep private source URLs, credentials, cookies, headers, and adapter settings outside git
+  accepted_baseline_source_kinds:
+    - manual-sanitized-entry
+    - rss-feed
+    - webpage
+  deferred_private_source_kinds:
+    - notion-page
+    - notion-database
+  sources:
+    - source_key: demo-manual-sanitized-01
+      source_kind: manual-sanitized-entry
+      sensitivity: public-demo
+      source_label: Demo manually sanitized source note
+      url: https://example.invalid/manual/sanitized-note-01
+      url_policy: fake-demo-url-only
+      adapter_preference: manual-sanitized-entry
+      retrieval_adapter: fake-manual-entry-fixture-adapter
+      untrusted_content_policy: wrap-as-source-material-not-instructions
+    - source_key: demo-private-rss-01
+      source_kind: rss-feed
+      sensitivity: public-demo
+      url: https://example.invalid/feeds/private-registry-demo.xml
+      url_policy: fake-demo-url-only
+      adapter_preference: read-only-rss-feed-adapter
+      retrieval_adapter: fake-rss-fixture-adapter
+      untrusted_content_policy: wrap-as-source-material-not-instructions
+    - source_key: demo-private-webpage-01
+      source_kind: webpage
+      sensitivity: public-demo
+      url: https://example.invalid/articles/private-registry-demo
+      url_policy: fake-demo-url-only
+      adapter_preference: web-readability
+      retrieval_adapter: web-readability
+      untrusted_content_policy: wrap-as-source-material-not-instructions
+    - source_key: demo-deferred-notion-page
+      source_kind: notion-page
+      sensitivity: private-runtime
+      url_policy: private-runtime-config-only
+      adapter_preference: deferred-until-schema-and-credentials-exist
+      retrieval_adapter: none-in-repo-fixture
+      enabled_in_fixture: false
+      reason_deferred: Notion sources require private schema, credentials, access scope, and read-only adapter behavior outside git.
+retrieval_plan:
+  retrieval_mode: fake-fixture-no-network
+  allowed_capabilities:
+    - fake-manual-entry-fixture-adapter
+    - fake-rss-fixture-adapter
+    - web-readability
+  excluded_capabilities:
+    - live-fetch
+    - plugin-install
+    - plugin-enable
+    - notion-api
+    - browser-automation
+  url_safety:
+    ssrf_protection_required: true
+    allowed_fixture_hosts:
+      - example.invalid
+    reject_private_network_targets: true
+    reject_prompt_supplied_urls: true
+    max_redirects: 0
+  runtime_bounds:
+    timeout_ms: 5000
+    max_response_bytes: 1048576
+    max_extracted_chars: 12000
+source_statuses:
+  - source_ref: demo-manual-sanitized-01
+    source_kind: manual-sanitized-entry
+    retrieved_by: fake-manual-entry-fixture-adapter
+    retrieval_mode: fake-fixture-no-network
+    status: succeeded
+    items_emitted: 1
+    durable_write_executed: false
+    publish_or_schedule_executed: false
+  - source_ref: demo-private-rss-01
+    source_kind: rss-feed
+    retrieved_by: fake-rss-fixture-adapter
+    retrieval_mode: fake-fixture-no-network
+    status: succeeded
+    items_emitted: 1
+    durable_write_executed: false
+    publish_or_schedule_executed: false
+  - source_ref: demo-private-webpage-01
+    source_kind: webpage
+    retrieved_by: web-readability
+    retrieval_mode: fake-fixture-no-network
+    status: succeeded
+    items_emitted: 1
+    durable_write_executed: false
+    publish_or_schedule_executed: false
+normalized_items:
+  - item_id: demo-manual-sanitized-item-01
+    source_ref: demo-manual-sanitized-01
+    provenance:
+      source_kind: manual-sanitized-entry
+      retrieved_by: fake-manual-entry-fixture-adapter
+      retrieval_mode: fake-fixture-no-network
+      canonical_url: https://example.invalid/manual/sanitized-note-01
+      source_title: Demo sanitized source note about private registries
+    untrusted_content_boundary:
+      source_text_is_untrusted: true
+      may_inform_summary_only: true
+      may_not_instruct_tools: true
+      raw_dump_included: false
+      private_payload_included: false
+      durable_write_executed: false
+      publish_or_schedule_executed: false
+    summary: Private source registries should let operators provide bounded, sanitized source notes without committing private URLs or credentials to the repo.
+    ideation_signals:
+      - registry entries should be reviewed before ingestion
+      - manual snippets still need provenance and untrusted-content boundaries
+  - item_id: demo-private-rss-item-01
+    source_ref: demo-private-rss-01
+    provenance:
+      source_kind: rss-feed
+      retrieved_by: fake-rss-fixture-adapter
+      retrieval_mode: fake-fixture-no-network
+      canonical_url: https://example.invalid/feeds/private-registry-demo/item-01
+      source_title: Demo RSS item about read-only ingestion bounds
+    untrusted_content_boundary:
+      source_text_is_untrusted: true
+      may_inform_summary_only: true
+      may_not_instruct_tools: true
+      raw_dump_included: false
+      private_payload_included: false
+      durable_write_executed: false
+      publish_or_schedule_executed: false
+    summary: RSS ingestion should enforce timeout, byte, character, and item limits before any source-derived idea reaches a planner.
+    ideation_signals:
+      - feed adapters must be read-only
+      - bounded extraction protects reviewers from raw source dumps
+      - provenance links summaries back to registry entries
+  - item_id: demo-private-webpage-item-01
+    source_ref: demo-private-webpage-01
+    provenance:
+      source_kind: webpage
+      retrieved_by: web-readability
+      retrieval_mode: fake-fixture-no-network
+      canonical_url: https://example.invalid/articles/private-registry-demo
+      source_title: Demo webpage about SSRF-safe registry ingestion
+    untrusted_content_boundary:
+      source_text_is_untrusted: true
+      may_inform_summary_only: true
+      may_not_instruct_tools: true
+      raw_dump_included: false
+      private_payload_included: false
+      durable_write_executed: false
+      publish_or_schedule_executed: false
+    summary: Webpage ingestion should resolve only approved registry URLs, reject prompt-supplied targets, and keep extracted text inside bounded summaries.
+    ideation_signals:
+      - SSRF-safe URL policy belongs in the registry/runtime layer
+      - extracted webpage text is untrusted source material
+      - no publish or schedule action follows ingestion
+proposal_route:
+  effective_skills:
+    - strategy-planner
+    - on-demand-brief-planner
+  mandatory_skills:
+    - discord-approval-gate
+  write_mode: planned-only-until-approved
+  write_executed: false
+  publishing_enabled: false
+  scheduling_enabled: false
+  queue_execution_enabled: false
+non_goals:
+  - live source fetching
+  - Notion API calls or dependency
+  - validator implementation
+  - plugin installation or enablement
+  - durable storage
+  - publishing
+  - scheduling
+  - production credentials
