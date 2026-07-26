@@ -363,6 +363,12 @@ for required in \
 done
 
 for required in \
+  "SCORING_PROFILES_DATA_SOURCE_ID" \
+  "SCORING_PROFILE_NAME" \
+  "query_scoring_profiles" \
+  "default_scoring_profile" \
+  "normalize_thresholds" \
+  "load_scoring_profile" \
   "score_item" \
   "reportable" \
   "watchlist" \
@@ -378,6 +384,8 @@ for required in \
   "cuerpos RSS completos"; do
   grep -F "$required" scripts/private-test-notion-rss-reportability-to-discord.sh >/dev/null || fail "RSS reportability rehearsal missing marker: $required"
 done
+
+bash scripts/private-test-notion-rss-reportability-to-discord.sh --self-test >/dev/null || fail "dynamic scoring self-test failed"
 
 if grep -E 'Bearer [A-Za-z0-9._~+/-]{20,}|secret_[A-Za-z0-9_/-]{12,}|ntn_[A-Za-z0-9_/-]{12,}|mka_[A-Za-z0-9_/-]{12,}|sk-[A-Za-z0-9_/-]{20,}|gh[pousr]_[A-Za-z0-9_/-]{20,}|xox[baprs]-[A-Za-z0-9_-]{20,}' "${private_script_paths[@]}" >/dev/null; then
   fail "private rehearsal scripts must not contain literal credential values"

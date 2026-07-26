@@ -2,15 +2,59 @@
 set -euo pipefail
 
 ENV_PATH="${ENV_PATH:-.env}"
+
+if [[ "${1:-}" == "--self-test" ]]; then
+  python3 - <<'PYTEST'
+
+def clamp_float(raw, default, minimum=0.0, maximum=1.0):
+    try:
+        value = float(raw)
+    except (TypeError, ValueError):
+        return default
+    return min(max(value, minimum), maximum)
+
+def normalize_thresholds(reportable, watchlist):
+    reportable = clamp_float(reportable, 0.55)
+    watchlist = clamp_float(watchlist, 0.32)
+    if reportable < watchlist:
+        reportable, watchlist = 0.55, 0.32
+    return reportable, watchlist
+
+def decide(score, reportable, watchlist):
+    return "reportable" if score >= reportable else "watchlist" if score >= watchlist else "discard"
+
+assert clamp_float("-0.2", 0.06) == 0.0
+assert clamp_float("1.4", 0.06) == 1.0
+assert normalize_thresholds("0.2", "0.8") == (0.55, 0.32)
+assert decide(0.60, 0.55, 0.32) == "reportable"
+assert decide(0.40, 0.55, 0.32) == "watchlist"
+assert decide(0.10, 0.55, 0.32) == "discard"
+print("Dynamic scoring profile self-test: PASS")
+PYTEST
+  exit 0
+fi
+SCORING_PROFILE_OVERRIDE="${SCORING_PROFILE:-}"
+NOTION_SOURCE_MAX_RESULTS_OVERRIDE="${NOTION_SOURCE_MAX_RESULTS:-}"
+RSS_REPORTABILITY_ALLOWED_HOSTS_OVERRIDE="${RSS_REPORTABILITY_ALLOWED_HOSTS:-}"
 [[ -f "$ENV_PATH" ]] || { echo "ERROR: env file not found: $ENV_PATH" >&2; exit 1; }
 
 set -a
 # shellcheck disable=SC1090
 . "$ENV_PATH"
 set +a
+if [[ -n "$SCORING_PROFILE_OVERRIDE" ]]; then
+  SCORING_PROFILE="$SCORING_PROFILE_OVERRIDE"
+fi
+if [[ -n "$NOTION_SOURCE_MAX_RESULTS_OVERRIDE" ]]; then
+  NOTION_SOURCE_MAX_RESULTS="$NOTION_SOURCE_MAX_RESULTS_OVERRIDE"
+fi
+if [[ -n "$RSS_REPORTABILITY_ALLOWED_HOSTS_OVERRIDE" ]]; then
+  RSS_REPORTABILITY_ALLOWED_HOSTS="$RSS_REPORTABILITY_ALLOWED_HOSTS_OVERRIDE"
+fi
 
 : "${NOTION_API_KEY:?NOTION_API_KEY is required in $ENV_PATH}"
 : "${NOTION_SOURCE_DATA_SOURCE_ID:?NOTION_SOURCE_DATA_SOURCE_ID is required in $ENV_PATH}"
+: "${NOTION_SCORING_PROFILES_DATA_SOURCE_ID:?NOTION_SCORING_PROFILES_DATA_SOURCE_ID is required in $ENV_PATH}"
 : "${DISCORD_BOT_TOKEN:?DISCORD_BOT_TOKEN is required in $ENV_PATH}"
 : "${DISCORD_TEST_CHANNEL_ID:?DISCORD_TEST_CHANNEL_ID is required in $ENV_PATH}"
 
@@ -34,6 +78,8 @@ from typing import Any
 
 NOTION_API_KEY = os.environ["NOTION_API_KEY"]
 DATA_SOURCE_ID = os.environ["NOTION_SOURCE_DATA_SOURCE_ID"]
+SCORING_PROFILES_DATA_SOURCE_ID = os.environ["NOTION_SCORING_PROFILES_DATA_SOURCE_ID"]
+SCORING_PROFILE_NAME = os.environ.get("SCORING_PROFILE", "ai-news")
 DISCORD_BOT_TOKEN = os.environ["DISCORD_BOT_TOKEN"]
 DISCORD_TEST_CHANNEL_ID = os.environ["DISCORD_TEST_CHANNEL_ID"]
 NOTION_VERSION = os.environ.get("NOTION_VERSION", "2025-09-03")
@@ -43,18 +89,11 @@ MAX_ITEMS_PER_SOURCE = min(max(int(os.environ.get("RSS_REPORTABILITY_MAX_ITEMS_P
 MAX_REPORT_LINES = min(max(int(os.environ.get("RSS_REPORTABILITY_MAX_REPORT_LINES", "8")), 1), 20)
 ALLOWED_FEED_HOSTS = {
     host.strip().lower()
-    for host in os.environ.get("RSS_REPORTABILITY_ALLOWED_HOSTS", "www.reddit.com,old.reddit.com").split(",")
+    for host in os.environ.get("RSS_REPORTABILITY_ALLOWED_HOSTS", "www.reddit.com,old.reddit.com,cassidoo.co,overreacted.io,kentcdodds.com,www.joshwcomeau.com,pnpm.io,ollama.com,code.visualstudio.com").split(",")
     if host.strip()
 }
 
-DPM_KEYWORDS = {
-    "discord", "notion", "workflow", "workflows", "automation", "bot", "bots",
-    "project", "management", "triage", "rss", "source", "registry", "publishing",
-    "content", "operations", "agent", "agents", "llm", "ai", "openclaw",
-    "approval", "review", "planner", "planning",
-}
-ACTIONABLE = {"how to", "guide", "checklist", "steps", "tutorial", "example", "case study", "playbook"}
-NOISE = {"subscribe", "sponsored", "buy now", "discount", "deal", "promo"}
+DEFAULT_ACTIONABLE = {"how to", "guide", "checklist", "steps", "tutorial", "example", "case study", "playbook"}
 
 
 def request_json(url: str, *, method: str = "GET", headers: dict[str, str] | None = None, body: bytes | None = None) -> dict[str, Any]:
@@ -110,7 +149,130 @@ def prop_value(props: dict[str, Any], name: str) -> str:
         return ",".join(item.get("name", "") for item in prop.get("multi_select", []))
     if typ == "url":
         return prop.get("url") or ""
+    if typ == "number":
+        value = prop.get("number")
+        return "" if value is None else str(value)
     return ""
+
+
+def parse_csv(value: str) -> list[str]:
+    return [part.strip().lower() for part in (value or "").split(",") if part.strip()]
+
+
+def parse_float(value: str, default: float, minimum: float | None = None, maximum: float | None = None) -> float:
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        parsed = default
+    if minimum is not None:
+        parsed = max(parsed, minimum)
+    if maximum is not None:
+        parsed = min(parsed, maximum)
+    return parsed
+
+
+def parse_boosts(value: str) -> dict[str, float]:
+    boosts: dict[str, float] = {}
+    for part in (value or "").split(","):
+        if ":" not in part:
+            continue
+        key, raw_score = part.split(":", 1)
+        key = key.strip().lower()
+        if not key:
+            continue
+        boosts[key] = parse_float(raw_score.strip(), 0.0)
+    return boosts
+
+
+def query_scoring_profiles() -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    start_cursor: str | None = None
+    while True:
+        payload: dict[str, Any] = {"page_size": 25}
+        if start_cursor:
+            payload["start_cursor"] = start_cursor
+        data = request_json(
+            f"https://api.notion.com/v1/data_sources/{SCORING_PROFILES_DATA_SOURCE_ID}/query",
+            method="POST",
+            headers={
+                "Authorization": f"Bearer {NOTION_API_KEY}",
+                "Content-Type": "application/json",
+                "Notion-Version": NOTION_VERSION,
+            },
+            body=json.dumps(payload).encode("utf-8"),
+        )
+        rows.extend(data.get("results") or [])
+        if not data.get("has_more"):
+            return rows
+        start_cursor = data.get("next_cursor")
+        if not start_cursor:
+            return rows
+
+
+def default_scoring_profile(reason: str) -> dict[str, Any]:
+    return {
+        "name": f"default-safe ({reason})",
+        "target_topics": {"ai", "llm", "agents", "automation", "content", "workflow"},
+        "high_keywords": {"ai", "llm", "agents", "automation"},
+        "medium_keywords": {"content", "workflow", "tooling", "benchmark"},
+        "negative_keywords": {"sponsored", "discount", "giveaway", "meme"},
+        "tag_boosts": {"ai": 0.08, "llm": 0.08, "agents": 0.06, "content": 0.05},
+        "preferred_categories": {"official", "company", "expert"},
+        "preferred_networks": set(),
+        "reportable_threshold": 0.65,
+        "watchlist_threshold": 0.40,
+        "freshness_window_days": 7.0,
+        "actionability_boost": 0.05,
+        "noise_penalty": 0.08,
+    }
+
+
+def normalize_thresholds(reportable: float, watchlist: float) -> tuple[float, float]:
+    if reportable < watchlist:
+        return 0.55, 0.32
+    return reportable, watchlist
+
+
+def load_scoring_profile() -> dict[str, Any]:
+    profile_name = SCORING_PROFILE_NAME.strip().lower()
+    try:
+        rows = query_scoring_profiles()
+    except Exception:
+        return default_scoring_profile("profile-query-failed")
+    active_profiles = []
+    for page in rows:
+        props = page.get("properties") or {}
+        name = (prop_value(props, "Name") or "").strip().lower()
+        status = (prop_value(props, "Status") or "active").strip().lower()
+        if status == "active":
+            active_profiles.append(name)
+        if name != profile_name or status != "active":
+            continue
+        high = set(parse_csv(prop_value(props, "High Keywords")))
+        medium = set(parse_csv(prop_value(props, "Medium Keywords")))
+        target_topics = set(parse_csv(prop_value(props, "Target Topics")))
+        negative = set(parse_csv(prop_value(props, "Negative Keywords")))
+        tag_boosts = parse_boosts(prop_value(props, "Source Tag Boosts"))
+        return {
+            "name": name,
+            "target_topics": target_topics,
+            "high_keywords": high,
+            "medium_keywords": medium,
+            "negative_keywords": negative,
+            "tag_boosts": tag_boosts,
+            "preferred_categories": set(parse_csv(prop_value(props, "Preferred Source Categories"))),
+            "preferred_networks": set(parse_csv(prop_value(props, "Preferred Networks"))),
+            "reportable_threshold": parse_float(prop_value(props, "Reportable Threshold"), 0.55, 0.0, 1.0),
+            "watchlist_threshold": parse_float(prop_value(props, "Watchlist Threshold"), 0.32, 0.0, 1.0),
+            "freshness_window_days": parse_float(prop_value(props, "Freshness Window Days"), 7.0, 0.0, 365.0),
+            "actionability_boost": parse_float(prop_value(props, "Actionability Boost"), 0.07, 0.0, 1.0),
+            "noise_penalty": parse_float(prop_value(props, "Noise Penalty"), 0.06, 0.0, 1.0),
+        }
+        profile["reportable_threshold"], profile["watchlist_threshold"] = normalize_thresholds(
+            profile["reportable_threshold"], profile["watchlist_threshold"]
+        )
+        return profile
+    return default_scoring_profile(f"profile-not-found:{profile_name}")
 
 
 def clean_text(value: str) -> str:
@@ -247,21 +409,28 @@ def parse_feed(raw: bytes, source_url: str) -> list[dict[str, Any]]:
     return items
 
 
-def freshness_score(published: datetime | None) -> tuple[float, str]:
+def freshness_score(published: datetime | None, freshness_window_days: float) -> tuple[float, str]:
     if not published:
         return 0.05, "fecha-desconocida"
     age_days = max((datetime.now(timezone.utc) - published).total_seconds() / 86400, 0)
     if age_days <= 2:
         return 0.14, "fresh-update"
-    if age_days <= 7:
-        return 0.11, "fresh-week"
+    if age_days <= freshness_window_days:
+        return 0.11, "fresh-window"
     if age_days <= 30:
         return 0.07, "recent-month"
     return 0.03, "stale"
 
 
-def score_item(item: dict[str, Any], source: dict[str, Any]) -> dict[str, Any]:
+def keyword_present(keyword: str, text: str) -> bool:
+    if " " in keyword:
+        return keyword in text
+    return re.search(rf"\b{re.escape(keyword)}\b", text) is not None
+
+
+def score_item(item: dict[str, Any], source: dict[str, Any], profile: dict[str, Any]) -> dict[str, Any]:
     text = f"{item['title']} {item['summary']} {' '.join(source['tags'])}".lower()
+    source_tags = set(source.get("tags", []))
     priority = source.get("priority", "medium").lower()
     source_category = source.get("category", "")
     priority_score = {"high": 0.25, "medium": 0.12, "low": 0.03}.get(priority, 0.12)
@@ -269,30 +438,37 @@ def score_item(item: dict[str, Any], source: dict[str, Any]) -> dict[str, Any]:
         "official": 0.25, "company": 0.18, "expert": 0.16, "curator": 0.08,
         "aggregator": 0.05, "community": 0.03, "weak": -0.05,
     }.get(source_category, 0.05 if source.get("type") == "rss" else 0.0)
-    keyword_hits = sorted({kw for kw in DPM_KEYWORDS if re.search(rf"\b{re.escape(kw)}\b", text)})
-    tag_hits = sorted(set(source.get("tags", [])) & DPM_KEYWORDS)
-    topic_score = min(len(keyword_hits) * 0.10 + len(tag_hits) * 0.05, 0.38)
-    fresh, fresh_reason = freshness_score(item.get("publishedAt"))
-    actionable_hits = sorted({kw for kw in ACTIONABLE if kw in text})
-    actionability = 0.07 if actionable_hits else 0.0
-    noise_hits = sorted({kw for kw in NOISE if kw in text})
-    noise_penalty = -0.06 if noise_hits else 0.0
+    if source_category in profile["preferred_categories"]:
+        trust_score += 0.04
+    high_hits = sorted({kw for kw in profile["high_keywords"] if keyword_present(kw, text)})
+    medium_hits = sorted({kw for kw in profile["medium_keywords"] if keyword_present(kw, text)})
+    topic_hits = sorted(source_tags & profile["target_topics"])
+    tag_boost_score = sum(profile["tag_boosts"].get(tag, 0.0) for tag in source_tags)
+    topic_score = min(len(high_hits) * 0.14 + len(medium_hits) * 0.07 + len(topic_hits) * 0.05 + tag_boost_score, 0.42)
+    fresh, fresh_reason = freshness_score(item.get("publishedAt"), profile["freshness_window_days"])
+    actionable_hits = sorted({kw for kw in DEFAULT_ACTIONABLE if kw in text})
+    actionability = profile["actionability_boost"] if actionable_hits else 0.0
+    negative_hits = sorted({kw for kw in profile["negative_keywords"] if keyword_present(kw, text)})
+    noise_penalty = -profile["noise_penalty"] if negative_hits else 0.0
     if len(item["title"] + item["summary"]) < 80:
         noise_penalty -= 0.08
     score = max(0.0, min(1.0, priority_score + trust_score + topic_score + fresh + actionability + noise_penalty))
     reasons = []
     if priority == "high": reasons.append("high-priority-source")
-    if keyword_hits or tag_hits: reasons.append("topic-match")
-    if fresh_reason in {"fresh-update", "fresh-week"}: reasons.append(fresh_reason)
+    if high_hits: reasons.append("high-keyword-match")
+    if medium_hits: reasons.append("medium-keyword-match")
+    if topic_hits: reasons.append("source-tag-match")
+    if fresh_reason in {"fresh-update", "fresh-window"}: reasons.append(fresh_reason)
     if actionability: reasons.append("actionable")
     if source_category in {"official", "company", "expert"}: reasons.append("trusted-source")
     if source_category in {"community", "aggregator", "weak"}: reasons.append("weak-source-needs-original")
-    if noise_hits: reasons.append("noise-penalty")
-    decision = "reportable" if score >= 0.55 else "watchlist" if score >= 0.32 else "discard"
+    if negative_hits: reasons.append("negative-keyword-penalty")
+    decision = "reportable" if score >= profile["reportable_threshold"] else "watchlist" if score >= profile["watchlist_threshold"] else "discard"
     return {
         "score": round(score, 2),
         "decision": decision,
         "reasons": reasons or ["low-signal"],
+        "profile": profile["name"],
         "breakdown": {
             "priority": round(priority_score, 2),
             "trust": round(trust_score, 2),
@@ -326,6 +502,7 @@ def post_discord(content: str) -> dict[str, Any]:
 
 def main() -> None:
     endpoint, notion = query_notion()
+    profile = load_scoring_profile()
     sources = []
     for page in notion.get("results") or []:
         props = page.get("properties") or {}
@@ -352,7 +529,7 @@ def main() -> None:
             fetched_url, raw = fetch_feed(source["url"])
             items = parse_feed(raw, fetched_url)
             for item in items:
-                scored = score_item(item, source)
+                scored = score_item(item, source, profile)
                 evaluated.append({"source": source, "item": item, "score": scored})
         except Exception as exc:
             failures.append({"source": source["name"], "error": str(exc)[:80] or type(exc).__name__})
@@ -366,6 +543,7 @@ def main() -> None:
         "🧪 Prueba Notion → RSS → reportabilidad (#299)",
         "",
         f"Endpoint de Notion: `{endpoint}`",
+        f"Perfil de scoring: `{profile['name']}`",
         f"Fuentes RSS activas leídas: `{len(sources)}`",
         f"Items evaluados: `{len(evaluated)}` · reportables `{len(reportable)}` · watchlist `{len(watchlist)}` · descartados `{len(discard)}`",
         "Modo: solo respuesta — sin escritura en memoria, sin ledger, sin publicar y sin agendar.",
@@ -396,6 +574,7 @@ def main() -> None:
     response = post_discord(content)
     print("Prueba Notion RSS reportability → Discord: PASS")
     print(f"message_id: {response.get('id', 'unknown')}")
+    print(f"scoring_profile: {profile['name']}")
     print(f"sources: {len(sources)}")
     print(f"items_evaluated: {len(evaluated)}")
     print(f"reportable: {len(reportable)}")
