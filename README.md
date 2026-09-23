@@ -35,6 +35,12 @@ Instead of scattering context across chat, docs, and ad-hoc scripts, this projec
 ## Technology stack
 
 <div align="center">
+<a href="https://github.com/Gentleman-Programming/gentle-ai">
+  <img width="220" src="https://raw.githubusercontent.com/Gentleman-Programming/gentle-ai/main/docs/assets/brand/built-with-gentle-ai.png" alt="Built with Gentle-AI" />
+</a>
+</div>
+
+<div align="center">
 
 ![Discord](https://img.shields.io/badge/Discord-entry%20point-5865F2?style=for-the-badge&logo=discord&logoColor=white)
 ![OpenClaw](https://img.shields.io/badge/OpenClaw-runtime-111827?style=for-the-badge&logo=docker&logoColor=white)
